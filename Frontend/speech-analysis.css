@@ -396,140 +396,284 @@
     }
 
     /* ===== RESULTS SECTION ===== */
-    .results-section {
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
-      animation: slideInRight 0.7s ease-out;
-    }
+    /* ===== PROGRESS REPORT CARD STYLES ===== */
+.progress-report-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-light);
+  animation: fadeInUp 0.6s ease-out;
+}
 
-    .emotion-report, .progress-section {
-      background: var(--bg-surface);
-      border-radius: var(--radius-xl);
-      padding: 2.5rem;
-      box-shadow: var(--shadow-xl);
-      position: relative;
-      overflow: hidden;
-    }
+.report-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+}
 
-    .emotion-report::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: var(--gradient-secondary);
-    }
+.report-header h3 {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
 
-    .progress-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: var(--gradient-accent);
-    }
+.report-header p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
 
-    .emotion-result {
-      padding: 2rem;
-      background: #f8f9fa;
-      border-radius: var(--radius-lg);
-      min-height: 180px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      border: 1px solid var(--border-light);
-      transition: var(--transition);
-      position: relative;
-    }
+.dominant-emotion {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: var(--radius-md);
+}
 
-    .emotion-result::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--gradient-primary);
-      opacity: 0;
-      border-radius: var(--radius-lg);
-      transition: var(--transition);
-      z-index: 0;
-    }
+.dominant-emotion h4 {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
 
-    .emotion-result:hover::before {
-      opacity: 0.03;
-    }
+.dominant-emotion-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: capitalize;
+}
 
-    .time-filters {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 2rem;
-    }
+.detailed-emotion-distribution {
+  margin-bottom: 2rem;
+}
 
-    .time-filter {
-      padding: 0.75rem 1.5rem;
-      border-radius: 50px;
-      background: #f1f3f4;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: var(--transition);
-      border: none;
-      cursor: pointer;
-    }
+.detailed-emotion-distribution h4 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
 
-    .time-filter.active, .time-filter:hover {
-      background: var(--gradient-primary);
-      color: white;
-      box-shadow: 0 4px 12px rgba(94, 53, 177, 0.3);
-      transform: translateY(-2px);
-    }
+.emotion-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-    /* ===== RECOMMENDATIONS SECTION ===== */
-    .recommendations-section {
-      animation: fadeInUp 0.9s ease-out;
-    }
+.emotion-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
 
-    .recommendations, .daily-challenge, .tip-of-the-day {
-      background: var(--bg-surface);
-      border-radius: var(--radius-xl);
-      padding: 2.5rem;
-      box-shadow: var(--shadow-xl);
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
+.emotion-label {
+  width: 80px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-transform: capitalize;
+  font-size: 0.9rem;
+}
 
-    .recommendations:hover, .daily-challenge:hover, .tip-of-the-day:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-xl);
-    }
+.bar-container {
+  flex: 1;
+  height: 24px;
+  background: #f1f3f4;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
 
-    .recommendations::before, .daily-challenge::before, .tip-of-the-day::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 6px;
-    }
+.bar-fill {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
 
-    .recommendations::before {
-      background: var(--gradient-success);
-    }
+.bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0.3) 0%, 
+    rgba(255,255,255,0.1) 50%, 
+    rgba(255,255,255,0.3) 100%);
+  animation: shimmer 2s infinite;
+}
 
-    .daily-challenge::before {
-      background: var(--gradient-warning);
-    }
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
 
-    .tip-of-the-day::before {
-      background: var(--gradient-accent);
-    }
+/* Emotion-specific bar colors */
+.bar-fill.joy { background: linear-gradient(90deg, #4caf50, #66bb6a); }
+.bar-fill.sadness { background: linear-gradient(90deg, #2196f3, #42a5f5); }
+.bar-fill.anger { background: linear-gradient(90deg, #f44336, #ef5350); }
+.bar-fill.fear { background: linear-gradient(90deg, #ff9800, #ffa726); }
+.bar-fill.surprise { background: linear-gradient(90deg, #9c27b0, #ab47bc); }
+.bar-fill.love { background: linear-gradient(90deg, #e91e63, #ec407a); }
 
+.emotion-percent {
+  width: 50px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.report-footer {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.view-report-btn {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  padding: 0.875rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(94, 53, 177, 0.3);
+}
+
+.view-report-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(94, 53, 177, 0.4);
+}
+
+/* Emotion tag styles for the regular emotion result */
+.emotion-tag {
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-weight: 600;
+  text-transform: capitalize;
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+.emotion-tag.positive {
+  background: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.emotion-tag.negative {
+  background: rgba(244, 67, 54, 0.1);
+  color: #c62828;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.emotion-tag.neutral {
+  background: rgba(255, 152, 0, 0.1);
+  color: #ef6c00;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+/* ===== EMOTION PROBABILITIES STYLES ===== */
+.emotion-probabilities, .top-emotions {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+}
+
+.emotion-probabilities h4, .top-emotions h4 {
+    font-size: 1rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--border-light);
+    padding-bottom: 0.5rem;
+}
+
+.probabilities-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.probability-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.emotion-name {
+    width: 100px;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.probability-bar-container {
+    flex: 1;
+    height: 20px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.probability-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-light), var(--primary));
+    border-radius: 10px;
+    transition: width 0.8s ease-out;
+    position: relative;
+}
+
+.probability-value {
+    width: 50px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.top-emotions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.top-emotion-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+}
+
+.top-emotion-item .rank {
+    font-weight: 700;
+    color: var(--primary);
+    width: 20px;
+}
+
+.top-emotion-item .emotion-name {
+    width: auto;
+    flex: 1;
+}
+
+.top-emotion-item .probability-value {
+    width: auto;
+    color: var(--primary);
+}
     /* ===== FOOTER ===== */
     .site-footer {
       background: var(--primary-dark);

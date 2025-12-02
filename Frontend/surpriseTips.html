@@ -3,78 +3,383 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FeelWise - Emotion Interaction</title>
+  <title>FeelWise - Surprise Mood Wellness Tips</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-  <link rel="stylesheet" href="module.css">
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-     #bg-video {
-      position: fixed;
-      right: 0;
-      bottom: 0;
-      min-width: 100%;
-      min-height: 100%;
-      object-fit: cover;   /* Makes video fill screen */
-      z-index: -1;         /* Push video behind content */
-    }
-    body{
-      font-family: Arial, sans-serif;
+    /* Background */
+    body {
+      font-family: 'Nunito', sans-serif;
       color: white;
       text-align: center;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 25%, #3498db 50%, #2ecc71 75%, #f1c40f 100%);
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* Animated Background Elements */
+    .bg-bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      animation: float 12s infinite ease-in-out;
+      z-index: -1;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    /* Sparkle Animation */
+    .sparkle {
+      position: absolute;
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.7);
+      animation: sparkleTwinkle 3s infinite ease-in-out;
+      z-index: -1;
+    }
+    
+    @keyframes sparkleTwinkle {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+    
+    /* Top Header */
+    .top-header {
+      padding: 1.5rem;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      background: rgba(155, 89, 182, 0.8);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 10;
+    }
 
+    .logo {
+      text-transform: uppercase;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
-     
-    .maincon1{
-     
-      background-color: #5e60ce71;
-      border-radius: 5%;
-      width: 600px;
-  
+
+    /* Main Card */
+    .maincon1 {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 650px;
+      margin: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      animation: floaty 4s ease-in-out infinite alternate;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      margin-top: 2rem;
     }
-    .mainheading{
-      background-color: #5e60ce;
-      border-radius: 5%;
-       text-align: center;
+
+    /* Reflection effect */
+    .maincon1::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, transparent 70%);
+      transform: skewX(-20deg);
+      animation: shine 5s infinite;
     }
-   h3{
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+    @keyframes floaty {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
     }
-     @media (max-width: 550px){
-   .maincon1{
-      width: 300px;
-  
+
+    @keyframes shine {
+      0% { left: -80%; }
+      100% { left: 100%; }
     }
- }
+
+    /* Headings */
+    .mainheading h1 {
+      background: linear-gradient(90deg, #ffffff, #f0f8ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 12px rgba(155, 89, 182, 0.4);
+    }
+
+    /* Tips Section */
+    .tip {
+      margin: 1rem 0;
+      padding: 1.2rem;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease-in-out;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .tip::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(155, 89, 182, 0.2), rgba(52, 152, 219, 0.2));
+      transition: width 0.5s ease;
+      z-index: -1;
+    }
+
+    .tip:hover::before {
+      width: 100%;
+    }
+
+    .tip:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.03);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+
+    .tip h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.6rem;
+      text-shadow: 0 0 6px rgba(0,0,0,0.2);
+    }
+
+    .tip p {
+      font-size: 1rem;
+      color: #000000;
+      margin: 0;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    /* On Hover Icon Accent */
+    .tip:hover h3 i {
+      color: #f1c40f;
+      transform: scale(1.1);
+    }
+    
+    /* Mood Indicator */
+    .mood-indicator {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      gap: 10px;
+    }
+    
+    .mood-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f1c40f;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    /* Footer */
+    .footer {
+      margin-top: 2rem;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .maincon1 {
+        width: 90%;
+        padding: 1.5rem;
+      }
+      .mainheading h1 {
+        font-size: 1.8rem;
+      }
+      .tip {
+        padding: 1rem;
+      }
+    }
+    
+    @media (max-width: 550px) {
+      .maincon1 {
+        width: 95%;
+        padding: 1rem;
+      }
+      .mainheading h1 {
+        font-size: 1.6rem;
+      }
+      .top-header {
+        font-size: 1.5rem;
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-     <!-- Top Header Section -->
-  <div class="top-header">
-    <div class="logo">FeelWise</div>
-    
-  </div>
-    <video autoplay muted loop id="bg-video">
-    <source src="video/WhatsApp Video 2025-08-25 at 4.09.00 PM.mp4" type="video/mp4">
-    Your browser does not support HTML5 video.
-  </video>
-  <br><br><br>
-<div class="container maincon1">
-  <br>
-  <div class="mainheading"><h1> Surprise Mood Wellness Tips</h1></div>
-  <div><h3>🌟 Pause and breathe</h3><p>Even exciting surprises can spark adrenaline. <br> A few deep breaths can help you process and <br> respond thoughtfully.</p></div>
-  <div><h3>😲 Notice your reaction</h3><p>Are you smiling? Speechless? Confused? Just <br> observe without judgment — surprise is a <br> full-body experience</p></div>
-  <div><h3>📣 Express it!</h3><p>If it’s a good surprise, share your joy. <br> Laugh, cheer, dance — let your <br> body celebrate!</p></div>
-  <div><h3>🧠 Let your brain catch up</h3><p>Surprises disrupt expectations.  <br>Give yourself space to mentally adjust, especially <br> if it’s unexpected news</p></div>
-  <div><h3>🫶 Share the moment.</h3><p>If it’s a positive surprise, <br> sharing it with someone doubles the joy!</p></div>
-  <div><h3>🎁 Stay open to the unknown</h3><p>Surprise can teach you to release control <br>and embrace spontaneity — which can lead to  <br>growth and magic.</p></div>
-  <div><h3>🔄 Shift from reaction to reflection</h3><p>“Why did this surprise me?”
-<br>
-“What expectation did it break?”</p></div>
+  <!-- Background Bubbles -->
+  <div id="bubbles-container"></div>
   
+  <!-- Sparkles -->
+  <div id="sparkles-container"></div>
+  
+  <!-- Header -->
+  <div class="top-header">
+    <div class="logo"><i class="fas fa-star"></i> FeelWise</div>
+  </div>
 
-  <div><h3>🌸 Gratitude & Positivity</h3><p>Write 3 things you’re grateful <br> for to shift focus.</p></div>
-</div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Main Content -->
+  <div class="container maincon1 mt-5">
+    <div class="mainheading">
+      <h1>Surprise Mood Wellness Tips</h1>
+    </div>
+    
+    <!-- Mood Indicator -->
+    <div class="mood-indicator">
+      <div class="mood-dot" style="animation-delay: 0s"></div>
+      <div class="mood-dot" style="animation-delay: 0.1s"></div>
+      <div class="mood-dot" style="animation-delay: 0.2s"></div>
+      <div class="mood-dot" style="animation-delay: 0.3s"></div>
+      <div class="mood-dot" style="animation-delay: 0.4s"></div>
+    </div>
+
+    <div class="tip">
+      <h3><i class="fas fa-pause-circle"></i> Pause and breathe</h3>
+      <p>Even exciting surprises can spark adrenaline. A few deep breaths can help you process and respond thoughtfully.</p>
+    </div>
+    
+    <div class="tip">
+      <h3><i class="fas fa-eye"></i> Notice your reaction</h3>
+      <p>Are you smiling? Speechless? Confused? Just observe without judgment — surprise is a full-body experience</p>
+    </div>
+    
+    <div class="tip">
+      <h3><i class="fas fa-comment-dots"></i> Express it!</h3>
+      <p>If it's a good surprise, share your joy. Laugh, cheer, dance — let your body celebrate!</p>
+    </div>
+    
+    <div class="tip">
+      <h3><i class="fas fa-brain"></i> Let your brain catch up</h3>
+      <p>Surprises disrupt expectations. Give yourself space to mentally adjust, especially if it's unexpected news</p>
+    </div>
+    
+    <div class="tip">
+      <h3><i class="fas fa-share-alt"></i> Share the moment</h3>
+      <p>If it's a positive surprise, sharing it with someone doubles the joy!</p>
+    </div>
+    
+    <div class="tip">
+      <h3><i class="fas fa-gift"></i> Stay open to the unknown</h3>
+      <p>Surprise can teach you to release control and embrace spontaneity — which can lead to growth and magic.</p>
+    </div>
+    
+    <div class="tip">
+      <h3><i class="fas fa-sync-alt"></i> Shift from reaction to reflection</h3>
+      <p>"Why did this surprise me?"<br>"What expectation did it break?"</p>
+    </div>
+    
+    <div class="tip">
+      <h3><i class="fas fa-seedling"></i> Gratitude & Positivity</h3>
+      <p>Write 3 things you're grateful for to shift focus.</p>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <div class="footer">
+    <p>Embrace the unexpected - it often brings the best gifts!</p>
+  </div>
+
+  <script>
+    // Create background bubbles
+    function createBubbles() {
+      const container = document.getElementById('bubbles-container');
+      const bubbleCount = 15;
+      
+      for (let i = 0; i < bubbleCount; i++) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('bg-bubble');
+        
+        // Random size between 30 and 150px
+        const size = Math.random() * 120 + 30;
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        
+        // Random position
+        bubble.style.left = `${Math.random() * 100}%`;
+        bubble.style.top = `${Math.random() * 100}%`;
+        
+        // Random animation duration and delay
+        bubble.style.animationDuration = `${Math.random() * 15 + 8}s`;
+        bubble.style.animationDelay = `${Math.random() * 5}s`;
+        
+        container.appendChild(bubble);
+      }
+    }
+    
+    // Create sparkles
+    function createSparkles() {
+      const container = document.getElementById('sparkles-container');
+      const sparkleCount = 20;
+      const sparkleSymbols = ['✦', '✧', '★', '☆', '✶', '✷', '✸'];
+      
+      for (let i = 0; i < sparkleCount; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.classList.add('sparkle');
+        
+        // Random sparkle symbol
+        const symbol = sparkleSymbols[Math.floor(Math.random() * sparkleSymbols.length)];
+        sparkle.innerHTML = symbol;
+        
+        // Random position
+        sparkle.style.left = `${Math.random() * 100}%`;
+        sparkle.style.top = `${Math.random() * 100}%`;
+        
+        // Random animation duration and delay
+        sparkle.style.animationDuration = `${Math.random() * 2 + 1}s`;
+        sparkle.style.animationDelay = `${Math.random() * 3}s`;
+        
+        container.appendChild(sparkle);
+      }
+    }
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      createBubbles();
+      createSparkles();
+    });
+    
+    // Add click effect to tips
+    document.querySelectorAll('.tip').forEach(tip => {
+      tip.addEventListener('click', function() {
+        this.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 200);
+      });
+    });
+  </script>
 </body>
 </html>

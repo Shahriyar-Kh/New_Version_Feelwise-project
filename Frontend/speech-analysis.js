@@ -41,6 +41,14 @@ document.addEventListener('DOMContentLoaded', function() {
             updateProgressChart(this.dataset.period);
         });
     });
+
+    // Add event listener for view detailed report button
+    const viewReportBtn = document.getElementById('viewDetailedReport');
+    if (viewReportBtn) {
+        viewReportBtn.addEventListener('click', function() {
+            alert('Detailed assessment report would open here. This feature can be connected to your backend reporting system.');
+        });
+    }
     
     // Initialize speech recognition
     function initSpeechRecognition() {
@@ -95,6 +103,12 @@ document.addEventListener('DOMContentLoaded', function() {
             startBtn.disabled = true;
             stopBtn.disabled = false;
             emotionResult.innerHTML = "";
+            
+            // Hide progress report card when starting new recording
+            const progressReportCard = document.getElementById('progressReportCard');
+            if (progressReportCard) {
+                progressReportCard.style.display = 'none';
+            }
             
             // Start media recording
             audioStream = await navigator.mediaDevices.getUserMedia({ 
@@ -205,11 +219,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Analyze speech function - FIXED to use main server URL
+    // Analyze speech function
     async function analyzeSpeech(transcript, audioBase64) {
         console.log("=> analyzeSpeech() starting", { transcript: transcript || "(none)", audioLength: audioBase64?.length });
 
-        // ✅ FIXED: Use main server endpoint instead of direct FastAPI
         const url = "http://localhost:5000/analyze-speech";
         const payload = { transcript: transcript || "", audio: audioBase64 };
 
@@ -227,7 +240,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             console.log("Fetch completed. status:", response.status, response.statusText);
-            console.log("Response headers:", Array.from(response.headers.entries()));
 
             const raw = await response.text();
             console.log("Raw response text (first 2000 chars):", raw ? raw.slice(0, 2000) : "<empty>");
@@ -272,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Display analysis results
+    // Display analysis results with detailed emotion probabilities
     function displayAnalysisResults(data) {
         console.log("displayAnalysisResults called with:", data);
         if (!data || typeof data !== 'object') {
@@ -284,13 +296,65 @@ document.addEventListener('DOMContentLoaded', function() {
         const safeEmotionLabel = emotion.charAt(0).toUpperCase() + emotion.slice(1);
         const recommendation = data.recommendation || "No recommendation provided";
 
-        // Show detected emotion & recommendation
+        // Show detailed emotion analysis in the regular emotion result
         if (emotionResult) {
-            emotionResult.innerHTML = `
+            let emotionHTML = `
                 <h3>Detected Emotion: <span class="emotion-tag ${getEmotionClass(emotion)}">${safeEmotionLabel}</span></h3>
                 <p><strong>Recommendation:</strong> ${recommendation}</p>
             `;
+
+            // Add emotion probabilities if available
+            if (data.probabilities) {
+                emotionHTML += `<div class="emotion-probabilities">
+                    <h4>Emotion Probabilities:</h4>
+                    <div class="probabilities-grid">`;
+
+                // Sort emotions by probability (descending)
+                const sortedEmotions = Object.entries(data.probabilities)
+                    .sort(([,a], [,b]) => b - a);
+
+                sortedEmotions.forEach(([emotionName, probability]) => {
+                    const percentage = (probability * 100).toFixed(1);
+                    emotionHTML += `
+                        <div class="probability-item">
+                            <span class="emotion-name">${emotionName.charAt(0).toUpperCase() + emotionName.slice(1)}</span>
+                            <div class="probability-bar-container">
+                                <div class="probability-bar" style="width: ${percentage}%"></div>
+                            </div>
+                            <span class="probability-value">${percentage}%</span>
+                        </div>
+                    `;
+                });
+
+                emotionHTML += `</div></div>`;
+            }
+
+            // Add top emotions if available
+            if (data.top_emotions && Array.isArray(data.top_emotions)) {
+                emotionHTML += `<div class="top-emotions">
+                    <h4>Top Emotions:</h4>
+                    <div class="top-emotions-list">`;
+
+                data.top_emotions.forEach(([emotionName, probability], index) => {
+                    const percentage = (probability * 100).toFixed(1);
+                    const rank = index + 1;
+                    emotionHTML += `
+                        <div class="top-emotion-item">
+                            <span class="rank">${rank}.</span>
+                            <span class="emotion-name">${emotionName.charAt(0).toUpperCase() + emotionName.slice(1)}</span>
+                            <span class="probability-value">${percentage}%</span>
+                        </div>
+                    `;
+                });
+
+                emotionHTML += `</div></div>`;
+            }
+
+            emotionResult.innerHTML = emotionHTML;
         }
+
+        // Update the progress report card with emotion distribution
+        updateProgressReportCard(data);
 
         // Show backend daily challenge if provided
         if (data.daily_challenge && dailyChallengeContent) {
@@ -304,6 +368,102 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Clear "Processing..." message
         transcriptDisplay.innerHTML += "<br><span style='color:green'>Analysis complete ✓</span>";
+    }
+
+    // New function to update the progress report card
+    function updateProgressReportCard(data) {
+        const progressReportCard = document.getElementById('progressReportCard');
+        const dominantEmotion = document.getElementById('dominantEmotion');
+        
+        if (!progressReportCard || !dominantEmotion) return;
+        
+        // Show the progress report card
+        progressReportCard.style.display = 'block';
+        
+        // Get emotion data - use backend probabilities if available
+        let emotionData = {
+            joy: 0,
+            sadness: 0,
+            anger: 0,
+            fear: 0,
+            surprise: 0,
+            love: 0
+        };
+
+        // Map backend emotion names to our frontend names
+        if (data.probabilities) {
+            // Map backend emotions to our emotion set
+            const emotionMapping = {
+                'happiness': 'joy',
+                'happy': 'joy',
+                'joy': 'joy',
+                'sadness': 'sadness',
+                'sad': 'sadness',
+                'anger': 'anger',
+                'angry': 'anger',
+                'fear': 'fear',
+                'surprise': 'surprise',
+                'surprised': 'surprise',
+                'love': 'love'
+            };
+
+            Object.entries(data.probabilities).forEach(([emotionName, probability]) => {
+                const mappedEmotion = emotionMapping[emotionName];
+                if (mappedEmotion) {
+                    // Convert probability to percentage (0-100)
+                    emotionData[mappedEmotion] = Math.round(probability * 100);
+                }
+            });
+        } else {
+            // Fallback: use dominant emotion
+            const dominant = data.emotion?.toLowerCase() || 'joy';
+            const emotionMapping = {
+                'joy': 'joy',
+                'happiness': 'joy',
+                'happy': 'joy',
+                'sadness': 'sadness',
+                'sad': 'sadness',
+                'anger': 'anger',
+                'angry': 'anger',
+                'fear': 'fear',
+                'surprise': 'surprise',
+                'surprised': 'surprise',
+                'love': 'love'
+            };
+            
+            const mappedEmotion = emotionMapping[dominant] || 'joy';
+            emotionData[mappedEmotion] = 100;
+        }
+        
+        // Set dominant emotion
+        const dominant = data.emotion || Object.entries(emotionData).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+        dominantEmotion.textContent = dominant.charAt(0).toUpperCase() + dominant.slice(1);
+        
+        // Update emotion bars with animation
+        setTimeout(() => {
+            updateEmotionBar('joy', emotionData.joy || 0);
+            updateEmotionBar('sadness', emotionData.sadness || 0);
+            updateEmotionBar('anger', emotionData.anger || 0);
+            updateEmotionBar('fear', emotionData.fear || 0);
+            updateEmotionBar('surprise', emotionData.surprise || 0);
+            updateEmotionBar('love', emotionData.love || 0);
+        }, 100);
+    }
+
+    // Helper function to update individual emotion bars
+    function updateEmotionBar(emotion, percentage) {
+        const bar = document.getElementById(`${emotion}Bar`);
+        const percent = document.getElementById(`${emotion}Percent`);
+        
+        if (bar && percent) {
+            bar.style.width = '0%'; // Reset for animation
+            percent.textContent = '0%';
+            
+            setTimeout(() => {
+                bar.style.width = `${percentage}%`;
+                percent.textContent = `${percentage}%`;
+            }, 300);
+        }
     }
     
     // Get emotion class for styling

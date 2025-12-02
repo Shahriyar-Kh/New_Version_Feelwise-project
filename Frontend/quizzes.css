@@ -42,7 +42,7 @@ a {
 
 /* Enhanced Header */
 .site-header {
-  background: var(--primary-gradient);
+  background: var(--primary);
   box-shadow: var(--shadow-md);
   position: sticky;
   top: 0;
@@ -425,7 +425,7 @@ a {
 
 /* Footer */
 .site-footer {
-  background: var(--primary-gradient);
+  background: var(--primary);
   margin-top: auto;
   position: relative;
   color: white;

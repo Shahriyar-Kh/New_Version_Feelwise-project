@@ -582,7 +582,7 @@ function showAssessmentReportOption() {
         font-size: 14px;
     `;
     notification.innerHTML = `
-        ✅ Facial analysis complete! <a href="assessment-report.html" style="color: #1976d2; text-decoration: underline;">View your comprehensive assessment report</a>
+        ✅ Facial analysis complete! <a href="full_assessment.html" style="color: #1976d2; text-decoration: underline;">View your comprehensive assessment report</a>
     `;
 
     const existingNotification = document.querySelector('.analysis-complete-notification');

@@ -20,10 +20,9 @@
         </h1>
       </div>
       <nav class="main-nav">
-        <a href="#" class="nav-link"><i class="fas fa-home"></i> Home</a>
-        <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
-        <a href="#" class="nav-link"><i class="fas fa-history"></i> History</a>
-        <a href="#" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+       <a href="module.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="progress.html" class="nav-link"><i class="fas fa-history"></i> History</a>
+        <a href="profile.html" class="nav-link"><i class="fas fa-user"></i> Profile</a>
       </nav>
     </div>
   </header>
@@ -58,25 +57,50 @@
         </div>
       </div>
 
-      <div class="results-section">
-        <div class="emotion-report card">
-          <div class="card-header">
-            <h2><i class="fas fa-chart-pie"></i> Your Emotion Report</h2>
-            <button class="icon-btn">
-              <i class="fas fa-download"></i>
-            </button>
-          </div>
-          <div id="emotionResult" class="emotion-result">
-            <div class="placeholder-content">
-              <i class="fas fa-comment-dots"></i>
-              <p>Your analysis will appear here after you share your thoughts</p>
-            </div>
-          </div>
-        </div>
+      <!-- Emotion Report + Graph Side by Side -->
+      <div class="emotion-progress">
+        <!-- Enhanced Emotion Report -->
+       <!-- Enhanced Emotion Report -->
+<div class="emotion-report card">
+  <div class="card-header">
+    <h2><i class="fas fa-chart-pie"></i> Your Emotion Report</h2>
+    <button class="icon-btn">
+      <i class="fas fa-download"></i>
+    </button>
+  </div>
+  <div id="emotionResult" class="emotion-result">
+    <!-- Line 1: Intro -->
+    <p class="report-intro">Your analysis will appear here after you share your thoughts</p>
+
+    <!-- Line 2: Dominant -->
+    <p class="dominant-emotion">Dominant Emotion: <span id="dominantEmotion">Joy</span></p>
+
+    <!-- Line 3: Detailed Distribution -->
+    <div class="emotion-distribution">
+      <h4>Detailed Emotion Distribution</h4>
+      <div class="detailed-stats">
+        <span>Joy 100%</span>
+        <span>Sadness 0%</span>
+        <span>Anger 0%</span>
+        <span>Fear 0%</span>
+        <span>Surprise 0%</span>
+        <span>Love 0%</span>
+      </div>
+    </div>
+
+    <!-- Line 4: Completion -->
+    <div class="analysis-complete">
+      <i class="fas fa-check-square"></i>
+      <span>Analysis complete!</span>
+      <a href="full_assessment.html">View your detailed assessment report</a>
+    </div>
+  </div>
+</div>
+
 
         <div class="progress-section card">
           <div class="card-header">
-            <h2><i class="fas fa-trending-up"></i> Your Emotional Progress</h2>
+            
             <div class="time-filters">
               <button class="time-filter active" data-period="daily">Daily</button>
               <button class="time-filter" data-period="weekly">Weekly</button>
@@ -88,6 +112,7 @@
           </div>
         </div>
       </div>
+      <!-- End side by side section -->
 
       <div class="recommendations-section">
         <div class="recommendations card">

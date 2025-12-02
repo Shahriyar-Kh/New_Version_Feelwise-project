@@ -19,6 +19,22 @@
     <link rel="stylesheet" href="challenges.css">
   </head>
   <body>
+     <header class="site-header">
+    <div class="header-content">
+      <div class="logo-container">
+        <h1 class="logo">
+          <i class="fas fa-brain"></i>
+          FeelWise
+        </h1>
+      </div>
+      <nav class="main-nav">
+        <a href="#" class="nav-link"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="#" class="nav-link"><i class="fas fa-history"></i> History</a>
+        <a href="#" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+      </nav>
+    </div>
+  </header>
     <div class="particles-container" id="particles-container"></div>
 
     <div class="main-container">
@@ -34,72 +50,107 @@
         </div>
 
         <div class="challenges-grid">
-          <div class="challenge-item">
-            <div class="challenge-icon">
-              <i class="fas fa-shield-alt"></i>
-            </div>
-            <h2>🛡️ Safe Space Setup</h2>
-            <p>
-              💪 Power Workout – Burn off energy with a 10-minute intense
-              exercise
-            </p>
-            <button class="challenge-btn" onclick="acceptChallenge('safe')">
-              Accept Challenge
-            </button>
-            <button
-              class="complete-btn"
-              id="safe-complete"
-              onclick="completeChallenge('safe')"
-            >
-              <i class="fas fa-check-circle me-2"></i>Completed
-            </button>
-            <div class="progress-wrapper">
-              <div class="progress-bar" id="safe-progress"></div>
-            </div>
-          </div>
+  <!-- Challenge 1 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-shield-alt"></i></div>
+    <h2>🛡️ Safe Space Setup</h2>
+    <p>💪 Power Workout – Burn off energy with a 10-minute intense exercise</p>
+    <button class="challenge-btn" onclick="acceptChallenge('safe')">Accept Challenge</button>
+    <button class="complete-btn" id="safe-complete" onclick="completeChallenge('safe')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="safe-progress"></div></div>
+  </div>
 
-          <div class="challenge-item">
-            <div class="challenge-icon">
-              <i class="fas fa-pencil-alt"></i>
-            </div>
-            <h2>📝 Rant & Rip</h2>
-            <p>Write out your frustrations, then tear up the paper</p>
-            <button class="challenge-btn" onclick="acceptChallenge('rant')">
-              Accept Challenge
-            </button>
-            <button
-              class="complete-btn"
-              id="rant-complete"
-              onclick="completeChallenge('rant')"
-            >
-              <i class="fas fa-check-circle me-2"></i>Completed
-            </button>
-            <div class="progress-wrapper">
-              <div class="progress-bar" id="rant-progress"></div>
-            </div>
-          </div>
+  <!-- Challenge 2 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-pencil-alt"></i></div>
+    <h2>📝 Rant & Rip</h2>
+    <p>Write out your frustrations, then tear up the paper</p>
+    <button class="challenge-btn" onclick="acceptChallenge('rant')">Accept Challenge</button>
+    <button class="complete-btn" id="rant-complete" onclick="completeChallenge('rant')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="rant-progress"></div></div>
+  </div>
 
-          <div class="challenge-item">
-            <div class="challenge-icon">
-              <i class="fas fa-exchange-alt"></i>
-            </div>
-            <h2>🚪 Change the Scene</h2>
-            <p>Step outside or move to a different room for 5 minutes</p>
-            <button class="challenge-btn" onclick="acceptChallenge('scene')">
-              Accept Challenge
-            </button>
-            <button
-              class="complete-btn"
-              id="scene-complete"
-              onclick="completeChallenge('scene')"
-            >
-              <i class="fas fa-check-circle me-2"></i>Completed
-            </button>
-            <div class="progress-wrapper">
-              <div class="progress-bar" id="scene-progress"></div>
-            </div>
-          </div>
-        </div>
+  <!-- Challenge 3 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-exchange-alt"></i></div>
+    <h2>🚪 Change the Scene</h2>
+    <p>Step outside or move to a different room for 5 minutes</p>
+    <button class="challenge-btn" onclick="acceptChallenge('scene')">Accept Challenge</button>
+    <button class="complete-btn" id="scene-complete" onclick="completeChallenge('scene')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="scene-progress"></div></div>
+  </div>
+
+  <!-- Challenge 4 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-music"></i></div>
+    <h2>🎵 Angry Playlist</h2>
+    <p>Play your favorite high-energy music for 5 minutes</p>
+    <button class="challenge-btn" onclick="acceptChallenge('music')">Accept Challenge</button>
+    <button class="complete-btn" id="music-complete" onclick="completeChallenge('music')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="music-progress"></div></div>
+  </div>
+
+  <!-- Challenge 5 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-bolt"></i></div>
+    <h2>⚡ Quick Sprint</h2>
+    <p>Run or jog in place for 2 minutes to release tension</p>
+    <button class="challenge-btn" onclick="acceptChallenge('sprint')">Accept Challenge</button>
+    <button class="complete-btn" id="sprint-complete" onclick="completeChallenge('sprint')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="sprint-progress"></div></div>
+  </div>
+
+  <!-- Challenge 6 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-water"></i></div>
+    <h2>💧 Cool Off</h2>
+    <p>Splash cold water on your face or wash your hands slowly</p>
+    <button class="challenge-btn" onclick="acceptChallenge('cool')">Accept Challenge</button>
+    <button class="complete-btn" id="cool-complete" onclick="completeChallenge('cool')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="cool-progress"></div></div>
+  </div>
+
+  <!-- Challenge 7 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-dumbbell"></i></div>
+    <h2>🏋️ Strength Burst</h2>
+    <p>Do 20 push-ups or squats to channel your anger physically</p>
+    <button class="challenge-btn" onclick="acceptChallenge('strength')">Accept Challenge</button>
+    <button class="complete-btn" id="strength-complete" onclick="completeChallenge('strength')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="strength-progress"></div></div>
+  </div>
+
+  <!-- Challenge 8 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-breathing"></i></div>
+    <h2>🌬️ Deep Breathing</h2>
+    <p>Take 10 slow, deep breaths, counting each inhale and exhale</p>
+    <button class="challenge-btn" onclick="acceptChallenge('breath')">Accept Challenge</button>
+    <button class="complete-btn" id="breath-complete" onclick="completeChallenge('breath')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="breath-progress"></div></div>
+  </div>
+
+  <!-- Challenge 9 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-book"></i></div>
+    <h2>📖 Redirect Focus</h2>
+    <p>Read a short motivational story or an inspiring quote</p>
+    <button class="challenge-btn" onclick="acceptChallenge('read')">Accept Challenge</button>
+    <button class="complete-btn" id="read-complete" onclick="completeChallenge('read')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="read-progress"></div></div>
+  </div>
+
+  <!-- Challenge 10 -->
+  <div class="challenge-item">
+    <div class="challenge-icon"><i class="fas fa-smile"></i></div>
+    <h2>😊 Gratitude List</h2>
+    <p>Write down 3 things you’re thankful for right now</p>
+    <button class="challenge-btn" onclick="acceptChallenge('gratitude')">Accept Challenge</button>
+    <button class="complete-btn" id="gratitude-complete" onclick="completeChallenge('gratitude')"><i class="fas fa-check-circle me-2"></i>Completed</button>
+    <div class="progress-wrapper"><div class="progress-bar" id="gratitude-progress"></div></div>
+  </div>
+</div>
+
 
         <button id="submit-challenges-btn" onclick="submitAllChallenges()">
           <i class="fas fa-paper-plane me-2"></i>Submit All Challenges
@@ -126,10 +177,52 @@
         </div>
       </div>
     </div>
+    <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>FeelWise</h3>
+        <p>Understanding emotions through AI-powered analysis</p>
+      </div>
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <a href="#">Blog</a>
+        <a href="#">Guides</a>
+        <a href="#">Support</a>
+      </div>
+      <div class="footer-section">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Careers</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-section">
+        <h4>Connect</h4>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2023 FeelWise. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
 
     <script>
       const API_BASE = "http://localhost:5000/api";
-      let challenges = { safe: 0, rant: 0, scene: 0 };
+     let challenges = { 
+  safe: 0, rant: 0, scene: 0, 
+  music: 0, sprint: 0, cool: 0, 
+  strength: 0, breath: 0, read: 0, gratitude: 0 
+};
 
       // Create animated particles
       function createParticles() {
