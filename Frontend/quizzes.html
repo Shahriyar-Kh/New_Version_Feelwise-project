@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FeelWise - Emotion Interaction</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="quizzes.css" />
+    
+  </head>
+  <body>
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+
+    <!-- Top Header Section -->
+    <header class="site-header">
+      <div class="header-content">
+        <div class="logo-container">
+          <h1 class="logo">
+            <i class="fas fa-brain"></i>
+            FeelWise
+          </h1>
+        </div>
+        <nav class="main-nav">
+          <a href="#" class="nav-link"><i class="fas fa-home"></i> Home</a>
+          <a href="#" class="nav-link"
+            ><i class="fas fa-chart-line"></i> Dashboard</a
+          >
+          <a href="#" class="nav-link"
+            ><i class="fas fa-history"></i> History</a
+          >
+          <a href="#" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+      <!-- Hero Section -->
+      <div class="hero-section">
+        <h1 class="mainheading floating">MOOD QUIZ</h1>
+        <p class="subheading">
+          Explore your emotions and understand yourself better through our
+          interactive emotion quizzes
+        </p>
+      </div>
+
+      <!-- Mood Quiz Cards -->
+      <div class="mood-grid" id="quizzes">
+        <div class="mood-card happy pulse" onclick="navigateToQuiz('Happy')">
+          <div class="mood-icon">
+            <i class="fas fa-smile"></i>
+          </div>
+          <h2>Happy</h2>
+        </div>
+
+        <div class="mood-card sad pulse" onclick="navigateToQuiz('Sad')">
+          <div class="mood-icon">
+            <i class="fas fa-sad-tear"></i>
+          </div>
+          <h2>Sad</h2>
+        </div>
+
+        <div
+          class="mood-card surprised pulse"
+          onclick="navigateToQuiz('Surprised')"
+        >
+          <div class="mood-icon">
+            <i class="fas fa-surprise"></i>
+          </div>
+          <h2>Surprised</h2>
+        </div>
+
+        <div class="mood-card love pulse" onclick="navigateToQuiz('Love')">
+          <div class="mood-icon">
+            <i class="fas fa-heart"></i>
+          </div>
+          <h2>Love</h2>
+        </div>
+
+        <div class="mood-card angry pulse" onclick="navigateToQuiz('Angry')">
+          <div class="mood-icon">
+            <i class="fas fa-angry"></i>
+          </div>
+          <h2>Angry</h2>
+        </div>
+
+        <div class="mood-card fear pulse" onclick="navigateToQuiz('Fear')">
+          <div class="mood-icon">
+            <i class="fas fa-flushed"></i>
+          </div>
+          <h2>Fear</h2>
+        </div>
+      </div>
+
+      <!-- Progress Section -->
+      <div class="progress-section" id="progressSection" style="display: none">
+        <h2><i class="fas fa-chart-line"></i> Your Progress Summary</h2>
+        <div id="progressList"></div>
+        <div id="challengesList" style="margin-top: 30px">
+          <h3><i class="fas fa-trophy"></i> Challenge Completions</h3>
+          <div id="challengeProgress"></div>
+        </div>
+        <button class="nav-btn mt-4" onclick="viewDetailedProgress()">
+          <i class="fas fa-chart-bar"></i> View Detailed Progress
+        </button>
+      </div>
+    </div>
+
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+    <script>
+      // Initialize particles.js
+      document.addEventListener("DOMContentLoaded", function () {
+        particlesJS("particles-js", {
+          particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: "#5e60ce" },
+            shape: { type: "circle" },
+            opacity: { value: 0.5, random: true },
+            size: { value: 3, random: true },
+            line_linked: {
+              enable: true,
+              distance: 150,
+              color: "#5e60ce",
+              opacity: 0.4,
+              width: 1,
+            },
+            move: {
+              enable: true,
+              speed: 2,
+              direction: "none",
+              random: true,
+              straight: false,
+              out_mode: "out",
+              bounce: false,
+            },
+          },
+          interactivity: {
+            detect_on: "canvas",
+            events: {
+              onhover: { enable: true, mode: "repulse" },
+              onclick: { enable: true, mode: "push" },
+              resize: true,
+            },
+          },
+          retina_detect: true,
+        });
+      });
+
+      const API_BASE = "http://localhost:5000/api";
+      const token = localStorage.getItem("token");
+
+      // Get current user ID for localStorage keys (user-specific storage)
+      let currentUserId = null;
+
+      // Initialize user-specific localStorage keys
+      async function initializeUserContext() {
+        if (token) {
+          try {
+            const res = await fetch(`${API_BASE}/auth/me`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+              const user = await res.json();
+              currentUserId = user.id || user._id;
+              console.log("Current user ID:", currentUserId);
+            }
+          } catch (error) {
+            console.error("Error getting user context:", error);
+          }
+        } else {
+          // For guest users, use a consistent guest identifier
+          currentUserId = "guest";
+        }
+      }
+
+      // Get user-specific localStorage key
+      function getUserSpecificKey(baseKey) {
+        return currentUserId
+          ? `${baseKey}_${currentUserId}`
+          : `${baseKey}_guest`;
+      }
+
+      // Navigate to quiz (DOES NOT save progress immediately)
+      function navigateToQuiz(mood) {
+        // Store the selected mood temporarily for when the quiz is completed
+        sessionStorage.setItem("selectedMood", mood);
+
+        // Navigate to the appropriate quiz page
+        const quizPages = {
+          Happy: "happyquiz.html",
+          Sad: "sadquiz.html",
+          Surprised: "surprisedQuiz.html",
+          Love: "loveQuiz.html",
+          Angry: "angryquiz.html",
+          Fear: "fearQuiz.html",
+        };
+
+        if (quizPages[mood]) {
+          // Add a nice page transition
+          document.body.style.opacity = "0";
+          setTimeout(() => {
+            window.location.href = quizPages[mood];
+          }, 500);
+        }
+      }
+
+      // Save quiz completion (ONLY called when quiz is actually completed)
+      // This function should be called from your individual quiz pages
+      async function saveQuizCompletion(mood, quizResults = null) {
+        try {
+          // Ensure user context is initialized
+          if (!currentUserId) {
+            await initializeUserContext();
+          }
+
+          let today = new Date();
+          let newEntry = {
+            mood: mood,
+            date: today.toLocaleDateString(),
+            time: today.toLocaleTimeString(),
+            userId: currentUserId,
+            completed: true,
+            results: quizResults, // Store quiz results if provided
+          };
+
+          // If logged in, save to database
+          if (token) {
+            await fetch(`${API_BASE}/progress/assessment`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                mood: mood.toLowerCase(),
+                type: "quiz",
+                completed: true,
+                results: quizResults,
+              }),
+            });
+          }
+
+          // Save to user-specific localStorage key
+          const userProgressKey = getUserSpecificKey("progress");
+          let progress =
+            JSON.parse(localStorage.getItem(userProgressKey)) || [];
+          progress.push(newEntry);
+          localStorage.setItem(userProgressKey, JSON.stringify(progress));
+
+          console.log(`Quiz completion saved for user ${currentUserId}:`, mood);
+
+          // Clear the temporary mood selection
+          sessionStorage.removeItem("selectedMood");
+        } catch (error) {
+          console.error("Error saving quiz completion:", error);
+        }
+      }
+
+      // Record challenge completion (call this when a challenge is completed) - USER SPECIFIC
+      async function recordChallengeCompletion(
+        mood,
+        challengeType = "default"
+      ) {
+        try {
+          // Ensure user context is initialized
+          if (!currentUserId) {
+            await initializeUserContext();
+          }
+
+          let newCompletion = {
+            mood: mood.toLowerCase(),
+            challenge: challengeType,
+            time: new Date().toISOString(),
+            userId: currentUserId, // Add user ID to the entry
+          };
+
+          // If logged in, also save to database
+          if (token) {
+            await fetch(`${API_BASE}/progress/complete-challenge`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                mood: mood.toLowerCase(),
+                challenge: challengeType,
+              }),
+            });
+          }
+
+          // Save to user-specific localStorage key
+          const userChallengesKey = getUserSpecificKey("completedChallenges");
+          let completions =
+            JSON.parse(localStorage.getItem(userChallengesKey)) || [];
+          completions.push(newCompletion);
+          localStorage.setItem(userChallengesKey, JSON.stringify(completions));
+
+          console.log(
+            `Challenge completion recorded for user ${currentUserId}: ${mood} - ${challengeType}`
+          );
+        } catch (error) {
+          console.error("Error recording challenge completion:", error);
+        }
+      }
+
+      // Display progress summary - USER SPECIFIC (Only shows completed quizzes)
+      async function displayProgress() {
+        try {
+          // Ensure user context is initialized
+          if (!currentUserId) {
+            await initializeUserContext();
+          }
+
+          let progressList = document.getElementById("progressList");
+          let challengeProgress = document.getElementById("challengeProgress");
+
+          progressList.innerHTML = "";
+          challengeProgress.innerHTML = "";
+
+          // Get user-specific progress
+          let progress = [];
+
+          if (token) {
+            // If logged in, get from database
+            try {
+              const res = await fetch(`${API_BASE}/progress/assessments`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (res.ok) {
+                const assessments = await res.json();
+                progress = assessments.map((a) => ({
+                  mood: a.mood.charAt(0).toUpperCase() + a.mood.slice(1),
+                  date: new Date(a.takenAt).toLocaleDateString(),
+                  time: new Date(a.takenAt).toLocaleTimeString(),
+                  userId: currentUserId,
+                  completed: a.completed || false,
+                }));
+              }
+            } catch (error) {
+              console.log("Failed to load from database, using localStorage");
+            }
+          }
+
+          // If no database data or not logged in, use user-specific localStorage
+          if (progress.length === 0) {
+            const userProgressKey = getUserSpecificKey("progress");
+            progress = JSON.parse(localStorage.getItem(userProgressKey)) || [];
+          }
+
+          // Filter to show only completed quizzes
+          const completedQuizzes = progress.filter(
+            (item) => item.completed === true
+          );
+
+          // Show quiz/assessment progress (only completed ones)
+          if (completedQuizzes.length === 0) {
+            progressList.innerHTML = `
+              <div class="progress-item">
+                <i class="fas fa-info-circle"></i>
+                <div>No completed quizzes yet. Complete a quiz to see your progress!</div>
+              </div>
+            `;
+          } else {
+            progressList.innerHTML =
+              "<h3><i class='fas fa-check-circle'></i> Completed Quizzes</h3>";
+            completedQuizzes
+              .slice(-5)
+              .reverse()
+              .forEach((item) => {
+                if (item.date && item.time && item.mood) {
+                  let div = document.createElement("div");
+                  div.className = "progress-item";
+                  div.innerHTML = `
+                    <i class="fas fa-${item.mood.toLowerCase()}"></i>
+                    <div>${item.date} at ${item.time} - Completed ${
+                    item.mood
+                  } Quiz</div>
+                  `;
+                  progressList.appendChild(div);
+                }
+              });
+          }
+
+          // Show user-specific challenge completions
+          let completions = [];
+
+          if (token) {
+            // If logged in, get from database
+            try {
+              const res = await fetch(
+                `${API_BASE}/progress/all-challenge-completions`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
+              if (res.ok) {
+                completions = await res.json();
+              }
+            } catch (error) {
+              console.log("Failed to load challenges from database");
+            }
+          }
+
+          // If no database data, use user-specific localStorage
+          if (completions.length === 0) {
+            const userChallengesKey = getUserSpecificKey("completedChallenges");
+            completions =
+              JSON.parse(localStorage.getItem(userChallengesKey)) || [];
+          }
+
+          if (completions.length === 0) {
+            challengeProgress.innerHTML = `
+              <div class="progress-item">
+                <i class="fas fa-info-circle"></i>
+                <div>No challenges completed yet.</div>
+              </div>
+            `;
+          } else {
+            const moodCounts = {};
+            completions.forEach((completion) => {
+              const mood = completion.mood.toLowerCase();
+              moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+            });
+
+            Object.keys(moodCounts).forEach((mood) => {
+              let div = document.createElement("div");
+              div.className = "progress-item";
+              div.innerHTML = `
+                <i class="fas fa-${mood}"></i>
+                <div>${mood.charAt(0).toUpperCase() + mood.slice(1)}: ${
+                moodCounts[mood]
+              } challenges completed</div>
+              `;
+              challengeProgress.appendChild(div);
+            });
+          }
+        } catch (error) {
+          console.error("Error displaying progress:", error);
+          document.getElementById("progressList").innerHTML = `
+            <div class="progress-item">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div>Error loading progress</div>
+            </div>
+          `;
+        }
+      }
+
+      // Show/Hide Sections
+      function showSection(section) {
+        if (section === "quizzes") {
+          document.getElementById("quizzes").style.display = "grid";
+          document.getElementById("progressSection").style.display = "none";
+        } else if (section === "progress") {
+          document.getElementById("quizzes").style.display = "none";
+          document.getElementById("progressSection").style.display = "block";
+          displayProgress();
+        }
+      }
+
+      // View detailed progress
+      function viewDetailedProgress() {
+        window.location.href = "progress tracking.html";
+      }
+
+      // Check authentication status
+      function checkAuth() {
+        if (token) {
+          // Show a nice notification instead of alert
+          const notification = document.createElement("div");
+          notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideIn 0.5s forwards;
+          `;
+          notification.innerHTML = `
+            <i class="fas fa-check-circle"></i> You are logged in! Your progress is being synced.
+          `;
+          document.body.appendChild(notification);
+
+          setTimeout(() => {
+            notification.style.animation = "slideOut 0.5s forwards";
+            setTimeout(() => notification.remove(), 500);
+          }, 3000);
+        } else {
+          // Use a custom modal instead of confirm
+          const modal = document.createElement("div");
+          modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+          `;
+
+          modal.innerHTML = `
+            <div style="
+              background: var(--dark);
+              padding: 30px;
+              border-radius: 15px;
+              text-align: center;
+              max-width: 400px;
+              width: 90%;
+              border: 1px solid rgba(255,255,255,0.1);
+            ">
+              <h3 style="margin-bottom: 20px;"><i class="fas fa-user"></i> Account Required</h3>
+              <p style="margin-bottom: 25px;">You are not logged in. Progress is saved locally. Would you like to sign in to sync across devices?</p>
+              <div style="display: flex; gap: 15px; justify-content: center;">
+                <button class="nav-btn" onclick="window.location.href='login.html'; this.closest('div').style.display='none';">
+                  <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+                <button class="nav-btn" style="background: rgba(255,255,255,0.1);" onclick="this.closest('div').remove();">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
+              </div>
+            </div>
+          `;
+
+          document.body.appendChild(modal);
+        }
+      }
+
+      // Initialize user context on page load
+      document.addEventListener("DOMContentLoaded", async () => {
+        await initializeUserContext();
+        // Add fade-in animation
+        document.body.style.transition = "opacity 0.5s";
+        document.body.style.opacity = "1";
+      });
+
+      // Make functions available globally for quiz pages
+      window.completeQuiz = saveQuizCompletion;
+      window.completeChallenge = recordChallengeCompletion;
+      window.getCurrentUserId = () => currentUserId;
+    </script>
+
+     <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>FeelWise</h3>
+        <p>Understanding emotions through AI-powered analysis</p>
+      </div>
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <a href="#">Blog</a>
+        <a href="#">Guides</a>
+        <a href="#">Support</a>
+      </div>
+      <div class="footer-section">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Careers</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-section">
+        <h4>Connect</h4>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2023 FeelWise. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  </body>
+</html>

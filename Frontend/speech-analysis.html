@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speech Emotion Analysis</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="speech-analysis.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+
+</head>
+
+<body>
+  <!-- Header with Navigation -->
+  <header class="site-header">
+    <div class="header-content">
+      <div class="logo-container">
+        <h1 class="logo">
+          <i class="fas fa-brain"></i>
+          FeelWise
+        </h1>
+      </div>
+      <nav class="main-nav">
+        <a href="#" class="nav-link"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="#" class="nav-link"><i class="fas fa-history"></i> History</a>
+        <a href="#" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="header">
+      <h1>Speech Emotion Analysis</h1>
+      <p>Understand your emotions through your voice with our advanced AI-powered analysis</p>
+      <a href="module.html" class="back-btn"><i class="fas fa-arrow-left"></i> Go Back to Modules</a>
+    </div>
+
+    <div class="main-content">
+
+      <!-- Input Section -->
+      <div class="input-section speech-mode">
+        <p>Click "Start" to begin recording your voice and share your thoughts. Our AI will analyze the emotional content in real-time.</p>
+        <div class="controls">
+          <button id="startRecordingBtn" type="button"><i class="fas fa-microphone"></i> Start Recording</button>
+          <button id="stopRecordingBtn" type="button" disabled><i class="fas fa-stop"></i> Stop Recording</button>
+        </div>
+
+        <div class="transcript-box">
+          <h3><i class="fas fa-scroll"></i> Live Transcript</h3>
+          <div id="transcriptDisplay" class="transcript-display">Your speech will appear here...</div>
+          <div id="processingIndicator"><div class="spinner"></div> Processing your emotions...</div>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="results-section">
+        <div class="emotion-report">
+          <h2><i class="fas fa-chart-pie"></i> Your Emotion Report</h2>
+          <div id="emotionResult" class="emotion-result">
+            <p>Speech-based emotion analysis results will be displayed here after recording.</p>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <h2><i class="fas fa-trending-up"></i> Your Emotional Progress</h2>
+          <div class="time-filters">
+            <button class="time-filter active" data-period="daily" type="button">Daily</button>
+            <button class="time-filter" data-period="weekly" type="button">Weekly</button>
+            <button class="time-filter" data-period="monthly" type="button">Monthly</button>
+          </div>
+          <canvas id="progressChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recommendations Section -->
+      <div class="recommendations-section">
+        <div class="recommendations">
+          <h2><i class="fas fa-lightbulb"></i> Recommendations</h2>
+          <div id="recommendationsContent">
+            <p>Personalized suggestions based on your voice emotion will be shown here.</p>
+          </div>
+        </div>
+
+        <div class="daily-challenge">
+          <h2><i class="fas fa-tasks"></i> Daily Challenge</h2>
+          <div id="dailyChallengeContent">
+            <p>Complete your voice-based challenge to boost emotional strength!</p>
+          </div>
+        </div>
+
+        <div class="tip-of-the-day">
+          <h2><i class="fas fa-info-circle"></i> Tip of the Day</h2>
+          <div id="dailyTipContent">
+            <p>Loading today's speech well-being tip...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>FeelWise</h3>
+        <p>Understanding emotions through AI-powered analysis</p>
+      </div>
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <a href="#"><i class="fas fa-blog"></i> Blog</a>
+        <a href="#"><i class="fas fa-book"></i> Guides</a>
+        <a href="#"><i class="fas fa-question-circle"></i> Support</a>
+      </div>
+      <div class="footer-section">
+        <h4>Company</h4>
+        <a href="#"><i class="fas fa-users"></i> About Us</a>
+        <a href="#"><i class="fas fa-briefcase"></i> Careers</a>
+        <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+      </div>
+      <div class="footer-section">
+        <h4>Connect</h4>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2023 FeelWise. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script src="speech-analysis.js"></script>
+  <script>
+    // Show/hide processing indicator during recording analysis
+    const processingIndicator = document.getElementById('processingIndicator');
+
+    function showProcessing() {
+      processingIndicator.style.display = 'flex';
+    }
+
+    function hideProcessing() {
+      processingIndicator.style.display = 'none';
+    }
+
+    // Override JS analyzeSpeech to toggle indicator
+    const originalAnalyzeSpeech = window.analyzeSpeech;
+    window.analyzeSpeech = async function(transcript, audioBase64) {
+      showProcessing();
+      await originalAnalyzeSpeech(transcript, audioBase64);
+      hideProcessing();
+    };
+
+    // Add recording state visual feedback
+    const startBtn = document.getElementById('startRecordingBtn');
+    const stopBtn = document.getElementById('stopRecordingBtn');
+    const transcriptDisplay = document.getElementById('transcriptDisplay');
+    
+    startBtn.addEventListener('click', () => {
+      startBtn.classList.add('recording');
+      transcriptDisplay.classList.add('active');
+    });
+    
+    stopBtn.addEventListener('click', () => {
+      startBtn.classList.remove('recording');
+    });
+  </script>
+</body>
+
+</html>

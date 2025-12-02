@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FeelWise - Angry Mood Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="module.css">
+  <link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+    <!-- Top Header Section -->
+  <div class="top-header">
+    <div class="logo">FeelWise</div>
+  </div>
+
+<!-- Quiz Section -->
+<div class="container my-5" id="quizSection">
+  <div class="text-center mb-4 mainheading">
+    <h2>Angry Mood Assessment</h2>
+    <p>Let's understand your anger and find ways to manage it</p>
+  </div>
+
+  <!-- Question 1 -->
+  <div class="quiz-card">
+    <h3>1. What triggers your anger most?</h3>
+    <div class="div1">
+      <input type="radio" name="q1" value="injustice"> Injustice or unfairness<br>
+      <input type="radio" name="q1" value="disrespect"> Being disrespected<br>
+      <input type="radio" name="q1" value="frustration"> Frustration with obstacles<br>
+      <input type="radio" name="q1" value="stress"> Overwhelming stress
+    </div>
+  </div>
+<br>
+
+  <!-- Question 2 -->
+  <div class="quiz-card">
+    <h3>2. How do you usually express anger?</h3>
+    <div class="div1">
+      <input type="radio" name="q2" value="verbal"> Verbal outbursts<br>
+      <input type="radio" name="q2" value="silent"> Silent treatment<br>
+      <input type="radio" name="q2" value="physical"> Physical tension/activity<br>
+      <input type="radio" name="q2" value="withdraw"> Withdraw from others
+    </div>
+  </div>
+<br>
+
+  <!-- Question 3 -->
+  <div class="quiz-card">
+    <h3>3. What helps you calm down?</h3>
+    <div class="div1">
+      <input type="radio" name="q3" value="exercise"> Physical exercise<br>
+      <input type="radio" name="q3" value="talk"> Talking to someone<br>
+      <input type="radio" name="q3" value="alone"> Being alone<br>
+      <input type="radio" name="q3" value="music"> Music or art
+    </div>
+  </div>
+<br>
+
+  <!-- Question 4 -->
+  <div class="quiz-card">
+    <h3>4. Rate your anger intensity (1-10)</h3>
+    <div class="div1">
+      <input type="radio" name="q4" value="low"> 1-3 (Mild irritation)<br>
+      <input type="radio" name="q4" value="medium"> 4-6 (Moderate anger)<br>
+      <input type="radio" name="q4" value="high"> 7-8 (Strong anger)<br>
+      <input type="radio" name="q4" value="extreme"> 9-10 (Intense rage)
+    </div>
+  </div>
+<br>
+
+  <!-- Question 5 -->
+  <div class="quiz-card">
+    <h3>5. Describe a recent situation that made you angry</h3>
+    <div class="div1">
+      <textarea rows="5" class="divArea" id="angerSituation" placeholder="Share what happened and how you felt..."></textarea>
+    </div>
+  </div>
+
+  <button class="btn btn-lg btn-dark btn-submit" onclick="submitQuiz()">Complete Assessment</button>
+</div>
+
+<!-- Result Section -->
+<div class="container my-5" id="resultSection" style="display:none;">
+  <div class="result-card">
+    <h2>Assessment Complete</h2>
+    <p id="quoteText"></p>
+    <div id="angerProfile"></div>
+    
+    <!-- Challenge Section -->
+    <div class="challenge-section">
+      <h3>Anger Management Challenges</h3>
+      <p>Try these personalized challenges to better manage your anger:</p>
+      
+      <div class="challenge-card" onclick="startChallenge('breathing')">
+        <h4>Deep Breathing Exercise</h4>
+        <p>Practice the 4-7-8 breathing technique</p>
+        <span class="challenge-status" id="breathing-status"></span>
+      </div>
+      
+      <div class="challenge-card" onclick="startChallenge('journaling')">
+        <h4>Anger Journaling</h4>
+        <p>Write about your anger triggers and patterns</p>
+        <span class="challenge-status" id="journaling-status"></span>
+      </div>
+      
+      <div class="challenge-card" onclick="startChallenge('physical')">
+        <h4>Physical Release</h4>
+        <p>Channel anger through exercise or physical activity</p>
+        <span class="challenge-status" id="physical-status"></span>
+      </div>
+      
+      <div class="challenge-card" onclick="startChallenge('mindfulness')">
+        <h4>Mindfulness Practice</h4>
+        <p>Practice staying present when anger arises</p>
+        <span class="challenge-status" id="mindfulness-status"></span>
+      </div>
+    </div>
+    
+    <button class="btn btn-success mt-3" onclick="window.location.href='quizzes.html'">Back to Quizzes</button>
+  </div>
+</div>
+
+<script>
+  const API_BASE = "http://localhost:5000/api";
+  const token = localStorage.getItem("token");
+  let currentUserId = null;
+
+  // Get user-specific localStorage key
+  function getUserSpecificKey(baseKey) {
+    return currentUserId ? `${baseKey}_${currentUserId}` : `${baseKey}_guest`;
+  }
+
+  // Initialize user context
+  async function initializeUserContext() {
+    if (token) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const user = await res.json();
+          currentUserId = user.id || user._id;
+        }
+      } catch (error) {
+        console.error("Error getting user context:", error);
+        currentUserId = 'guest';
+      }
+    } else {
+      currentUserId = 'guest';
+    }
+  }
+
+  // Complete challenge details
+  const challengeDetails = {
+    breathing: {
+      title: "Deep Breathing Exercise",
+      description: "Let's practice the 4-7-8 breathing technique together.",
+      steps: [
+        "Find a comfortable seated position",
+        "Inhale quietly through your nose for 4 counts",
+        "Hold your breath for 7 counts", 
+        "Exhale completely through your mouth for 8 counts",
+        "Repeat this cycle 4 times",
+        "Focus on releasing anger with each exhale"
+      ]
+    },
+    journaling: {
+      title: "Anger Journaling",
+      description: "Reflect on your anger patterns through writing.",
+      steps: [
+        "Write down what triggered your anger today",
+        "Describe how your body felt during the anger episode",
+        "Note what thoughts went through your mind",
+        "Identify any patterns you notice in your anger triggers",
+        "Write about one positive way you could handle this situation next time",
+        "End by writing one thing you're grateful for today"
+      ]
+    },
+    physical: {
+      title: "Physical Release",
+      description: "Channel anger through exercise or physical activity.",
+      steps: [
+        "Do 10 jumping jacks to release initial energy",
+        "Try 5 minutes of brisk walking or jogging in place",
+        "Do some push-ups or wall push-ups (as many as comfortable)",
+        "Practice progressive muscle relaxation - tense and release each muscle group",
+        "End with gentle stretching, especially neck and shoulders",
+        "Take deep breaths and notice how your body feels now"
+      ]
+    },
+    mindfulness: {
+      title: "Mindfulness Practice",
+      description: "Practice staying present when anger arises.",
+      steps: [
+        "Sit comfortably and close your eyes",
+        "Notice where you feel anger in your body without trying to change it",
+        "Breathe naturally and observe your thoughts without judgment",
+        "When you notice anger thoughts, gently return focus to your breath",
+        "Practice the 5-4-3-2-1 grounding technique (5 things you see, 4 you hear, etc.)",
+        "End by setting an intention for how you want to respond to anger today"
+      ]
+    }
+  };
+
+  function submitQuiz() {
+    // Check if first 4 questions are answered
+    for (let i = 1; i <= 4; i++) {
+      if (!document.querySelector(`input[name="q${i}"]:checked`)) {
+        alert("Please answer all questions!");
+        return;
+      }
+    }
+
+    // Get answers for personalized response
+    const trigger = document.querySelector('input[name="q1"]:checked').value;
+    const expression = document.querySelector('input[name="q2"]:checked').value;
+    const calming = document.querySelector('input[name="q3"]:checked').value;
+    const intensity = document.querySelector('input[name="q4"]:checked').value;
+    const situation = document.getElementById('angerSituation').value;
+
+    // Generate personalized quote and profile
+    let quote = getPersonalizedQuote(trigger, intensity);
+    let profile = generateAngerProfile(trigger, expression, calming, intensity);
+
+    // Show result
+    document.getElementById("quizSection").style.display = "none";
+    document.getElementById("resultSection").style.display = "block";
+    document.getElementById("quoteText").innerHTML = quote;
+    document.getElementById("angerProfile").innerHTML = profile;
+    
+    // Load challenge statuses for this user
+    loadChallengeStatuses();
+
+    // Record the quiz completion for this specific user
+    recordUserAssessment('Angry', {
+      trigger, expression, calming, intensity, situation
+    });
+  }
+
+  function getPersonalizedQuote(trigger, intensity) {
+    const quotes = {
+      injustice: {
+        low: "Channel your sense of justice into positive action. Small steps create big changes.",
+        medium: "Your anger about injustice shows you care. Use that energy to make a difference.",
+        high: "Intense anger about unfairness is natural. Transform that passion into purposeful action.",
+        extreme: "Your rage against injustice is powerful. Channel it safely to create the change you want to see."
+      },
+      disrespect: {
+        low: "Your worth isn't determined by others' actions. Stay true to yourself.",
+        medium: "Set clear boundaries. Respect yourself first, and others will follow.",
+        high: "Strong anger about disrespect shows healthy self-worth. Express it constructively.",
+        extreme: "You deserve respect. Channel this intensity into assertive, not aggressive, communication."
+      },
+      frustration: {
+        low: "Every obstacle is a stepping stone. Take a breath and find another way.",
+        medium: "Frustration signals you care about your goals. Adapt your approach.",
+        high: "Your strong reaction shows your determination. Channel it into creative problem-solving.",
+        extreme: "Intense frustration can fuel breakthrough thinking. Step back and reassess."
+      },
+      stress: {
+        low: "Recognize stress early. Small self-care actions prevent bigger problems.",
+        medium: "Stress-induced anger is your body's alarm system. Listen and respond with care.",
+        high: "High stress anger needs immediate attention. Prioritize your well-being.",
+        extreme: "Overwhelming anger from stress requires support. Reach out and get help."
+      }
+    };
+    return quotes[trigger][intensity] || "Every feeling is valid. How you respond defines your strength.";
+  }
+
+  function generateAngerProfile(trigger, expression, calming, intensity) {
+    let profile = `<div style="text-align: left; margin: 20px 0;">`;
+    profile += `<h4>Your Anger Profile:</h4>`;
+    profile += `<p><strong>Primary Trigger:</strong> ${trigger.charAt(0).toUpperCase() + trigger.slice(1)}</p>`;
+    profile += `<p><strong>Expression Style:</strong> ${expression.charAt(0).toUpperCase() + expression.slice(1)}</p>`;
+    profile += `<p><strong>Calming Method:</strong> ${calming.charAt(0).toUpperCase() + calming.slice(1)}</p>`;
+    profile += `<p><strong>Intensity Level:</strong> ${intensity.charAt(0).toUpperCase() + intensity.slice(1)}</p>`;
+    profile += `</div>`;
+    return profile;
+  }
+
+  // Load user-specific challenge statuses
+  async function loadChallengeStatuses() {
+    const challenges = ['breathing', 'journaling', 'physical', 'mindfulness'];
+    
+    if (token) {
+      // If logged in, get user-specific challenge completions from database
+      try {
+        const response = await fetch(`${API_BASE}/progress/all-challenge-completions`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const userCompletions = await response.json();
+          challenges.forEach(challenge => {
+            const isCompleted = userCompletions.some(c => 
+              c.mood === 'angry' && c.challenge === challenge
+            );
+            const statusElement = document.getElementById(`${challenge}-status`);
+            if (isCompleted) {
+              statusElement.textContent = '✅ Completed';
+              statusElement.parentElement.classList.add('challenge-completed');
+            } else {
+              statusElement.textContent = 'Try this challenge';
+            }
+          });
+          return;
+        }
+      } catch (error) {
+        console.log("Failed to load from database, using localStorage");
+      }
+    }
+    
+    // Fallback to user-specific localStorage
+    if (currentUserId) {
+      const userChallengesKey = getUserSpecificKey("completedChallenges");
+      const completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+      
+      challenges.forEach(challenge => {
+        const isCompleted = completedChallenges.some(c => 
+          c.mood === 'angry' && c.challenge === challenge
+        );
+        const statusElement = document.getElementById(`${challenge}-status`);
+        if (isCompleted) {
+          statusElement.textContent = '✅ Completed';
+          statusElement.parentElement.classList.add('challenge-completed');
+        } else {
+          statusElement.textContent = 'Try this challenge';
+        }
+      });
+    }
+  }
+
+  // Start challenge function
+  async function startChallenge(challengeType) {
+    const challenge = challengeDetails[challengeType];
+    if (!challenge) return;
+
+    // Create modal HTML
+    const modalHTML = `
+      <div class="challenge-modal" id="challengeModal">
+        <div class="challenge-modal-content">
+          <span class="close-modal" onclick="closeModal()">&times;</span>
+          <h3>${challenge.title}</h3>
+          <p>${challenge.description}</p>
+          <div class="steps-container">
+            ${challenge.steps.map((step, index) => `
+              <div class="step-item">
+                <strong>Step ${index + 1}:</strong> ${step}
+              </div>
+            `).join('')}
+          </div>
+          <button class="btn btn-success" onclick="completeUserChallenge('${challengeType}')">
+            Mark Challenge Complete
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Add modal to body if it doesn't exist
+    const existingModal = document.getElementById('challengeModal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('challengeModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('challengeModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  }
+
+  // Complete challenge for the current user
+  async function completeUserChallenge(challengeType) {
+    try {
+      if (token) {
+        // Save to database for logged-in user
+        const response = await fetch(`${API_BASE}/progress/complete-challenge`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ 
+            mood: 'angry', 
+            challenge: challengeType 
+          }),
+        });
+
+        if (response.ok) {
+          console.log("Challenge completion saved for user");
+        }
+      }
+      
+      // Also save to user-specific localStorage
+      if (currentUserId) {
+        const userChallengesKey = getUserSpecificKey("completedChallenges");
+        let completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+        const newCompletion = {
+          mood: 'angry',
+          challenge: challengeType,
+          time: new Date().toISOString(),
+          userId: currentUserId
+        };
+        completedChallenges.push(newCompletion);
+        localStorage.setItem(userChallengesKey, JSON.stringify(completedChallenges));
+      }
+
+      // Update UI
+      const statusElement = document.getElementById(`${challengeType}-status`);
+      if (statusElement) {
+        statusElement.textContent = '✅ Completed';
+        statusElement.parentElement.classList.add('challenge-completed');
+      }
+
+      closeModal();
+      alert(`Great job completing the ${challengeDetails[challengeType].title}!`);
+
+      // Call parent function if available (for integration with quizzes.html)
+      if (typeof window.parent.completeChallenge === 'function') {
+        window.parent.completeChallenge('angry', challengeType);
+      }
+
+    } catch (error) {
+      console.error("Error completing challenge:", error);
+      alert("Challenge completed locally!");
+    }
+  }
+
+  // Record user-specific assessment
+  async function recordUserAssessment(mood, assessmentData) {
+    try {
+      if (token) {
+        // Save to database for logged-in user
+        await fetch(`${API_BASE}/progress/assessment`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ 
+            mood: mood.toLowerCase(), 
+            type: 'assessment',
+            data: assessmentData
+          }),
+        });
+      }
+
+      // Save to user-specific localStorage
+      if (currentUserId) {
+        const userProgressKey = getUserSpecificKey("progress");
+        let progress = JSON.parse(localStorage.getItem(userProgressKey) || "[]");
+        let today = new Date();
+        let newEntry = {
+          mood: mood,
+          date: today.toLocaleDateString(),
+          time: today.toLocaleTimeString(),
+          userId: currentUserId
+        };
+        progress.push(newEntry);
+        localStorage.setItem(userProgressKey, JSON.stringify(progress));
+      }
+
+      // Call parent function if available (from quizzes.html)
+      if (typeof window.parent.saveMoodAssessment === 'function') {
+        window.parent.saveMoodAssessment(mood);
+      } else if (typeof saveMoodAssessment === 'function') {
+        saveMoodAssessment(mood);
+      }
+    } catch (error) {
+      console.error("Error recording assessment:", error);
+    }
+  }
+
+  // Click outside modal to close
+  window.addEventListener('click', function(event) {
+    const modal = document.getElementById('challengeModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Initialize on page load
+  document.addEventListener("DOMContentLoaded", async () => {
+    await initializeUserContext();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeelWise - Comprehensive Assessment Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <link rel="stylesheet" href="fa.css">
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="logo">FeelWise</div>
+        <div class="nav-buttons">
+            <a href="javascript:history.back()" class="nav-btn">← Back</a>
+            <a href="index.html" class="nav-btn">Home</a>
+        </div>
+    </div>
+
+    <!-- Report Container -->
+    <div class="report-container">
+        <div class="report-header">
+            <h1>Comprehensive Emotional Assessment Report</h1>
+            <p id="reportDate">Generated on <span></span></p>
+        </div>
+
+        <div class="report-content">
+            <!-- Loading State -->
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+                <h3>Generating Your Comprehensive Report...</h3>
+                <p>Analyzing your text and facial expression patterns...</p>
+            </div>
+
+            <!-- No Data State -->
+            <div id="noDataState" class="no-data" style="display: none;">
+                <h3>No Analysis Data Found</h3>
+                <p>You haven't completed any analyses yet. Start by analyzing your thoughts and facial expressions to generate your personalized report.</p>
+                <div class="action-buttons">
+                    <a href="text-analysis.html" class="action-btn btn-primary">Start Text Analysis</a>
+                    <a href="facial-analysis.html" class="action-btn btn-primary">Start Facial Analysis</a>
+                </div>
+            </div>
+
+            <!-- Report Content -->
+            <div id="reportData" style="display: none;">
+                <!-- Analysis Type Tabs -->
+                <div class="analysis-tabs">
+                    <button class="tab-button active" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab-button" onclick="switchTab('text')">Text Analysis</button>
+                    <button class="tab-button" onclick="switchTab('facial')">Facial Analysis</button>
+                    <button class="tab-button" onclick="switchTab('comparison')">Comparison</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div id="overviewTab" class="tab-content active">
+                    <!-- Summary Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Text Analyses</h3>
+                            <p class="stat-number" id="totalTextAnalyses">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Facial Analyses</h3>
+                            <p class="stat-number" id="totalFacialAnalyses">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Time Period</h3>
+                            <p class="stat-number" id="overallTimeRange">0 days</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Overall Dominant Emotion</h3>
+                            <p class="stat-number" id="overallDominantEmotion">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Overall Emotional Distribution -->
+                    <div class="emotion-distribution">
+                        <h2 class="section-title">Overall Emotional Distribution</h2>
+                        <div class="emotion-circles">
+                            <div class="emotion-circle">
+                                <div class="circle positive" id="overallPositiveCircle">0%</div>
+                                <p><strong>Positive</strong></p>
+                            </div>
+                            <div class="emotion-circle">
+                                <div class="circle negative" id="overallNegativeCircle">0%</div>
+                                <p><strong>Negative</strong></p>
+                            </div>
+                            <div class="emotion-circle">
+                                <div class="circle neutral" id="overallNeutralCircle">0%</div>
+                                <p><strong>Neutral</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cross-Analysis Insights -->
+                    <div class="correlation-insights">
+                        <h4>Cross-Analysis Insights</h4>
+                        <div id="correlationInsights"></div>
+                    </div>
+
+                    <!-- Combined Recommendations -->
+                    <div class="recommendations-section">
+                        <h2 class="section-title">Personalized Recommendations</h2>
+                        <div id="combinedRecommendations"></div>
+                    </div>
+                </div>
+
+                <!-- Text Analysis Tab -->
+                <div id="textTab" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Text Analyses</h3>
+                            <p class="stat-number" id="textAnalysesCount">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Text Period</h3>
+                            <p class="stat-number" id="textTimeRange">0 days</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Text Dominant Emotion</h3>
+                            <p class="stat-number" id="textDominantEmotion">-</p>
+                        </div>
+                    </div>
+
+                    <div class="emotion-distribution">
+                        <h2 class="section-title">Text Emotional Distribution</h2>
+                        <div class="emotion-circles">
+                            <div class="emotion-circle">
+                                <div class="circle positive" id="textPositiveCircle">0%</div>
+                                <p><strong>Positive</strong></p>
+                            </div>
+                            <div class="emotion-circle">
+                                <div class="circle negative" id="textNegativeCircle">0%</div>
+                                <p><strong>Negative</strong></p>
+                            </div>
+                            <div class="emotion-circle">
+                                <div class="circle neutral" id="textNeutralCircle">0%</div>
+                                <p><strong>Neutral</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="trends-section">
+                        <h2 class="section-title">Text Emotion Frequency</h2>
+                        <div class="trends-grid" id="textEmotionTrends"></div>
+                    </div>
+
+                    <div class="recent-analyses">
+                        <h2 class="section-title">Recent Text Analyses</h2>
+                        <div id="recentTextAnalyses"></div>
+                    </div>
+                </div>
+
+                <!-- Facial Analysis Tab -->
+                <div id="facialTab" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Facial Analyses</h3>
+                            <p class="stat-number" id="facialAnalysesCount">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Facial Period</h3>
+                            <p class="stat-number" id="facialTimeRange">0 days</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Facial Dominant Emotion</h3>
+                            <p class="stat-number" id="facialDominantEmotion">-</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Average Confidence</h3>
+                            <p class="stat-number" id="averageConfidence">0%</p>
+                        </div>
+                    </div>
+
+                    <div class="emotion-distribution">
+                        <h2 class="section-title">Facial Emotional Distribution</h2>
+                        <div class="emotion-circles">
+                            <div class="emotion-circle">
+                                <div class="circle positive" id="facialPositiveCircle">0%</div>
+                                <p><strong>Positive</strong></p>
+                            </div>
+                            <div class="emotion-circle">
+                                <div class="circle negative" id="facialNegativeCircle">0%</div>
+                                <p><strong>Negative</strong></p>
+                            </div>
+                            <div class="emotion-circle">
+                                <div class="circle neutral" id="facialNeutralCircle">0%</div>
+                                <p><strong>Neutral</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="trends-section">
+                        <h2 class="section-title">Facial Emotion Frequency</h2>
+                        <div class="trends-grid" id="facialEmotionTrends"></div>
+                    </div>
+
+                    <div class="recent-analyses">
+                        <h2 class="section-title">Recent Facial Analyses</h2>
+                        <div id="recentFacialAnalyses"></div>
+                    </div>
+                </div>
+
+                <!-- Comparison Tab -->
+                <div id="comparisonTab" class="tab-content">
+                    <div class="comparison-section">
+                        <h2 class="comparison-title">Text vs Facial Analysis Comparison</h2>
+                        <div class="comparison-grid">
+                            <div class="analysis-type">
+                                <h4>Text Analysis Emotions</h4>
+                                <div class="chart-container">
+                                    <canvas id="textChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="analysis-type">
+                                <h4>Facial Analysis Emotions</h4>
+                                <div class="chart-container">
+                                    <canvas id="facialChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="correlation-insights">
+                            <h4>Analysis Correlation</h4>
+                            <div id="comparisonInsights"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons" id="actionButtons" style="display: none;">
+            <button onclick="window.print()" class="action-btn btn-primary">Print Report</button>
+            <button onclick="exportCombinedReport()" class="action-btn btn-secondary">Export Combined Data</button>
+            <button onclick="exportTextReport()" class="action-btn btn-secondary">Export Text Data</button>
+            <button onclick="exportFacialReport()" class="action-btn btn-secondary">Export Facial Data</button>
+            <a href="text-analysis.html" class="action-btn btn-secondary">New Text Analysis</a>
+            <a href="facial-analysis.html" class="action-btn btn-secondary">New Facial Analysis</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:5000/api";
+        const token = localStorage.getItem("token");
+        let currentUserId = null;
+        let textChart, facialChart;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.getElementById('reportDate').querySelector('span').textContent = 
+                new Date().toLocaleDateString() + ' at ' + new Date().toLocaleTimeString();
+
+            await initializeUserContext();
+            await loadComprehensiveAssessmentReport();
+        });
+
+        // Initialize user context
+        async function initializeUserContext() {
+            if (token) {
+                try {
+                    const res = await fetch(`${API_BASE}/auth/me`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (res.ok) {
+                        const user = await res.json();
+                        currentUserId = user.id || user._id;
+                    }
+                } catch (error) {
+                    console.error("Error getting user context:", error);
+                    currentUserId = "guest";
+                }
+            } else {
+                currentUserId = "guest";
+            }
+        }
+
+        // Get user-specific localStorage key
+        function getUserSpecificKey(baseKey) {
+            return currentUserId ? `${baseKey}_${currentUserId}` : `${baseKey}_guest`;
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Load comprehensive assessment report
+        async function loadComprehensiveAssessmentReport() {
+            try {
+                // Load both text and facial analysis data
+                const textData = await loadAnalysisData('text');
+                const facialData = await loadAnalysisData('facial');
+
+                if (textData.length === 0 && facialData.length === 0) {
+                    showNoDataState();
+                    return;
+                }
+
+                // Generate comprehensive report
+                const reportData = generateComprehensiveReport(textData, facialData);
+                displayComprehensiveReport(reportData);
+
+            } catch (error) {
+                console.error('Error loading comprehensive assessment report:', error);
+                showNoDataState();
+            }
+        }
+
+        // Load analysis data (text or facial)
+        async function loadAnalysisData(type) {
+            let analyses = [];
+            const historyKey = type === 'text' ? 'emotionHistory' : 'facialAnalysisHistory';
+            const apiEndpoint = type === 'text' ? 'text-analysis' : 'facial-analysis';
+            
+            // Try backend first if logged in
+            if (token && currentUserId !== "guest") {
+                try {
+                    const res = await fetch(`${API_BASE}/${apiEndpoint}/history`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        analyses = await res.json();
+                    }
+                } catch (error) {
+                    console.log(`Failed to load ${type} analysis from backend, using localStorage`);
+                }
+            }
+
+            // Fallback to localStorage
+            if (analyses.length === 0) {
+                const userHistoryKey = getUserSpecificKey(historyKey);
+                analyses = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
+            }
+
+            return analyses;
+        }
+
+        // Generate comprehensive report
+        function generateComprehensiveReport(textData, facialData) {
+            const now = new Date();
+            
+            // Calculate time ranges
+            const allTimestamps = [
+                ...textData.map(d => new Date(d.timestamp)),
+                ...facialData.map(d => new Date(d.timestamp))
+            ];
+            
+            const oldestAnalysis = allTimestamps.length > 0 ? new Date(Math.min(...allTimestamps)) : now;
+            const daysDiff = Math.ceil((now - oldestAnalysis) / (1000 * 60 * 60 * 24));
+
+            // Process text data
+            const textReport = textData.length > 0 ? generateReportData(textData) : null;
+            
+            // Process facial data
+            const facialReport = generateFacialReportData(facialData);
+
+            // Calculate overall statistics
+            const overallStats = calculateOverallStats(textData, facialData);
+
+            return {
+                textReport,
+                facialReport,
+                overallStats,
+                timeRange: `${daysDiff} days`,
+                correlationInsights: generateCorrelationInsights(textData, facialData),
+                combinedRecommendations: generateCombinedRecommendations(textData, facialData)
+            };
+        }
+
+        // Generate facial report data
+        function generateFacialReportData(facialData) {
+            if (facialData.length === 0) {
+                return null;
+            }
+
+            const now = new Date();
+            const oldestAnalysis = new Date(Math.min(...facialData.map(d => new Date(d.timestamp))));
+            const daysDiff = Math.ceil((now - oldestAnalysis) / (1000 * 60 * 60 * 24));
+
+            // Calculate emotion trends
+            const emotionTrends = {};
+            let totalConfidence = 0;
+            const totalEmotions = { positive: 0, negative: 0, neutral: 0 };
+
+            facialData.forEach(analysis => {
+                const emotion = analysis.emotion;
+                emotionTrends[emotion] = (emotionTrends[emotion] || 0) + 1;
+                totalConfidence += analysis.confidence || 75;
+                
+                totalEmotions.positive += analysis.emotionDistribution.positive;
+                totalEmotions.negative += analysis.emotionDistribution.negative;
+                totalEmotions.neutral += analysis.emotionDistribution.neutral;
+            });
+
+            const averageEmotions = {
+                positive: totalEmotions.positive / facialData.length,
+                negative: totalEmotions.negative / facialData.length,
+                neutral: totalEmotions.neutral / facialData.length
+            };
+
+            const averageConfidence = totalConfidence / facialData.length;
+            const dominantEmotion = Object.entries(emotionTrends).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+
+            return {
+                totalAnalyses: facialData.length,
+                timeRange: `${daysDiff} days`,
+                emotionTrends,
+                averageEmotions,
+                averageConfidence,
+                dominantEmotion,
+                recentAnalyses: facialData.slice(-5).reverse()
+            };
+        }
+
+        // Calculate overall statistics combining both analysis types
+        function calculateOverallStats(textData, facialData) {
+            const allData = [...textData, ...facialData];
+            
+            if (allData.length === 0) {
+                return {
+                    totalAnalyses: 0,
+                    averageEmotions: { positive: 0, negative: 0, neutral: 0 },
+                    dominantEmotion: 'none'
+                };
+            }
+
+            // Combine emotion distributions
+            let totalPositive = 0, totalNegative = 0, totalNeutral = 0;
+            const combinedEmotions = {};
+
+            // Process text data
+            textData.forEach(analysis => {
+                totalPositive += analysis.emotions?.positive || 0;
+                totalNegative += analysis.emotions?.negative || 0;
+                totalNeutral += analysis.emotions?.neutral || 0;
+                
+                const emotion = analysis.dominantEmotion;
+                combinedEmotions[emotion] = (combinedEmotions[emotion] || 0) + 1;
+            });
+
+            // Process facial data
+            facialData.forEach(analysis => {
+                totalPositive += analysis.emotionDistribution?.positive || 0;
+                totalNegative += analysis.emotionDistribution?.negative || 0;
+                totalNeutral += analysis.emotionDistribution?.neutral || 0;
+                
+                const emotion = analysis.emotion;
+                combinedEmotions[emotion] = (combinedEmotions[emotion] || 0) + 1;
+            });
+
+            const totalCount = textData.length + facialData.length;
+            const averageEmotions = {
+                positive: totalPositive / totalCount,
+                negative: totalNegative / totalCount,
+                neutral: totalNeutral / totalCount
+            };
+
+            const dominantEmotion = Object.keys(combinedEmotions).length > 0 
+                ? Object.entries(combinedEmotions).reduce((a, b) => a[1] > b[1] ? a : b)[0]
+                : 'none';
+
+            return {
+                totalAnalyses: totalCount,
+                averageEmotions,
+                dominantEmotion,
+                combinedEmotions
+            };
+        }
+
+        // Generate correlation insights between text and facial analysis
+        function generateCorrelationInsights(textData, facialData) {
+            const insights = [];
+
+            if (textData.length === 0 && facialData.length === 0) {
+                return ['No analysis data available for correlation insights.'];
+            }
+
+            if (textData.length === 0) {
+                insights.push('Only facial analysis data available. Consider adding text analysis for deeper insights.');
+                return insights;
+            }
+
+            if (facialData.length === 0) {
+                insights.push('Only text analysis data available. Consider adding facial analysis for more comprehensive assessment.');
+                return insights;
+            }
+
+            // Calculate averages for comparison
+            const textAvg = {
+                positive: textData.reduce((sum, a) => sum + (a.emotions?.positive || 0), 0) / textData.length,
+                negative: textData.reduce((sum, a) => sum + (a.emotions?.negative || 0), 0) / textData.length
+            };
+
+            const facialAvg = {
+                positive: facialData.reduce((sum, a) => sum + (a.emotionDistribution?.positive || 0), 0) / facialData.length,
+                negative: facialData.reduce((sum, a) => sum + (a.emotionDistribution?.negative || 0), 0) / facialData.length
+            };
+
+            // Generate insights based on comparison
+            const positiveDiff = Math.abs(textAvg.positive - facialAvg.positive);
+            const negativeDiff = Math.abs(textAvg.negative - facialAvg.negative);
+
+            if (positiveDiff < 10 && negativeDiff < 10) {
+                insights.push('Your written emotions align closely with your facial expressions, indicating good emotional awareness.');
+            } else if (textAvg.positive > facialAvg.positive + 15) {
+                insights.push('Your written expressions tend to be more positive than your facial expressions. Consider if you might be masking emotions.');
+            } else if (facialAvg.positive > textAvg.positive + 15) {
+                insights.push('Your facial expressions tend to be more positive than your written thoughts. This suggests good emotional resilience.');
+            }
+
+            if (textAvg.negative > facialAvg.negative + 15) {
+                insights.push('Your written expressions show more negative emotions than your face. Writing may help you process difficult feelings.');
+            } else if (facialAvg.negative > textAvg.negative + 15) {
+                insights.push('Your facial expressions show more stress than your written thoughts. Consider stress management techniques.');
+            }
+
+            // Analysis frequency insights
+            if (textData.length > facialData.length * 2) {
+                insights.push('You engage more with text analysis. Consider balancing with facial expression analysis for complete self-awareness.');
+            } else if (facialData.length > textData.length * 2) {
+                insights.push('You engage more with facial analysis. Consider adding text analysis to explore your inner emotional landscape.');
+            } else {
+                insights.push('You maintain a good balance between text and facial analysis methods.');
+            }
+
+            return insights;
+        }
+
+        // Generate combined recommendations
+        function generateCombinedRecommendations(textData, facialData) {
+            const recommendations = [];
+
+            if (textData.length === 0 && facialData.length === 0) {
+                return ['Start with either text or facial analysis to begin understanding your emotional patterns.'];
+            }
+
+            // Get individual recommendations
+            if (textData.length > 0) {
+                const textReport = generateReportData(textData);
+                recommendations.push(...textReport.recommendations.slice(0, 3));
+            }
+
+            if (facialData.length > 0) {
+                recommendations.push('Practice facial relaxation exercises to reduce emotional tension.');
+                recommendations.push('Use mirror work to increase facial expression awareness.');
+            }
+
+            // Add correlation-based recommendations
+            if (textData.length > 0 && facialData.length > 0) {
+                recommendations.push('Continue using both analysis methods for comprehensive emotional intelligence.');
+                recommendations.push('Compare your results across methods to identify emotional patterns.');
+            }
+
+            // General wellness recommendations
+            recommendations.push('Practice daily mindfulness to increase emotional awareness across all contexts.');
+            recommendations.push('Maintain consistent sleep and exercise routines for emotional stability.');
+
+            return recommendations.slice(0, 8); // Limit to 8 recommendations
+        }
+
+        // Generate text report data (reuse from text analysis)
+        function generateReportData(history) {
+            if (history.length === 0) {
+                return null;
+            }
+
+            const now = new Date();
+            const oldestAnalysis = new Date(Math.min(...history.map(h => new Date(h.timestamp))));
+            const daysDiff = Math.ceil((now - oldestAnalysis) / (1000 * 60 * 60 * 24));
+
+            // Calculate trends
+            const emotionalTrends = {};
+            const totalEmotions = { positive: 0, negative: 0, neutral: 0 };
+
+            history.forEach(analysis => {
+                const dominant = analysis.dominantEmotion;
+                emotionalTrends[dominant] = (emotionalTrends[dominant] || 0) + 1;
+                
+                totalEmotions.positive += analysis.emotions?.positive || 0;
+                totalEmotions.negative += analysis.emotions?.negative || 0;
+                totalEmotions.neutral += analysis.emotions?.neutral || 0;
+            });
+
+            const averageEmotions = {
+                positive: totalEmotions.positive / history.length,
+                negative: totalEmotions.negative / history.length,
+                neutral: totalEmotions.neutral / history.length
+            };
+
+            // Generate insights and recommendations
+            const insights = generateInsights(emotionalTrends, averageEmotions, history);
+            const recommendations = generatePersonalizedRecommendations(emotionalTrends, averageEmotions);
+
+            return {
+                totalAnalyses: history.length,
+                timeRange: `${daysDiff} days`,
+                emotionalTrends,
+                averageEmotions,
+                insights,
+                recommendations,
+                recentAnalyses: history.slice(-5).reverse(),
+                dominantEmotion: Object.entries(emotionalTrends).reduce((a, b) => a[1] > b[1] ? a : b)[0]
+            };
+        }
+
+        // Display comprehensive report
+        function displayComprehensiveReport(reportData) {
+            // Hide loading and show report
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('reportData').style.display = 'block';
+            document.getElementById('actionButtons').style.display = 'flex';
+
+            // Populate overview tab
+            populateOverviewTab(reportData);
+
+            // Populate individual tabs
+            if (reportData.textReport) {
+                populateTextTab(reportData.textReport);
+            }
+
+            if (reportData.facialReport) {
+                populateFacialTab(reportData.facialReport);
+            }
+
+            // Populate comparison tab
+            populateComparisonTab(reportData);
+        }
+
+        // Populate overview tab
+        function populateOverviewTab(reportData) {
+            const textCount = reportData.textReport ? reportData.textReport.totalAnalyses : 0;
+            const facialCount = reportData.facialReport ? reportData.facialReport.totalAnalyses : 0;
+
+            document.getElementById('totalTextAnalyses').textContent = textCount;
+            document.getElementById('totalFacialAnalyses').textContent = facialCount;
+            document.getElementById('overallTimeRange').textContent = reportData.timeRange;
+            document.getElementById('overallDominantEmotion').textContent = 
+                reportData.overallStats.dominantEmotion.charAt(0).toUpperCase() + 
+                reportData.overallStats.dominantEmotion.slice(1);
+
+            // Overall emotional distribution
+            document.getElementById('overallPositiveCircle').textContent = 
+                reportData.overallStats.averageEmotions.positive.toFixed(1) + '%';
+            document.getElementById('overallNegativeCircle').textContent = 
+                reportData.overallStats.averageEmotions.negative.toFixed(1) + '%';
+            document.getElementById('overallNeutralCircle').textContent = 
+                reportData.overallStats.averageEmotions.neutral.toFixed(1) + '%';
+
+            // Correlation insights
+            const correlationContainer = document.getElementById('correlationInsights');
+            correlationContainer.innerHTML = '';
+            reportData.correlationInsights.forEach(insight => {
+                const p = document.createElement('p');
+                p.textContent = insight;
+                p.style.marginBottom = '10px';
+                correlationContainer.appendChild(p);
+            });
+
+            // Combined recommendations
+            const recsContainer = document.getElementById('combinedRecommendations');
+            recsContainer.innerHTML = '';
+            reportData.combinedRecommendations.forEach(rec => {
+                const recItem = document.createElement('div');
+                recItem.className = 'rec-item';
+                recItem.innerHTML = `
+                    <span class="checkmark">✓</span>
+                    <span>${rec}</span>
+                `;
+                recsContainer.appendChild(recItem);
+            });
+        }
+
+        // Populate text analysis tab
+        function populateTextTab(textReport) {
+            document.getElementById('textAnalysesCount').textContent = textReport.totalAnalyses;
+            document.getElementById('textTimeRange').textContent = textReport.timeRange;
+            document.getElementById('textDominantEmotion').textContent = 
+                textReport.dominantEmotion.charAt(0).toUpperCase() + textReport.dominantEmotion.slice(1);
+
+            // Text emotional distribution
+            document.getElementById('textPositiveCircle').textContent = textReport.averageEmotions.positive.toFixed(1) + '%';
+            document.getElementById('textNegativeCircle').textContent = textReport.averageEmotions.negative.toFixed(1) + '%';
+            document.getElementById('textNeutralCircle').textContent = textReport.averageEmotions.neutral.toFixed(1) + '%';
+
+            // Text emotion trends
+            const textTrendsContainer = document.getElementById('textEmotionTrends');
+            textTrendsContainer.innerHTML = '';
+            Object.entries(textReport.emotionalTrends).forEach(([emotion, count]) => {
+                const trendItem = document.createElement('div');
+                trendItem.className = 'trend-item';
+                trendItem.innerHTML = `
+                    <div class="emotion-name">${emotion}</div>
+                    <div class="count">${count}</div>
+                `;
+                textTrendsContainer.appendChild(trendItem);
+            });
+
+            // Recent text analyses
+            const recentTextContainer = document.getElementById('recentTextAnalyses');
+            recentTextContainer.innerHTML = '';
+            if (textReport.recentAnalyses.length > 0) {
+                textReport.recentAnalyses.forEach(analysis => {
+                    const recentItem = document.createElement('div');
+                    recentItem.className = 'recent-item';
+                    recentItem.innerHTML = `
+                        <div class="date">${new Date(analysis.timestamp).toLocaleDateString()}</div>
+                        <div class="emotion">Dominant Emotion: ${analysis.dominantEmotion}</div>
+                        <div class="text-preview">"${analysis.text.substring(0, 150)}${analysis.text.length > 150 ? '...' : ''}"</div>
+                    `;
+                    recentTextContainer.appendChild(recentItem);
+                });
+            } else {
+                recentTextContainer.innerHTML = '<p class="text-muted">No recent text analyses to display.</p>';
+            }
+        }
+
+        // Populate facial analysis tab
+        function populateFacialTab(facialReport) {
+            document.getElementById('facialAnalysesCount').textContent = facialReport.totalAnalyses;
+            document.getElementById('facialTimeRange').textContent = facialReport.timeRange;
+            document.getElementById('facialDominantEmotion').textContent = 
+                facialReport.dominantEmotion.charAt(0).toUpperCase() + facialReport.dominantEmotion.slice(1);
+            document.getElementById('averageConfidence').textContent = facialReport.averageConfidence.toFixed(1) + '%';
+
+            // Facial emotional distribution
+            document.getElementById('facialPositiveCircle').textContent = facialReport.averageEmotions.positive.toFixed(1) + '%';
+            document.getElementById('facialNegativeCircle').textContent = facialReport.averageEmotions.negative.toFixed(1) + '%';
+            document.getElementById('facialNeutralCircle').textContent = facialReport.averageEmotions.neutral.toFixed(1) + '%';
+
+            // Facial emotion trends
+            const facialTrendsContainer = document.getElementById('facialEmotionTrends');
+            facialTrendsContainer.innerHTML = '';
+            Object.entries(facialReport.emotionalTrends).forEach(([emotion, count]) => {
+                const trendItem = document.createElement('div');
+                trendItem.className = 'trend-item';
+                trendItem.innerHTML = `
+                    <div class="emotion-name">${emotion}</div>
+                    <div class="count">${count}</div>
+                `;
+                facialTrendsContainer.appendChild(trendItem);
+            });
+
+            // Recent facial analyses
+            const recentFacialContainer = document.getElementById('recentFacialAnalyses');
+            recentFacialContainer.innerHTML = '';
+            if (facialReport.recentAnalyses.length > 0) {
+                facialReport.recentAnalyses.forEach(analysis => {
+                    const recentItem = document.createElement('div');
+                    recentItem.className = 'recent-item';
+                    recentItem.innerHTML = `
+                        <div class="date">${new Date(analysis.timestamp).toLocaleDateString()}</div>
+                        <div class="emotion">Detected Emotion: ${analysis.emotion} (${analysis.confidence.toFixed(1)}% confidence)</div>
+                        <div class="text-preview">Facial expression analysis completed</div>
+                    `;
+                    recentFacialContainer.appendChild(recentItem);
+                });
+            } else {
+                recentFacialContainer.innerHTML = '<p class="text-muted">No recent facial analyses to display.</p>';
+            }
+        }
+
+        // Populate comparison tab
+        function populateComparisonTab(reportData) {
+            // Create comparison charts
+            if (reportData.textReport && reportData.facialReport) {
+                createComparisonCharts(reportData.textReport, reportData.facialReport);
+            }
+
+            // Populate comparison insights
+            const comparisonContainer = document.getElementById('comparisonInsights');
+            comparisonContainer.innerHTML = '';
+            reportData.correlationInsights.forEach(insight => {
+                const p = document.createElement('p');
+                p.textContent = insight;
+                p.style.marginBottom = '10px';
+                comparisonContainer.appendChild(p);
+            });
+        }
+
+        // Create comparison charts
+        function createComparisonCharts(textReport, facialReport) {
+            // Text analysis chart
+            const textCtx = document.getElementById('textChart').getContext('2d');
+            if (textChart) textChart.destroy();
+            textChart = new Chart(textCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Negative', 'Neutral'],
+                    datasets: [{
+                        data: [
+                            textReport.averageEmotions.positive,
+                            textReport.averageEmotions.negative,
+                            textReport.averageEmotions.neutral
+                        ],
+                        backgroundColor: ['#66bb6a', '#ef5350', '#ffca28'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Facial analysis chart
+            const facialCtx = document.getElementById('facialChart').getContext('2d');
+            if (facialChart) facialChart.destroy();
+            facialChart = new Chart(facialCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Negative', 'Neutral'],
+                    datasets: [{
+                        data: [
+                            facialReport.averageEmotions.positive,
+                            facialReport.averageEmotions.negative,
+                            facialReport.averageEmotions.neutral
+                        ],
+                        backgroundColor: ['#66bb6a', '#ef5350', '#ffca28'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Show no data state
+        function showNoDataState() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('noDataState').style.display = 'block';
+        }
+
+        // Generate insights (reuse from text analysis)
+        function generateInsights(trends, averages, history) {
+            const insights = [];
+            
+            const mostCommon = Object.entries(trends).reduce((a, b) => a[1] > b[1] ? a : b);
+            insights.push(`Your most frequent emotional state is ${mostCommon[0]} (${mostCommon[1]} times)`);
+            
+            if (averages.positive > averages.negative) {
+                insights.push(`You maintain a positive emotional outlook ${averages.positive.toFixed(1)}% of the time`);
+            } else if (averages.negative > averages.positive) {
+                insights.push(`Your emotional state shows ${averages.negative.toFixed(1)}% negative sentiment - consider focusing on self-care`);
+            } else {
+                insights.push('You maintain a balanced emotional state');
+            }
+            
+            if (history.length >= 3) {
+                const recent = history.slice(-3);
+                const recentPositive = recent.reduce((sum, a) => sum + (a.emotions?.positive || 0), 0) / 3;
+                const overallPositive = averages.positive;
+                
+                if (recentPositive > overallPositive + 5) {
+                    insights.push('Your recent emotional state shows improvement - keep it up!');
+                } else if (recentPositive < overallPositive - 5) {
+                    insights.push('Your recent emotional state shows some challenges - consider additional support');
+                }
+            }
+            
+            return insights;
+        }
+
+        // Generate personalized recommendations (reuse from text analysis)
+        function generatePersonalizedRecommendations(trends, averages) {
+            const recommendations = [];
+            
+            if (averages.negative > 40) {
+                recommendations.push('Consider practicing daily mindfulness meditation (10-15 minutes)');
+                recommendations.push('Schedule regular check-ins with a trusted friend or counselor');
+                recommendations.push('Engage in physical activity to improve mood naturally');
+            }
+            
+            if (averages.positive > 60) {
+                recommendations.push('Your positive outlook is a strength - consider mentoring others');
+                recommendations.push('Use your positive energy to tackle challenging goals');
+            }
+            
+            const dominantEmotion = Object.entries(trends).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+            
+            const emotionRecs = {
+                sadness: ['Practice gratitude journaling', 'Engage in creative activities', 'Spend time in nature'],
+                anger: ['Try progressive muscle relaxation', 'Practice assertive communication', 'Consider anger management techniques'],
+                fear: ['Practice exposure therapy with small steps', 'Learn grounding techniques', 'Build a support network'],
+                joy: ['Share your joy with others', 'Capture positive moments in a journal', 'Plan enjoyable activities regularly'],
+                love: ['Express appreciation to loved ones', 'Practice self-compassion', 'Consider volunteer work'],
+                surprise: ['Embrace new experiences', 'Stay curious and open-minded', 'Reflect on unexpected positive outcomes']
+            };
+            
+            if (emotionRecs[dominantEmotion]) {
+                recommendations.push(...emotionRecs[dominantEmotion]);
+            }
+            
+            return recommendations.slice(0, 6);
+        }
+
+        // Export functions
+        async function exportCombinedReport() {
+            try {
+                const textData = await loadAnalysisData('text');
+                const facialData = await loadAnalysisData('facial');
+                
+                if (textData.length === 0 && facialData.length === 0) {
+                    alert('No analysis data to export');
+                    return;
+                }
+
+                const csvContent = convertCombinedToCSV(textData, facialData);
+                downloadCSV(csvContent, 'combined_emotional_analysis');
+            } catch (error) {
+                console.error('Error exporting combined report:', error);
+                alert('Error exporting data. Please try again.');
+            }
+        }
+
+        async function exportTextReport() {
+            try {
+                const textData = await loadAnalysisData('text');
+                if (textData.length === 0) {
+                    alert('No text analysis data to export');
+                    return;
+                }
+                const csvContent = convertTextToCSV(textData);
+                downloadCSV(csvContent, 'text_analysis');
+            } catch (error) {
+                console.error('Error exporting text report:', error);
+                alert('Error exporting data. Please try again.');
+            }
+        }
+
+        async function exportFacialReport() {
+            try {
+                const facialData = await loadAnalysisData('facial');
+                if (facialData.length === 0) {
+                    alert('No facial analysis data to export');
+                    return;
+                }
+                const csvContent = convertFacialToCSV(facialData);
+                downloadCSV(csvContent, 'facial_analysis');
+            } catch (error) {
+                console.error('Error exporting facial report:', error);
+                alert('Error exporting data. Please try again.');
+            }
+        }
+
+        // CSV conversion functions
+        function convertCombinedToCSV(textData, facialData) {
+            const headers = ['Date', 'Time', 'Analysis Type', 'Content/Emotion', 'Positive %', 'Negative %', 'Neutral %', 'Confidence/Details'];
+            const rows = [];
+
+            // Add text data
+            textData.forEach(item => {
+                const date = new Date(item.timestamp);
+                rows.push([
+                    date.toLocaleDateString(),
+                    date.toLocaleTimeString(),
+                    'Text Analysis',
+                    `"${item.text.replace(/"/g, '""')}"`,
+                    item.emotions.positive.toFixed(2),
+                    item.emotions.negative.toFixed(2),
+                    item.emotions.neutral.toFixed(2),
+                    item.dominantEmotion
+                ].join(','));
+            });
+
+            // Add facial data
+            facialData.forEach(item => {
+                const date = new Date(item.timestamp);
+                rows.push([
+                    date.toLocaleDateString(),
+                    date.toLocaleTimeString(),
+                    'Facial Analysis',
+                    item.emotion,
+                    item.emotionDistribution.positive.toFixed(2),
+                    item.emotionDistribution.negative.toFixed(2),
+                    item.emotionDistribution.neutral.toFixed(2),
+                    `${item.confidence.toFixed(2)}% confidence`
+                ].join(','));
+            });
+
+            return [headers.join(','), ...rows].join('\n');
+        }
+
+        function convertTextToCSV(data) {
+            const headers = ['Date', 'Time', 'Text', 'Dominant Emotion', 'Positive %', 'Negative %', 'Neutral %'];
+            const rows = data.map(item => {
+                const date = new Date(item.timestamp);
+                return [
+                    date.toLocaleDateString(),
+                    date.toLocaleTimeString(),
+                    `"${item.text.replace(/"/g, '""')}"`,
+                    item.dominantEmotion,
+                    item.emotions.positive.toFixed(2),
+                    item.emotions.negative.toFixed(2),
+                    item.emotions.neutral.toFixed(2)
+                ].join(',');
+            });
+            return [headers.join(','), ...rows].join('\n');
+        }
+
+        function convertFacialToCSV(data) {
+            const headers = ['Date', 'Time', 'Detected Emotion', 'Confidence %', 'Positive %', 'Negative %', 'Neutral %'];
+            const rows = data.map(item => {
+                const date = new Date(item.timestamp);
+                return [
+                    date.toLocaleDateString(),
+                    date.toLocaleTimeString(),
+                    item.emotion,
+                    item.confidence.toFixed(2),
+                    item.emotionDistribution.positive.toFixed(2),
+                    item.emotionDistribution.negative.toFixed(2),
+                    item.emotionDistribution.neutral.toFixed(2)
+                ].join(',');
+            });
+            return [headers.join(','), ...rows].join('\n');
+        }
+
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FeelWise - Sign Up</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="signup.css" />
+  </head>
+  <body>
+    <!-- Animated background bubbles -->
+    <ul class="bg-bubbles">
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+
+    <!-- Signup Form -->
+    <div class="signup-container">
+      <div class="logo">
+        <div class="logo-circle">
+          <i class="fas fa-brain"></i>
+        </div>
+        <div class="logo-text">
+          <h1>FeelWise</h1>
+          <p>Emotional Intelligence Platform</p>
+        </div>
+      </div>
+
+      <h2>Join FeelWise</h2>
+      <form id="signup-form">
+        <div class="input-group">
+          <i class="fas fa-user input-icon"></i>
+          <input type="text" id="name" placeholder="Full Name" required />
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-envelope input-icon"></i>
+          <input type="email" id="email" placeholder="Email Address" required />
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-lock input-icon"></i>
+          <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-calendar-alt input-icon"></i>
+          <input type="date" id="dob" required />
+        </div>
+
+        <p class="error-message" id="signup-error">
+          Please check your information and try again.
+        </p>
+        <p class="success-message" id="signup-success">
+          Account created successfully! Redirecting...
+        </p>
+
+        <button type="submit">
+          Create Account
+          <i class="fas fa-user-plus" style="margin-left: 8px"></i>
+        </button>
+      </form>
+
+      <p>Already have an account? <a href="login.html">Login here</a></p>
+
+      <div class="footer">
+        <p>© 2023 FeelWise. All rights reserved.</p>
+      </div>
+    </div>
+
+    <script type="module" src="signup.js"></script>
+  </body>
+</html>

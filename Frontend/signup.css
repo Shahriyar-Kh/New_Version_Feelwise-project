@@ -1,0 +1,334 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #4a154b, #6d4eff, #8a2be2);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Animated background elements */
+.bg-bubbles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bg-bubbles li {
+  position: absolute;
+  list-style: none;
+  display: block;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.15);
+  bottom: -160px;
+  border-radius: 50%;
+  animation: square 25s infinite;
+  transition-timing-function: linear;
+}
+
+.bg-bubbles li:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+  width: 80px;
+  height: 80px;
+}
+
+.bg-bubbles li:nth-child(2) {
+  left: 20%;
+  animation-delay: 2s;
+  animation-duration: 17s;
+  width: 60px;
+  height: 60px;
+}
+
+.bg-bubbles li:nth-child(3) {
+  left: 25%;
+  animation-delay: 4s;
+}
+
+.bg-bubbles li:nth-child(4) {
+  left: 40%;
+  animation-delay: 0s;
+  animation-duration: 22s;
+  width: 100px;
+  height: 100px;
+}
+
+.bg-bubbles li:nth-child(5) {
+  left: 70%;
+  animation-delay: 3s;
+}
+
+.bg-bubbles li:nth-child(6) {
+  left: 80%;
+  animation-delay: 2s;
+  width: 120px;
+  height: 120px;
+}
+
+.bg-bubbles li:nth-child(7) {
+  left: 32%;
+  animation-delay: 6s;
+  width: 70px;
+  height: 70px;
+}
+
+.bg-bubbles li:nth-child(8) {
+  left: 55%;
+  animation-delay: 8s;
+  animation-duration: 18s;
+  width: 50px;
+  height: 50px;
+}
+
+.bg-bubbles li:nth-child(9) {
+  left: 25%;
+  animation-delay: 9s;
+  animation-duration: 20s;
+  width: 90px;
+  height: 90px;
+}
+
+.bg-bubbles li:nth-child(10) {
+  left: 90%;
+  animation-delay: 11s;
+  width: 60px;
+  height: 60px;
+}
+
+@keyframes square {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+    border-radius: 50%;
+  }
+  100% {
+    transform: translateY(-1000px) rotate(720deg);
+    opacity: 0;
+    border-radius: 20%;
+  }
+}
+
+.signup-container {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  width: 430px;
+  text-align: center;
+  z-index: 1;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transform: scale(1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.signup-container:hover {
+  transform: scale(1.01);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-circle {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(45deg, #6d4eff, #8a2be2);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 5px 15px rgba(107, 33, 168, 0.4);
+  margin-right: 15px;
+}
+
+.logo i {
+  font-size: 32px;
+  color: white;
+}
+
+.logo-text {
+  text-align: left;
+}
+
+.logo-text h1 {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(to right, #fff, #e9d5ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+
+.logo-text p {
+  font-size: 14px;
+  color: #e9d5ff;
+  font-weight: 300;
+}
+
+.signup-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 25px;
+  color: white;
+  font-weight: 600;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.signup-container input {
+  width: 100%;
+  padding: 16px 20px 16px 45px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.signup-container input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.5);
+}
+
+.signup-container input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 300;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+}
+
+.signup-container button {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(to right, #6d4eff, #8a2be2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(107, 33, 168, 0.4);
+  margin-top: 10px;
+  letter-spacing: 0.5px;
+}
+
+.signup-container button:hover {
+  background: linear-gradient(to right, #7a4dac, #5a189a);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(107, 33, 168, 0.6);
+}
+
+.signup-container button:active {
+  transform: translateY(0);
+}
+
+.signup-container a {
+  color: #e9d5ff;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+  font-weight: 500;
+}
+
+.signup-container a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.error-message {
+  color: #ff9e9e;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  display: none;
+  text-align: left;
+  padding-left: 10px;
+}
+
+.success-message {
+  color: #a7f3d0;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  display: none;
+  text-align: left;
+  padding-left: 10px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 25px 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.divider::before {
+  margin-right: 10px;
+}
+
+.divider::after {
+  margin-left: 10px;
+}
+
+.footer {
+  margin-top: 25px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+p {
+  margin-top: 15px;
+}
+
+/* Date input styling */
+.signup-container input[type="date"] {
+  color-scheme: dark;
+}
+
+.signup-container input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}

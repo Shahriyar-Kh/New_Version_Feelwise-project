@@ -1,0 +1,278 @@
+
+ 
+    :root {
+      --primary: #5e60ce;
+      --secondary: #6930c3;
+      --accent1: #64dfdf;
+      --accent2: #80ffdb;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --happy: #FF9E44;
+      --love: #FF5D8F;
+      --sad: #5B8EFB;
+      --fear: #985FE6;
+      --surprised: #47B881;
+      --angry: #F85C50;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding-top: 80px;
+      color: var(--dark);
+    }
+    
+    .top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      color: #fff;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 1000;
+    }
+    
+    .logo {
+      font-size: 26px;
+      font-weight: bold;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .logo i {
+      color: var(--accent2);
+    }
+    
+    .user-actions {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .user-actions button {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .user-actions button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .page-title {
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    
+    .page-title h1 {
+      font-weight: 700;
+      color: var(--secondary);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .page-title::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent1) 0%, var(--accent2) 100%);
+      border-radius: 2px;
+    }
+    
+    .page-title p {
+      color: #6c757d;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    
+    .challenges-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .emotion-card {
+      position: relative;
+      height: 200px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: all 0.4s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .emotion-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    
+    .emotion-card.happy { background: linear-gradient(135deg, var(--happy) 0%, #FFD166 100%); }
+    .emotion-card.love { background: linear-gradient(135deg, var(--love) 0%, #FF97B7 100%); }
+    .emotion-card.sad { background: linear-gradient(135deg, var(--sad) 0%, #83A8FB 100%); }
+    .emotion-card.fear { background: linear-gradient(135deg, var(--fear) 0%, #B28DEF 100%); }
+    .emotion-card.surprised { background: linear-gradient(135deg, var(--surprised) 0%, #6DCF9A 100%); }
+    .emotion-card.angry { background: linear-gradient(135deg, var(--angry) 0%, #FF7D73 100%); }
+    
+    .emotion-icon {
+      font-size: 50px;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .emotion-card:hover .emotion-icon {
+      transform: scale(1.2);
+    }
+    
+    .emotion-name {
+      color: white;
+      font-size: 24px;
+      font-weight: 600;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+    
+    .emotion-description {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      transform: translateY(100%);
+      transition: all 0.3s ease;
+      font-size: 14px;
+      text-align: center;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+    }
+    
+    .emotion-card:hover .emotion-description {
+      transform: translateY(0);
+    }
+    
+    .pulse-effect {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      background: transparent;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+      }
+    }
+    
+    .completion-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 30px;
+      height: 30px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 14px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.3s ease;
+    }
+    
+    .completed .completion-badge {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .motivation-text {
+      text-align: center;
+      margin: 40px 0;
+      padding: 0 20px;
+    }
+    
+    .motivation-text p {
+      font-size: 18px;
+      color: var(--secondary);
+      font-style: italic;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    ::-webkit-scrollbar {
+        width: 10px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: rgba(30, 30, 46, 0.5);
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 5px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary);
+      }
+    
+    
+    @media (max-width: 768px) {
+      .top-header {
+        padding: 15px 20px;
+      }
+      
+      .page-title h1 {
+        font-size: 28px;
+      }
+      
+      .emotion-card {
+        height: 180px;
+      }
+      
+      .emotion-icon {
+        font-size: 40px;
+      }
+      
+      .emotion-name {
+        font-size: 20px;
+      }
+    }

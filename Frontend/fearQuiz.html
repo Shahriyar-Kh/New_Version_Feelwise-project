@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FeelWise - Fear Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="module.css">
+  <link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+  <!-- Top Header Section -->
+  <div class="top-header">
+    <div class="logo">FeelWise</div>
+  </div>
+
+  <!-- Quiz Section -->
+  <div class="container my-5" id="quizSection">
+    <div class="text-center mb-4 mainheading">
+      <h2>Fear Assessment</h2>
+      <p>Let's understand your fears and find ways to overcome them</p>
+    </div>
+
+    <!-- Question 1 -->
+    <div class="quiz-card">
+      <h3>1. Who's your "call for courage" buddy?</h3>
+      <div class="div1">
+        <input type="radio" name="q1" value="bestie"> Bestie <br />
+        <input type="radio" name="q1" value="family"> Mom ❤️ <br />
+        <input type="radio" name="q1" value="partner"> Partner 💖 <br />
+        <input type="radio" name="q1" value="none"> None
+      </div>
+    </div>
+<br>
+
+    <!-- Question 2 -->
+    <div class="quiz-card">
+      <h3>2. What's the bravest thing you've done?</h3>
+      <div class="div1">
+        <input type="radio" name="q2" value="help"> Help someone ❤️ <br />
+        <input type="radio" name="q2" value="stand"> Take stand for yourself 💪 <br />
+        <input type="radio" name="q2" value="failure"> Faced failure 💔 <br />
+        <input type="radio" name="q2" value="calm"> Stayed calm & rested 🌿
+      </div>
+    </div>
+<br>
+
+    <!-- Question 3 -->
+    <div class="quiz-card">
+      <h3>3. What makes you feel brave?</h3>
+      <div class="div1">
+        <input type="radio" name="q3" value="goals"> Setting small goals 🎯 <br />
+        <input type="radio" name="q3" value="selftalk"> Positive self-talk 🌟 <br />
+        <input type="radio" name="q3" value="steps"> Facing challenges step by step 👣 <br />
+        <input type="radio" name="q3" value="support"> Support from loved ones ❤️
+      </div>
+    </div>
+<br>
+
+    <!-- Question 4 -->
+    <div class="quiz-card">
+      <h3>4. What are you most afraid of?</h3>
+      <div class="div1">
+        <input type="radio" name="q4" value="darkness"> Darkness 🌑 <br />
+        <input type="radio" name="q4" value="failure"> Failure ❌ <br />
+        <input type="radio" name="q4" value="alone"> Being alone 🥺 <br />
+        <input type="radio" name="q4" value="loss"> Losing a loved one 💔
+      </div>
+    </div>
+<br>
+
+    <!-- Question 5 -->
+    <div class="quiz-card">
+      <h3>5. Why are you fearful? What is making you afraid?</h3>
+      <div class="div1">
+        <textarea rows="5" class="divArea" id="fearSituation" placeholder="Share what's making you afraid and how you feel..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-lg btn-dark btn-submit" onclick="submitQuiz()">Complete Assessment</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="container my-5" id="resultSection" style="display:none;">
+    <div class="result-card">
+      <h2>Assessment Complete</h2>
+      <p id="quoteText"></p>
+      <div id="fearProfile"></div>
+      
+      <!-- Challenge Section -->
+      <div class="challenge-section">
+        <h3>Fear Management Challenges</h3>
+        <p>Try these personalized challenges to overcome your fears:</p>
+        
+        <div class="challenge-card" onclick="startChallenge('grounding')">
+          <h4>5-4-3-2-1 Grounding</h4>
+          <p>Use your senses to stay present when fear strikes</p>
+          <span class="challenge-status" id="grounding-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('gradual')">
+          <h4>Gradual Exposure</h4>
+          <p>Face your fear in small, manageable steps</p>
+          <span class="challenge-status" id="gradual-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('visualization')">
+          <h4>Courage Visualization</h4>
+          <p>Imagine yourself overcoming your fears successfully</p>
+          <span class="challenge-status" id="visualization-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('affirmations')">
+          <h4>Courage Affirmations</h4>
+          <p>Build confidence with positive self-talk</p>
+          <span class="challenge-status" id="affirmations-status"></span>
+        </div>
+      </div>
+      
+      <button class="btn btn-success mt-3" onclick="window.location.href='quizzes.html'">Back to Quizzes</button>
+    </div>
+  </div>
+
+<script>
+  const API_BASE = "http://localhost:5000/api";
+  const token = localStorage.getItem("token");
+  let currentUserId = null;
+
+  // Get user-specific localStorage key
+  function getUserSpecificKey(baseKey) {
+    return currentUserId ? `${baseKey}_${currentUserId}` : `${baseKey}_guest`;
+  }
+
+  // Initialize user context
+  async function initializeUserContext() {
+    if (token) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const user = await res.json();
+          currentUserId = user.id || user._id;
+        }
+      } catch (error) {
+        console.error("Error getting user context:", error);
+        currentUserId = 'guest';
+      }
+    } else {
+      currentUserId = 'guest';
+    }
+  }
+
+  // Complete challenge details
+  const challengeDetails = {
+    grounding: {
+      title: "5-4-3-2-1 Grounding Technique",
+      description: "This technique helps you stay present when fear overwhelms you.",
+      steps: [
+        "Take a deep breath and look around you",
+        "Name 5 things you can see around you",
+        "Name 4 things you can touch or feel", 
+        "Name 3 things you can hear right now",
+        "Name 2 things you can smell",
+        "Name 1 thing you can taste",
+        "Take another deep breath and notice how you feel now"
+      ]
+    },
+    gradual: {
+      title: "Gradual Exposure Challenge",
+      description: "Face your fear gradually in small, manageable steps.",
+      steps: [
+        "Write down your specific fear",
+        "Break it down into smaller, less scary parts",
+        "Rate each part from 1-10 (least to most scary)",
+        "Start with the easiest step (lowest rating)",
+        "Practice this step until it feels comfortable",
+        "Move to the next step only when ready",
+        "Celebrate each small victory along the way"
+      ]
+    },
+    visualization: {
+      title: "Courage Visualization",
+      description: "Use the power of imagination to build confidence.",
+      steps: [
+        "Find a quiet, comfortable place to sit or lie down",
+        "Close your eyes and take several deep breaths",
+        "Picture yourself in the situation you fear",
+        "Imagine yourself feeling calm and confident",
+        "Visualize yourself successfully handling the situation",
+        "See yourself feeling proud and accomplished afterward",
+        "Open your eyes and hold onto that feeling of confidence"
+      ]
+    },
+    affirmations: {
+      title: "Courage Affirmations",
+      description: "Build inner strength with positive self-talk.",
+      steps: [
+        "Stand in front of a mirror and look into your eyes",
+        "Say: 'I am braver than I believe'",
+        "Say: 'I can handle whatever comes my way'",
+        "Say: 'Fear is temporary, but courage is lasting'",
+        "Say: 'I choose courage over comfort'",
+        "Say: 'I am growing stronger every day'",
+        "Repeat these affirmations whenever fear arises"
+      ]
+    }
+  };
+
+  function submitQuiz() {
+    // Check if first 4 questions are answered
+    for (let i = 1; i <= 4; i++) {
+      if (!document.querySelector(`input[name="q${i}"]:checked`)) {
+        alert("Please answer all questions!");
+        return;
+      }
+    }
+
+    // Get answers for personalized response
+    const support = document.querySelector('input[name="q1"]:checked').value;
+    const courage = document.querySelector('input[name="q2"]:checked').value;
+    const brave = document.querySelector('input[name="q3"]:checked').value;
+    const fear = document.querySelector('input[name="q4"]:checked').value;
+    const situation = document.getElementById('fearSituation').value;
+
+    // Generate personalized quote and profile
+    let quote = getPersonalizedQuote(fear, support);
+    let profile = generateFearProfile(support, courage, brave, fear);
+
+    // Show result
+    document.getElementById("quizSection").style.display = "none";
+    document.getElementById("resultSection").style.display = "block";
+    document.getElementById("quoteText").innerHTML = quote;
+    document.getElementById("fearProfile").innerHTML = profile;
+    
+    // Load challenge statuses for this user
+    loadChallengeStatuses();
+
+    // Record the quiz completion for this specific user
+    recordUserAssessment('Fear', {
+      support, courage, brave, fear, situation
+    });
+  }
+
+  function getPersonalizedQuote(fear, support) {
+    const quotes = {
+      darkness: {
+        bestie: "Even in darkness, your friendships light the way. You're never truly alone.",
+        family: "Your family's love is a beacon that guides you through any darkness.",
+        partner: "Together, you and your partner can illuminate even the darkest paths.",
+        none: "You have an inner light that's stronger than any darkness. Trust in yourself."
+      },
+      failure: {
+        bestie: "With friends cheering you on, every 'failure' becomes a stepping stone to success.",
+        family: "Your family believes in you. Their support makes you resilient against setbacks.",
+        partner: "Your partner sees your strength. Together, you can overcome any challenge.",
+        none: "Failure is just feedback. You have the courage to keep trying and growing."
+      },
+      alone: {
+        bestie: "You're surrounded by friendship. Even apart, that connection keeps you strong.",
+        family: "Family bonds transcend physical distance. You're always loved and supported.",
+        partner: "Your partner's love is with you always, making you never truly alone.",
+        none: "Solitude can be powerful. You're learning to be your own best companion."
+      },
+      loss: {
+        bestie: "Friends help us process grief and find meaning after loss. You're supported.",
+        family: "Family helps us honor memories and find strength in love that endures.",
+        partner: "Together, you can face life's uncertainties with courage and hope.",
+        none: "Love lives on in memories and the impact we make. You carry that strength forward."
+      }
+    };
+    return quotes[fear][support] || "Courage is not the absence of fear, but action in spite of it. You have that courage.";
+  }
+
+  function generateFearProfile(support, courage, brave, fear) {
+    let profile = `<div style="text-align: left; margin: 20px 0;">`;
+    profile += `<h4>Your Fear Profile:</h4>`;
+    profile += `<p><strong>Primary Fear:</strong> ${fear.charAt(0).toUpperCase() + fear.slice(1)}</p>`;
+    profile += `<p><strong>Support System:</strong> ${support.charAt(0).toUpperCase() + support.slice(1)}</p>`;
+    profile += `<p><strong>Brave Action:</strong> ${courage.charAt(0).toUpperCase() + courage.slice(1)}</p>`;
+    profile += `<p><strong>Courage Source:</strong> ${brave.charAt(0).toUpperCase() + brave.slice(1)}</p>`;
+    profile += `</div>`;
+    return profile;
+  }
+
+  // Load user-specific challenge statuses
+  async function loadChallengeStatuses() {
+    const challenges = ['grounding', 'gradual', 'visualization', 'affirmations'];
+    
+    if (token) {
+      // If logged in, get user-specific challenge completions from database
+      try {
+        const response = await fetch(`${API_BASE}/progress/all-challenge-completions`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const userCompletions = await response.json();
+          challenges.forEach(challenge => {
+            const isCompleted = userCompletions.some(c => 
+              c.mood === 'fear' && c.challenge === challenge
+            );
+            const statusElement = document.getElementById(`${challenge}-status`);
+            if (isCompleted) {
+              statusElement.textContent = '✅ Completed';
+              statusElement.parentElement.classList.add('challenge-completed');
+            } else {
+              statusElement.textContent = 'Try this challenge';
+            }
+          });
+          return;
+        }
+      } catch (error) {
+        console.log("Failed to load from database, using localStorage");
+      }
+    }
+    
+    // Fallback to user-specific localStorage
+    if (currentUserId) {
+      const userChallengesKey = getUserSpecificKey("completedChallenges");
+      const completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+      
+      challenges.forEach(challenge => {
+        const isCompleted = completedChallenges.some(c => 
+          c.mood === 'fear' && c.challenge === challenge
+        );
+        const statusElement = document.getElementById(`${challenge}-status`);
+        if (isCompleted) {
+          statusElement.textContent = '✅ Completed';
+          statusElement.parentElement.classList.add('challenge-completed');
+        } else {
+          statusElement.textContent = 'Try this challenge';
+        }
+      });
+    }
+  }
+
+  // Start challenge function
+  async function startChallenge(challengeType) {
+    const challenge = challengeDetails[challengeType];
+    if (!challenge) return;
+
+    // Create modal HTML
+    const modalHTML = `
+      <div class="challenge-modal" id="challengeModal">
+        <div class="challenge-modal-content">
+          <span class="close-modal" onclick="closeModal()">&times;</span>
+          <h3>${challenge.title}</h3>
+          <p>${challenge.description}</p>
+          <div class="steps-container">
+            ${challenge.steps.map((step, index) => `
+              <div class="step-item">
+                <strong>Step ${index + 1}:</strong> ${step}
+              </div>
+            `).join('')}
+          </div>
+          <button class="btn btn-success" onclick="completeUserChallenge('${challengeType}')">
+            Mark Challenge Complete
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Add modal to body if it doesn't exist
+    const existingModal = document.getElementById('challengeModal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('challengeModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('challengeModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  }
+
+  // Complete challenge for the current user
+  async function completeUserChallenge(challengeType) {
+    try {
+      if (token) {
+        // Save to database for logged-in user
+        const response = await fetch(`${API_BASE}/progress/complete-challenge`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ 
+            mood: 'fear', 
+            challenge: challengeType 
+          }),
+        });
+
+        if (response.ok) {
+          console.log("Challenge completion saved for user");
+        }
+      }
+      
+      // Also save to user-specific localStorage
+      if (currentUserId) {
+        const userChallengesKey = getUserSpecificKey("completedChallenges");
+        let completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+        const newCompletion = {
+          mood: 'fear',
+          challenge: challengeType,
+          time: new Date().toISOString(),
+          userId: currentUserId
+        };
+        completedChallenges.push(newCompletion);
+        localStorage.setItem(userChallengesKey, JSON.stringify(completedChallenges));
+      }
+
+      // Update UI
+      const statusElement = document.getElementById(`${challengeType}-status`);
+      if (statusElement) {
+        statusElement.textContent = '✅ Completed';
+        statusElement.parentElement.classList.add('challenge-completed');
+      }
+
+      closeModal();
+      alert(`Great job completing the ${challengeDetails[challengeType].title}!`);
+
+      // Call parent function if available (for integration with quizzes.html)
+      if (typeof window.parent.completeChallenge === 'function') {
+        window.parent.completeChallenge('fear', challengeType);
+      }
+
+    } catch (error) {
+      console.error("Error completing challenge:", error);
+      alert("Challenge completed locally!");
+    }
+  }
+
+  // Record user-specific assessment
+  async function recordUserAssessment(mood, assessmentData) {
+    try {
+      if (token) {
+        // Save to database for logged-in user
+        await fetch(`${API_BASE}/progress/assessment`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ 
+            mood: mood.toLowerCase(), 
+            type: 'assessment',
+            data: assessmentData
+          }),
+        });
+      }
+
+      // Save to user-specific localStorage
+      if (currentUserId) {
+        const userProgressKey = getUserSpecificKey("progress");
+        let progress = JSON.parse(localStorage.getItem(userProgressKey) || "[]");
+        let today = new Date();
+        let newEntry = {
+          mood: mood,
+          date: today.toLocaleDateString(),
+          time: today.toLocaleTimeString(),
+          userId: currentUserId
+        };
+        progress.push(newEntry);
+        localStorage.setItem(userProgressKey, JSON.stringify(progress));
+      }
+
+      // Call parent function if available (from quizzes.html)
+      if (typeof window.parent.saveMoodAssessment === 'function') {
+        window.parent.saveMoodAssessment(mood);
+      } else if (typeof saveMoodAssessment === 'function') {
+        saveMoodAssessment(mood);
+      }
+    } catch (error) {
+      console.error("Error recording assessment:", error);
+    }
+  }
+
+  // Click outside modal to close
+  window.addEventListener('click', function(event) {
+    const modal = document.getElementById('challengeModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Initialize on page load
+  document.addEventListener("DOMContentLoaded", async () => {
+    await initializeUserContext();
+  });
+</script>
+
+</body>
+</html>

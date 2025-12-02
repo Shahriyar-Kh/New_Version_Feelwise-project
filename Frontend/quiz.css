@@ -1,0 +1,355 @@
+
+  
+    :root {
+      --primary-purple: #7E57C2;
+      --deep-purple: #5E35B1;
+      --light-purple: #B39DDB;
+      --lavender: #D1C4E9;
+      --white: #FFFFFF;
+      --light-bg: #F5F3FF;
+      --text-dark: #311B92;
+    }
+    
+    body { 
+      font-family: 'Nunito', sans-serif; 
+      background: linear-gradient(135deg, var(--lavender) 0%, var(--white) 100%);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+    
+    .top-header {
+      background: linear-gradient(90deg, var(--deep-purple) 0%, var(--primary-purple) 100%);
+      padding: 15px 30px;
+      box-shadow: 0 4px 20px rgba(94, 53, 177, 0.3);
+      border-bottom: 2px solid var(--light-purple);
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--white);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .mainheading {
+      color: var(--deep-purple);
+      text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.7);
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    .mainheading:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-purple) 0%, var(--light-purple) 100%);
+      border-radius: 2px;
+    }
+    
+    .quiz-card {
+      background: linear-gradient(135deg, var(--white) 0%, var(--lavender) 100%);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(126, 87, 194, 0.2);
+      color: var(--text-dark);
+      border: 2px solid var(--light-purple);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .quiz-card:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--primary-purple), var(--deep-purple));
+    }
+    
+    .quiz-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(126, 87, 194, 0.3);
+    }
+    
+    .quiz-card h3 {
+      color: var(--deep-purple);
+      margin-bottom: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+    }
+    
+    .quiz-card h3 i {
+      margin-right: 10px;
+      color: var(--primary-purple);
+    }
+    
+    .div1 {
+      margin-left: 10%;
+      position: relative;
+    }
+    
+    input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--light-purple);
+      border-radius: 50%;
+      margin-right: 10px;
+      position: relative;
+      top: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    input[type="radio"]:checked {
+      border: 6px solid var(--primary-purple);
+      background: var(--white);
+    }
+    
+    input[type="radio"]:hover {
+      border-color: var(--primary-purple);
+    }
+    
+    .divArea {
+      background-color: rgba(209, 196, 233, 0.3);
+      width: 80%;
+      border: 2px solid var(--light-purple);
+      border-radius: 10px;
+      padding: 15px;
+      color: var(--text-dark);
+      transition: all 0.3s ease;
+    }
+    
+    .divArea:focus {
+      outline: none;
+      border-color: var(--primary-purple);
+      box-shadow: 0 0 0 3px rgba(126, 87, 194, 0.3);
+    }
+    
+    .btn-submit {
+      background: linear-gradient(90deg, var(--deep-purple) 0%, var(--primary-purple) 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 5px 15px rgba(126, 87, 194, 0.4);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-left: 45%;
+      margin-top: 30px;
+    }
+    
+    .btn-submit:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.5s ease;
+    }
+    
+    .btn-submit:hover:before {
+      left: 100%;
+    }
+    
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(126, 87, 194, 0.6);
+    }
+    
+    .result-card {
+      text-align: center;
+      background: linear-gradient(135deg, var(--white) 0%, var(--lavender) 100%);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(126, 87, 194, 0.2);
+      border: 2px solid var(--light-purple);
+    }
+    
+    .result-card h2 {
+      color: var(--deep-purple);
+      margin-bottom: 20px;
+      font-weight: 800;
+    }
+    
+    #quoteText {
+      font-style: italic;
+      color: var(--primary-purple);
+      font-size: 18px;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(179, 157, 219, 0.2);
+      border-radius: 10px;
+      border-left: 4px solid var(--primary-purple);
+    }
+    
+    .challenge-section {
+      background: linear-gradient(135deg, var(--primary-purple) 0%, var(--deep-purple) 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin: 30px 0;
+      box-shadow: 0 10px 25px rgba(94, 53, 177, 0.3);
+    }
+    
+    .challenge-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    
+    .challenge-card i {
+      margin-right: 15px;
+      font-size: 24px;
+      color: var(--lavender);
+    }
+    
+    .challenge-card:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .challenge-completed {
+      background: rgba(46, 213, 115, 0.3);
+      border-color: rgba(46, 213, 115, 0.5);
+    }
+    
+    /* Modal Styles */
+    .challenge-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .challenge-modal-content {
+      background: linear-gradient(135deg, var(--white) 0%, var(--lavender) 100%);
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      color: var(--text-dark);
+      box-shadow: 0 15px 35px rgba(94, 53, 177, 0.4);
+      border: 2px solid var(--light-purple);
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--primary-purple);
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    
+    .close-modal:hover {
+      color: var(--deep-purple);
+      transform: scale(1.1);
+    }
+    
+    .step-item {
+      background: rgba(179, 157, 219, 0.2);
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border-left: 4px solid var(--primary-purple);
+    }
+    
+    ::-webkit-scrollbar{
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--lavender);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary-purple);
+      border-radius: 10px;
+    }
+    
+    /* Floating elements for visual interest */
+    .floating-element {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, var(--light-purple) 0%, var(--primary-purple) 100%);
+      opacity: 0.1;
+      border-radius: 50%;
+      filter: blur(10px);
+      z-index: -1;
+    }
+    
+    .float-1 {
+      top: 20%;
+      left: 5%;
+      width: 120px;
+      height: 120px;
+    }
+    
+    .float-2 {
+      top: 60%;
+      right: 5%;
+      width: 80px;
+      height: 80px;
+    }
+    
+    .float-3 {
+      bottom: 10%;
+      left: 15%;
+      width: 60px;
+      height: 60px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .div1 {
+        margin-left: 5%;
+      }
+      
+      .btn-submit {
+        margin-left: 0;
+        width: 100%;
+      }
+      
+      .divArea {
+        width: 95%;
+      }
+      
+      .floating-element {
+        display: none;
+      }
+    }

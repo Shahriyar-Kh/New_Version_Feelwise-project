@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EQ Boost - Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="profile.css" />
+  </head>
+  <body>
+    <!-- Background Decorations -->
+    <div class="bg-decoration bg-decoration-1"></div>
+    <div class="bg-decoration bg-decoration-2"></div>
+
+    <div class="container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo">EQ Boost</div>
+        <div class="nav-menu">
+          <div class="nav-item active">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </div>
+          <a href="module.html" class="nav-link">
+            <i class="fas fa-book"></i>
+            <span>My Modules</span>
+          </a>
+          <a href="journal.html" class="nav-link">
+            <i class="fas fa-pen"></i>
+            <span>Journal</span>
+          </a>
+
+        
+         
+         
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+          <div class="header-left">
+            <h1 id="welcome-text">My EQ Profile Dashboard</h1>
+            <p>Welcome to your Emotional Intelligence journey</p>
+          </div>
+          <div class="header-right">
+            <div class="search-box">
+              <input type="text" placeholder="Search" />
+              <i class="fas fa-search"></i>
+            </div>
+            <div class="user-info">
+              <img
+                id="header-avatar"
+                src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                alt="User"
+                class="user-avatar-small"
+              />
+              <span id="header-username">Hello User</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+          <!-- Profile Card -->
+          <div class="profile-card">
+            <div class="profile-header">
+              <div class="profile-info">
+                <h2>My profile</h2>
+                <p>Personal & login info</p>
+              </div>
+              <button class="settings-btn" id="settings-btn">
+                <i class="fas fa-cog"></i>
+                Edit
+              </button>
+            </div>
+            <div class="profile-content">
+              <div class="profile-avatar">
+                <img
+                  id="user-avatar"
+                  src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                  alt="Profile Picture"
+                />
+                <div class="avatar-overlay" id="change-avatar-btn">
+                  <i class="fas fa-camera"></i>
+                </div>
+              </div>
+              <div class="profile-details">
+                <h3 id="username-display">UserName</h3>
+                <p id="email-display">user@example.com</p>
+                <p>EQ Learner</p>
+                <div class="status-indicator">
+                  <div class="status-dot"></div>
+                  <span class="status-text" id="mood-display"
+                    >Status: Active</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="profile-actions">
+              <button class="btn-primary" id="upload-avatar-btn">
+                <i class="fas fa-upload"></i>
+                Upload New
+              </button>
+              <button class="btn-secondary" id="remove-avatar-btn">
+                <i class="fas fa-trash"></i>
+                Remove
+              </button>
+            </div>
+          </div>
+
+          <!-- Progress Card -->
+          <div class="progress-card">
+            <div class="progress-header">
+              <h2>Your Progress</h2>
+              <a href="#" class="view-all">View all</a>
+            </div>
+            <div class="progress-item">
+              <div class="progress-text">
+                <span id="current-module-name">Self-Awareness Module</span>
+                <span id="module-progress-text">75% Complete</span>
+              </div>
+              <div class="progress-bar">
+                <div
+                  id="module-progress-bar"
+                  class="progress-fill"
+                  style="width: 75%"
+                ></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-text">
+                <span>Overall EQ Training</span>
+                <span id="overall-progress-text">45% Complete</span>
+              </div>
+              <div class="progress-bar">
+                <div
+                  id="overall-progress-bar"
+                  class="progress-fill"
+                  style="width: 45%"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Mood Tracker in Progress Card -->
+            <div
+              class="mood-widget"
+              style="
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #f1f3f4;
+              "
+            >
+              <div class="mood-header">
+                <h3>How Are You Feeling?</h3>
+              </div>
+              <div class="mood-options">
+                <div class="mood-option" data-mood="Happy">
+                  <i class="fas fa-smile-beam"></i>
+                  <span>Happy</span>
+                </div>
+                <div class="mood-option" data-mood="Neutral">
+                  <i class="fas fa-meh"></i>
+                  <span>Neutral</span>
+                </div>
+                <div class="mood-option" data-mood="Sad">
+                  <i class="fas fa-sad-tear"></i>
+                  <span>Sad</span>
+                </div>
+                <div class="mood-option" data-mood="Angry">
+                  <i class="fas fa-angry"></i>
+                  <span>Angry</span>
+                </div>
+              </div>
+              <button class="mood-submit" id="submit-mood-btn">
+                <i class="fas fa-check"></i>
+                Submit Mood
+              </button>
+              <div
+                id="ayah-container"
+                class="ayah-text"
+                style="display: none"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EQ Modules Section -->
+        <div class="modules-section">
+          <div class="modules-header">
+            <h2>My EQ Modules</h2>
+            <a href="module.html" class="view-all">View all</a>
+          </div>
+          <div class="modules-grid">
+            <div class="module-item">
+              <div class="module-info">
+                <div class="module-icon self-awareness"></div>
+                <span>Self-Awareness</span>
+              </div>
+              <div class="module-status">In Progress</div>
+            </div>
+            <div class="module-item">
+              <div class="module-info">
+                <div class="module-icon empathy"></div>
+                <span>Empathy</span>
+              </div>
+              <div class="module-status empathy">Not Started</div>
+            </div>
+            <div class="module-item">
+              <div class="module-info">
+                <div class="module-icon regulation"></div>
+                <span>Self-Regulation</span>
+              </div>
+              <div class="module-status regulation">Locked</div>
+            </div>
+            <div class="module-item">
+              <div class="module-info">
+                <div class="module-icon social"></div>
+                <span>Social Skills</span>
+              </div>
+              <div class="module-status social">Locked</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Account Settings</h2>
+          <button class="close-modal" id="close-modal">&times;</button>
+        </div>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter new username" />
+        </div>
+        <div class="form-group">
+          <label for="current-password"
+            >Current Password (for verification)</label
+          >
+          <input
+            type="password"
+            id="current-password"
+            placeholder="Enter current password"
+          />
+        </div>
+        <div class="form-group">
+          <label for="new-password">New Password</label>
+          <input
+            type="password"
+            id="new-password"
+            placeholder="Enter new password"
+          />
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirm New Password</label>
+          <input
+            type="password"
+            id="confirm-password"
+            placeholder="Confirm new password"
+          />
+        </div>
+        <div id="settings-notification" class="notification"></div>
+        <div class="form-actions">
+          <button class="btn-primary-full" id="save-changes">
+            Save Changes
+          </button>
+          <button class="btn-secondary-full" id="logout-btn">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div class="modal-overlay" id="image-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Update Profile Picture</h2>
+          <button class="close-modal" id="cancel-upload">&times;</button>
+        </div>
+        <div style="text-align: center">
+          <img
+            id="image-preview"
+            style="
+              width: 120px;
+              height: 120px;
+              border-radius: 50%;
+              object-fit: cover;
+              margin: 20px auto;
+              border: 4px solid #f1f3f4;
+              display: none;
+            "
+            alt="Preview"
+          />
+          <div style="margin: 25px 0">
+            <label
+              for="avatar-input"
+              style="
+                display: inline-block;
+                padding: 12px 24px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                border-radius: 10px;
+                cursor: pointer;
+                font-weight: 500;
+              "
+            >
+              <i class="fas fa-cloud-upload-alt"></i> Choose Image
+            </label>
+            <input
+              type="file"
+              id="avatar-input"
+              accept="image/*"
+              style="display: none"
+            />
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary-full" id="confirm-upload">Upload</button>
+            <button class="btn-secondary-full" id="cancel-upload-btn">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="edits.js"></script>
+  </body>
+</html>

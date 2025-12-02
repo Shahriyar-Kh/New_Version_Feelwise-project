@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Facial Emotion Analysis | FeelWise</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="face-analysis.css">
+</head>
+
+<body>
+  <!-- Animated Background Elements -->
+  <div class="background-elements">
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+  </div>
+
+  <!-- Header with Navigation -->
+  <header class="site-header">
+    <div class="header-content">
+      <div class="logo-container">
+        <h1 class="logo">
+          <i class="fas fa-brain"></i>
+          FeelWise
+        </h1>
+      </div>
+      <nav class="main-nav">
+        <a href="#" class="nav-link"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="#" class="nav-link"><i class="fas fa-history"></i> History</a>
+        <a href="#" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-text">
+        <h1>Facial Emotion Analysis</h1>
+        <p>Analyze your facial expressions for emotional insights and track your emotional patterns over time</p>
+      </div>
+      <a href="module.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Modules
+      </a>
+    </div>
+
+    <div class="main-content">
+      <div class="input-section card">
+        <div class="card-header">
+          <h2><i class="fas fa-camera"></i> Capture Your Expression</h2>
+        </div>
+        <div class="face-input-content">
+          <div class="camera-section">
+            <div class="video-container">
+              <video id="video" width="320" height="240" autoplay></video>
+              <div class="camera-overlay"></div>
+            </div>
+            <button id="captureBtn" class="primary-btn">
+              <i class="fas fa-camera"></i> Capture Photo
+            </button>
+          </div>
+
+          <div class="divider">
+            <span>or</span>
+          </div>
+
+          <div class="upload-section">
+            <label for="imageUpload" class="upload-label">
+              <i class="fas fa-upload"></i> Upload a Photo
+            </label>
+            <input type="file" id="imageUpload" accept="image/*" />
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-section card">
+        <div class="card-header">
+          <h2><i class="fas fa-image"></i> Image Preview</h2>
+        </div>
+        <div class="preview-content">
+          <div class="preview-container">
+            <canvas id="canvas" width="320" height="240"></canvas>
+            <img id="uploadedImage" src="#" alt="Uploaded Preview" />
+          </div>
+          <button id="analyzeEmotionBtn" class="primary-btn">
+            <i class="fas fa-sparkles"></i> Analyze Emotion
+          </button>
+        </div>
+      </div>
+
+      <div class="results-section">
+        <div class="emotion-report card">
+          <div class="card-header">
+            <h2><i class="fas fa-chart-pie"></i> Your Emotion Report</h2>
+            <button class="icon-btn">
+              <i class="fas fa-download"></i>
+            </button>
+          </div>
+          <div id="emotionResult" class="emotion-result">
+            <div class="placeholder-content">
+              <i class="fas fa-smile"></i>
+              <p>Facial emotion detection results will appear here after analysis</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-section card">
+          <div class="card-header">
+            <h2><i class="fas fa-trending-up"></i> Your Emotional Progress</h2>
+            <div class="time-filters">
+              <button class="time-filter active" data-period="daily">Daily</button>
+              <button class="time-filter" data-period="weekly">Weekly</button>
+              <button class="time-filter" data-period="monthly">Monthly</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="progressChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="recommendations-section">
+        <div class="recommendations card">
+          <div class="card-header">
+            <h2><i class="fas fa-lightbulb"></i> Recommendations</h2>
+            <button class="icon-btn">
+              <i class="fas fa-sync"></i>
+            </button>
+          </div>
+          <div id="recommendationsContent" class="recommendations-content">
+            <div class="recommendation-item">
+              <div class="recommendation-icon">
+                <i class="fas fa-smile-beam"></i>
+              </div>
+              <div class="recommendation-text">
+                <h3>Practice smiling</h3>
+                <p>Even forced smiles can trigger positive emotional responses and reduce stress.</p>
+              </div>
+            </div>
+            <div class="recommendation-item">
+              <div class="recommendation-icon">
+                <i class="fas fa-eye"></i>
+              </div>
+              <div class="recommendation-text">
+                <h3>Eye contact practice</h3>
+                <p>Improve your communication skills by practicing appropriate eye contact.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="daily-challenge card">
+          <div class="card-header">
+            <h2><i class="fas fa-tasks"></i> Daily Challenge</h2>
+            <div class="challenge-progress">
+              <span class="progress-text">0%</span>
+            </div>
+          </div>
+          <div id="dailyChallengeContent" class="challenge-content">
+            <h3>Express three emotions</h3>
+            <p>Practice expressing happiness, surprise, and calmness in front of a mirror</p>
+            <button class="secondary-btn">
+              <i class="fas fa-check"></i> Mark as Complete
+            </button>
+          </div>
+        </div>
+
+        <div class="tip-of-the-day card">
+          <div class="card-header">
+            <h2><i class="fas fa-star"></i> Tip of the Day</h2>
+            <button class="icon-btn">
+              <i class="fas fa-share"></i>
+            </button>
+          </div>
+          <div id="dailyTipContent" class="tip-content">
+            <div class="tip-icon">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <p>Your facial expressions influence your emotions. Spending 5 minutes practicing positive expressions can improve your mood throughout the day.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>FeelWise</h3>
+        <p>Understanding emotions through AI-powered analysis</p>
+      </div>
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <a href="#">Blog</a>
+        <a href="#">Guides</a>
+        <a href="#">Support</a>
+      </div>
+      <div class="footer-section">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Careers</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-section">
+        <h4>Connect</h4>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2023 FeelWise. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="facial-analysis.js"></script>
+</body>
+
+</html>

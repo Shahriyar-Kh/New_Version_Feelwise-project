@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FeelWise - Love Assessment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+  <!-- Top Header Section -->
+  <div class="top-header">
+    <div class="logo">FeelWise</div>
+  </div>
+
+  <!-- Quiz Section -->
+  <div class="container my-5" id="quizSection">
+    <div class="text-center mb-4 mainheading">
+      <h2>Love & Connection Assessment</h2>
+      <p>Discover what love means to you and how you express it!</p>
+    </div>
+
+    <!-- Question 1 -->
+    <div class="quiz-card">
+      <h3>1. Love feels like…</h3>
+      <div class="div1">
+        <input type="radio" name="q1" value="hug"> A warm hug 🤗 <br />
+        <input type="radio" name="q1" value="music"> Music 🎵 <br />
+        <input type="radio" name="q1" value="sunshine"> Sunshine 🌞 <br />
+        <input type="radio" name="q1" value="chocolate"> Chocolate 🍫
+      </div>
+    </div>
+    <br>
+
+    <!-- Question 2 -->
+    <div class="quiz-card">
+      <h3>2. Best symbol of love?</h3>
+      <div class="div1">
+        <input type="radio" name="q2" value="heart"> Heart ❤️ <br />
+        <input type="radio" name="q2" value="rose"> Rose 🌹 <br />
+        <input type="radio" name="q2" value="ring"> Ring 💍 <br />
+        <input type="radio" name="q2" value="teddy"> Teddy 🧸
+      </div>
+    </div>
+    <br>
+
+    <!-- Question 3 -->
+    <div class="quiz-card">
+      <h3>3. Who do you love most?</h3>
+      <div class="div1">
+        <input type="radio" name="q3" value="family"> Family 👨‍👩‍👧 <br />
+        <input type="radio" name="q3" value="friends"> Friends 👯 <br />
+        <input type="radio" name="q3" value="myself"> Myself 💖 <br />
+        <input type="radio" name="q3" value="partner"> Partner 💕
+      </div>
+    </div>
+    <br>
+
+    <!-- Question 4 -->
+    <div class="quiz-card">
+      <h3>4. Love season?</h3>
+      <div class="div1">
+        <input type="radio" name="q4" value="spring"> Spring 🌸 <br />
+        <input type="radio" name="q4" value="winter"> Winter ❄️ <br />
+        <input type="radio" name="q4" value="autumn"> Autumn 🍂 <br />
+        <input type="radio" name="q4" value="summer"> Summer 🌞
+      </div>
+    </div>
+    <br>
+
+    <!-- Question 5 -->
+    <div class="quiz-card">
+      <h3>5. What's the best memory you have with your loved one?</h3>
+      <div class="div1">
+        <textarea rows="5" class="divArea" id="loveMemory" placeholder="Share your special memory..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-lg btn-dark btn-submit" onclick="submitQuiz()">Complete Assessment</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="container my-5" id="resultSection" style="display:none;">
+    <div class="result-card">
+      <h2>Assessment Complete</h2>
+      <p id="quoteText"></p>
+      <div id="loveProfile"></div>
+      
+      <!-- Challenge Section -->
+      <div class="challenge-section">
+        <h3>Love & Connection Challenges</h3>
+        <p>Try these personalized challenges to deepen your connections:</p>
+        
+        <div class="challenge-card" onclick="startChallenge('gratitude')">
+          <h4>Gratitude Expression</h4>
+          <p>Express appreciation to those you love</p>
+          <span class="challenge-status" id="gratitude-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('kindness')">
+          <h4>Acts of Kindness</h4>
+          <p>Show love through thoughtful actions</p>
+          <span class="challenge-status" id="kindness-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('communication')">
+          <h4>Heart-to-Heart Communication</h4>
+          <p>Deepen connections through meaningful conversations</p>
+          <span class="challenge-status" id="communication-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('selflove')">
+          <h4>Self-Love Practice</h4>
+          <p>Cultivate love and compassion for yourself</p>
+          <span class="challenge-status" id="selflove-status"></span>
+        </div>
+      </div>
+      
+      <button class="btn btn-success mt-3" onclick="window.location.href='quizzes.html'">Back to Quizzes</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:5000/api";
+    const token = localStorage.getItem("token");
+    let currentUserId = null;
+
+    // Get user-specific localStorage key
+    function getUserSpecificKey(baseKey) {
+      return currentUserId ? `${baseKey}_${currentUserId}` : `${baseKey}_guest`;
+    }
+
+    // Initialize user context
+    async function initializeUserContext() {
+      if (token) {
+        try {
+          const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const user = await res.json();
+            currentUserId = user.id || user._id;
+          }
+        } catch (error) {
+          console.error("Error getting user context:", error);
+          currentUserId = 'guest';
+        }
+      } else {
+        currentUserId = 'guest';
+      }
+    }
+
+    // Complete challenge details
+    const challengeDetails = {
+      gratitude: {
+        title: "Gratitude Expression",
+        description: "Express appreciation to those you love.",
+        steps: [
+          "Think of someone you're grateful for in your life",
+          "Write a heartfelt note expressing your appreciation",
+          "Be specific about what you value in them",
+          "Deliver your message in person, by text, or through a card",
+          "Notice how expressing gratitude makes you feel",
+          "Consider making this a weekly practice",
+          "Reflect on the positive impact of your expression"
+        ]
+      },
+      kindness: {
+        title: "Acts of Kindness",
+        description: "Show love through thoughtful actions.",
+        steps: [
+          "Identify a small act of kindness you can do for someone",
+          "It could be making their favorite meal or doing a chore for them",
+          "Perform the act without expecting anything in return",
+          "Notice the recipient's reaction and your own feelings",
+          "Reflect on how small acts strengthen relationships",
+          "Consider making kindness a daily practice",
+          "Journal about the experience and its impact"
+        ]
+      },
+      communication: {
+        title: "Heart-to-Heart Communication",
+        description: "Deepen connections through meaningful conversations.",
+        steps: [
+          "Set aside quality time without distractions",
+          "Ask open-ended questions about their feelings and experiences",
+          "Practice active listening without interrupting",
+          "Share your own feelings openly and honestly",
+          "Express appreciation for their vulnerability",
+          "Discuss what strengthens your connection",
+          "Make plans to continue these meaningful conversations"
+        ]
+      },
+      selflove: {
+        title: "Self-Love Practice",
+        description: "Cultivate love and compassion for yourself.",
+        steps: [
+          "Set aside time for self-reflection",
+          "Write down three things you appreciate about yourself",
+          "Engage in an activity that brings you joy",
+          "Practice positive self-talk and affirmations",
+          "Treat yourself with the same kindness you'd show a friend",
+          "Set healthy boundaries to honor your needs",
+          "Reflect on how self-love enhances your other relationships"
+        ]
+      }
+    };
+
+    function submitQuiz() {
+      // Check if first 4 questions are answered
+      for (let i = 1; i <= 4; i++) {
+        if (!document.querySelector(`input[name="q${i}"]:checked`)) {
+          alert("Please answer all questions!");
+          return;
+        }
+      }
+
+      // Get answers for personalized response
+      const loveFeeling = document.querySelector('input[name="q1"]:checked').value;
+      const loveSymbol = document.querySelector('input[name="q2"]:checked').value;
+      const lovedOne = document.querySelector('input[name="q3"]:checked').value;
+      const loveSeason = document.querySelector('input[name="q4"]:checked').value;
+      const loveMemory = document.getElementById('loveMemory').value;
+
+      // Generate personalized quote and profile
+      let quote = getPersonalizedQuote(loveFeeling, lovedOne);
+      let profile = generateLoveProfile(loveFeeling, loveSymbol, lovedOne, loveSeason);
+
+      // Show result
+      document.getElementById("quizSection").style.display = "none";
+      document.getElementById("resultSection").style.display = "block";
+      document.getElementById("quoteText").innerHTML = quote;
+      document.getElementById("loveProfile").innerHTML = profile;
+      
+      // Load challenge statuses for this user
+      loadChallengeStatuses();
+
+      // Record the quiz completion for this specific user
+      recordUserAssessment('Love', {
+        loveFeeling, loveSymbol, lovedOne, loveSeason, loveMemory
+      });
+    }
+
+    function getPersonalizedQuote(loveFeeling, lovedOne) {
+      const quotes = {
+        hug: {
+          family: "Family love is the warmest embrace that never lets go. 💕",
+          friends: "Friendship is the comforting hug that says 'I understand' without words. 👯",
+          myself: "Self-love is giving yourself the hug you've been waiting for from others. 💖",
+          partner: "A partner's love is a hug that feels like coming home. 💑"
+        },
+        music: {
+          family: "Family love creates the harmonious melody of our lives. 👨‍👩‍👧",
+          friends: "Friendship is the rhythm that makes life's journey joyful. 🎵",
+          myself: "Self-love is learning to dance to your own unique rhythm. 💃",
+          partner: "Partnership is a beautiful duet where two voices become one song. 🎶"
+        },
+        sunshine: {
+          family: "Family love is the sunshine that nurtures our growth. 🌞",
+          friends: "Friends are the sunshine that brightens our darkest days. ☀️",
+          myself: "Self-love is becoming your own source of light and warmth. ✨",
+          partner: "A partner's love is the sunshine that makes every day brighter. 🌅"
+        },
+        chocolate: {
+          family: "Family love is like chocolate - rich, sweet, and comforting. 🍫",
+          friends: "Friendship is the sweet chocolate that makes life's treats even better. 🍬",
+          myself: "Self-love is savoring your own sweetness without needing external validation. 🍭",
+          partner: "A partner's love is like fine chocolate - complex, rich, and deeply satisfying. 🧡"
+        }
+      };
+      return quotes[loveFeeling][lovedOne] || "Love is composed of a single soul inhabiting two bodies. - Aristotle 💖";
+    }
+
+    function generateLoveProfile(loveFeeling, loveSymbol, lovedOne, loveSeason) {
+      let profile = `<div style="text-align: left; margin: 20px 0;">`;
+      profile += `<h4>Your Love Profile:</h4>`;
+      profile += `<p><strong>Love Feels Like:</strong> ${loveFeeling.charAt(0).toUpperCase() + loveFeeling.slice(1)}</p>`;
+      profile += `<p><strong>Love Symbol:</strong> ${loveSymbol.charAt(0).toUpperCase() + loveSymbol.slice(1)}</p>`;
+      profile += `<p><strong>You Love Most:</strong> ${lovedOne.charAt(0).toUpperCase() + lovedOne.slice(1)}</p>`;
+      profile += `<p><strong>Love Season:</strong> ${loveSeason.charAt(0).toUpperCase() + loveSeason.slice(1)}</p>`;
+      profile += `</div>`;
+      return profile;
+    }
+
+    // Load user-specific challenge statuses
+    async function loadChallengeStatuses() {
+      const challenges = ['gratitude', 'kindness', 'communication', 'selflove'];
+      
+      if (token) {
+        // If logged in, get user-specific challenge completions from database
+        try {
+          const response = await fetch(`${API_BASE}/progress/all-challenge-completions`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (response.ok) {
+            const userCompletions = await response.json();
+            challenges.forEach(challenge => {
+              const isCompleted = userCompletions.some(c => 
+                c.mood === 'love' && c.challenge === challenge
+              );
+              const statusElement = document.getElementById(`${challenge}-status`);
+              if (isCompleted) {
+                statusElement.textContent = '✅ Completed';
+                statusElement.parentElement.classList.add('challenge-completed');
+              } else {
+                statusElement.textContent = 'Try this challenge';
+              }
+            });
+            return;
+          }
+        } catch (error) {
+          console.log("Failed to load from database, using localStorage");
+        }
+      }
+      
+      // Fallback to user-specific localStorage
+      if (currentUserId) {
+        const userChallengesKey = getUserSpecificKey("completedChallenges");
+        const completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+        
+        challenges.forEach(challenge => {
+          const isCompleted = completedChallenges.some(c => 
+            c.mood === 'love' && c.challenge === challenge
+          );
+          const statusElement = document.getElementById(`${challenge}-status`);
+          if (isCompleted) {
+            statusElement.textContent = '✅ Completed';
+            statusElement.parentElement.classList.add('challenge-completed');
+          } else {
+            statusElement.textContent = 'Try this challenge';
+          }
+        });
+      }
+    }
+
+    // Start challenge function
+    async function startChallenge(challengeType) {
+      const challenge = challengeDetails[challengeType];
+      if (!challenge) return;
+
+      // Create modal HTML
+      const modalHTML = `
+        <div class="challenge-modal" id="challengeModal">
+          <div class="challenge-modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3>${challenge.title}</h3>
+            <p>${challenge.description}</p>
+            <div class="steps-container">
+              ${challenge.steps.map((step, index) => `
+                <div class="step-item">
+                  <strong>Step ${index + 1}:</strong> ${step}
+                </div>
+              `).join('')}
+            </div>
+            <button class="btn btn-success" onclick="completeUserChallenge('${challengeType}')">
+              Mark Challenge Complete
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Add modal to body if it doesn't exist
+      const existingModal = document.getElementById('challengeModal');
+      if (existingModal) existingModal.remove();
+      
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      document.getElementById('challengeModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('challengeModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    // Complete challenge for the current user
+    async function completeUserChallenge(challengeType) {
+      try {
+        if (token) {
+          // Save to database for logged-in user
+          const response = await fetch(`${API_BASE}/progress/complete-challenge`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ 
+              mood: 'love', 
+              challenge: challengeType 
+            }),
+          });
+
+          if (response.ok) {
+            console.log("Challenge completion saved for user");
+          }
+        }
+        
+        // Also save to user-specific localStorage
+        if (currentUserId) {
+          const userChallengesKey = getUserSpecificKey("completedChallenges");
+          let completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+          const newCompletion = {
+            mood: 'love',
+            challenge: challengeType,
+            time: new Date().toISOString(),
+            userId: currentUserId
+          };
+          completedChallenges.push(newCompletion);
+          localStorage.setItem(userChallengesKey, JSON.stringify(completedChallenges));
+        }
+
+        // Update UI
+        const statusElement = document.getElementById(`${challengeType}-status`);
+        if (statusElement) {
+          statusElement.textContent = '✅ Completed';
+          statusElement.parentElement.classList.add('challenge-completed');
+        }
+
+        closeModal();
+        alert(`Wonderful! You've completed the ${challengeDetails[challengeType].title}!`);
+
+        // Call parent function if available (for integration with quizzes.html)
+        if (typeof window.parent.completeChallenge === 'function') {
+          window.parent.completeChallenge('love', challengeType);
+        }
+
+      } catch (error) {
+        console.error("Error completing challenge:", error);
+        alert("Challenge completed locally!");
+      }
+    }
+
+    // Record user-specific assessment
+    async function recordUserAssessment(mood, assessmentData) {
+      try {
+        if (token) {
+          // Save to database for logged-in user
+          await fetch(`${API_BASE}/progress/assessment`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ 
+              mood: mood.toLowerCase(), 
+              type: 'assessment',
+              data: assessmentData
+            }),
+          });
+        }
+
+        // Save to user-specific localStorage
+        if (currentUserId) {
+          const userProgressKey = getUserSpecificKey("progress");
+          let progress = JSON.parse(localStorage.getItem(userProgressKey) || "[]");
+          let today = new Date();
+          let newEntry = {
+            mood: mood,
+            date: today.toLocaleDateString(),
+            time: today.toLocaleTimeString(),
+            userId: currentUserId
+          };
+          progress.push(newEntry);
+          localStorage.setItem(userProgressKey, JSON.stringify(progress));
+        }
+
+        // Call parent function if available (from quizzes.html)
+        if (typeof window.parent.saveMoodAssessment === 'function') {
+          window.parent.saveMoodAssessment(mood);
+        } else if (typeof saveMoodAssessment === 'function') {
+          saveMoodAssessment(mood);
+        }
+      } catch (error) {
+        console.error("Error recording assessment:", error);
+      }
+    }
+
+    // Click outside modal to close
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('challengeModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    // Initialize on page load
+    document.addEventListener("DOMContentLoaded", async () => {
+      await initializeUserContext();
+    });
+  </script>
+</body>
+</html>

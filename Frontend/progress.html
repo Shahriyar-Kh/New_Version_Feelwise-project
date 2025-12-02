@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enhanced Progress Report</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="module.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="progress.css" />
+  </head>
+  <body>
+    <div class="top-header">
+      <div id="logo">FeelWise</div>
+    </div>
+    <br />
+    <br />
+    <br />
+    <br />
+
+    <div class="container">
+      <header>
+        <div class="logo">
+          <i class="fas fa-brain"></i>
+        </div>
+        <h1>Progress Tracking</h1>
+        <p class="subtitle">Comprehensive Mental Wellness Progress Report</p>
+      </header>
+
+      <div class="content-wrapper">
+        <div class="main-content">
+          <div class="section-title">
+            <i class="fas fa-user-circle"></i>
+            <span>User Information</span>
+          </div>
+          <div class="user-info">
+            <div class="info-card">
+              <div class="label">Username</div>
+              <div class="value" id="username">Loading...</div>
+            </div>
+            <div class="info-card">
+              <div class="label">Mood Assessments</div>
+              <div class="value" id="mood-count">0</div>
+            </div>
+            <div class="info-card">
+              <div class="label">Challenges Completed</div>
+              <div class="value" id="challenge-count">0</div>
+            </div>
+            <div class="info-card">
+              <div class="label">Current Streak</div>
+              <div class="value" id="streak-count">0 days</div>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <i class="fas fa-tasks"></i>
+            <span>Challenge Progress</span>
+          </div>
+          <div id="challenges-progress">
+            <div class="loading">Loading challenges...</div>
+          </div>
+
+          <div class="section-title">
+            <i class="fas fa-history"></i>
+            <span>Recent Completions</span>
+          </div>
+          <div id="challenge-completions" class="assessment-list">
+            <div class="loading">Loading challenge completions...</div>
+          </div>
+        </div>
+
+        <div class="sidebar">
+          <div class="section-title">
+            <i class="fas fa-chart-line"></i>
+            <span>Mood Distribution</span>
+          </div>
+          <div class="mood-chart" id="mood-chart">
+            <!-- Mood bars will be generated here -->
+          </div>
+
+          <div class="section-title">
+            <i class="fas fa-lightbulb"></i>
+            <span>Personalized Suggestions</span>
+          </div>
+          <div id="suggestions-container">
+            <div class="suggestion-card">
+              <h4><i class="fas fa-spinner"></i> Loading Suggestions</h4>
+              <p>
+                We're analyzing your data to provide personalized
+                recommendations...
+              </p>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <i class="fas fa-file-alt"></i>
+            <span>Assessment History</span>
+          </div>
+          <div id="assessment-list" class="assessment-list">
+            <div class="loading">Loading assessments...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-container">
+        <button class="btn btn-back" onclick="goBack()">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <button class="btn btn-download" onclick="downloadPDF()">
+          <span class="btn-text">
+            <i class="fas fa-download"></i> Download PDF Report
+          </span>
+          <div class="progress-overlay"></div>
+        </button>
+        <button class="btn btn-clear" onclick="clearAll()">
+          <i class="fas fa-trash"></i> Clear Progress
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div class="modal" id="progressModal">
+      <div class="modal-content">
+        <h2 style="color: var(--primary); margin-bottom: 15px">
+          <i class="fas fa-file-pdf"></i> Generating PDF Report
+        </h2>
+        <p>
+          Please wait while we prepare your comprehensive progress report...
+        </p>
+        <div class="progress-bar-modal">
+          <div class="progress-bar-modal-fill" id="modalProgressBar"></div>
+        </div>
+        <p id="progressStatus" style="font-weight: 600; color: var(--primary)">
+          Initializing...
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // Initialize jsPDF
+      window.jsPDF = window.jspdf.jsPDF;
+
+      // Backend integration variables
+      const API_BASE = "http://localhost:5000/api";
+      const moods = ["happy", "love", "sad", "fear", "surprised", "angry"];
+      const moodIcons = {
+        happy: "fa-smile",
+        love: "fa-heart",
+        sad: "fa-frown",
+        angry: "fa-angry",
+        fear: "fa-flushed",
+        surprised: "fa-surprise",
+      };
+
+      let currentUser = null;
+      let currentUserId = null;
+      let allChallengeCompletions = [];
+      let allAssessments = [];
+      let moodDistribution = {};
+      let currentStreak = 0;
+
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+
+      // User-specific localStorage key generator
+      function getUserSpecificKey(baseKey) {
+        return currentUserId
+          ? `${baseKey}_${currentUserId}`
+          : `${baseKey}_guest`;
+      }
+
+      // DOM Content Loaded
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadUserInfo();
+        await loadAllData();
+        await displayStats();
+        await loadChallengesProgress();
+        await displayAllChallengeCompletions();
+        await loadAssessments();
+        generateMoodChart();
+        generateSuggestions();
+      });
+
+      // Load user information
+      async function loadUserInfo() {
+        try {
+          if (!token) {
+            currentUserId = "guest";
+            document.getElementById("username").textContent = "Guest User";
+            return;
+          }
+
+          const response = await fetch(`${API_BASE}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (!response.ok) throw new Error("Authentication failed");
+
+          currentUser = await response.json();
+          currentUserId = currentUser.id || currentUser._id;
+          document.getElementById("username").textContent =
+            currentUser.username;
+        } catch (error) {
+          console.error("Error loading user info:", error);
+          currentUserId = "guest";
+          document.getElementById("username").textContent = "Guest User";
+        }
+      }
+
+      // Load all data (challenges and assessments)
+      async function loadAllData() {
+        await Promise.all([
+          loadAllChallengeCompletions(),
+          loadAssessmentData(),
+        ]);
+        calculateMoodDistribution();
+        calculateCurrentStreak();
+      }
+
+      // Load challenge completions
+      async function loadAllChallengeCompletions() {
+        try {
+          let completions = [];
+
+          // Try to fetch from backend first
+          if (token) {
+            const response = await fetch(
+              `${API_BASE}/progress/all-challenge-completions`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+            if (response.ok) {
+              completions = await response.json();
+            }
+          }
+
+          // Fallback to localStorage if backend fails or no data
+          if (completions.length === 0) {
+            const localCompletions = JSON.parse(
+              localStorage.getItem(getUserSpecificKey("completedChallenges")) ||
+                "[]"
+            );
+            completions = localCompletions.map((c) => ({
+              mood: c.mood,
+              challenge: c.challenge,
+              completedAt: c.time,
+            }));
+          }
+
+          allChallengeCompletions = completions.sort(
+            (a, b) => new Date(b.completedAt) - new Date(a.completedAt)
+          );
+        } catch (error) {
+          console.error("Error loading challenge completions:", error);
+          allChallengeCompletions = [];
+        }
+      }
+
+      // Load assessment data
+      async function loadAssessmentData() {
+        try {
+          let assessments = [];
+
+          // Try to fetch from backend first
+          if (token) {
+            const response = await fetch(`${API_BASE}/progress/assessments`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (response.ok) {
+              assessments = await response.json();
+            }
+          }
+
+          // Fallback to localStorage if backend fails or no data
+          if (assessments.length === 0) {
+            const localProgress = JSON.parse(
+              localStorage.getItem(getUserSpecificKey("progress")) || "[]"
+            );
+            assessments = localProgress.map((p) => ({
+              mood: p.mood,
+              takenAt: new Date(`${p.date} ${p.time}`),
+              type: "quiz",
+            }));
+          }
+
+          allAssessments = assessments.sort(
+            (a, b) => new Date(b.takenAt) - new Date(a.takenAt)
+          );
+        } catch (error) {
+          console.error("Error loading assessment data:", error);
+          allAssessments = [];
+        }
+      }
+
+      // Calculate mood distribution from real data
+      function calculateMoodDistribution() {
+        moodDistribution = {};
+        moods.forEach((mood) => (moodDistribution[mood] = 0));
+
+        // Count assessments by mood
+        allAssessments.forEach((assessment) => {
+          const mood = assessment.mood.toLowerCase();
+          if (moodDistribution.hasOwnProperty(mood)) {
+            moodDistribution[mood]++;
+          }
+        });
+
+        // Add challenge completions to the distribution
+        allChallengeCompletions.forEach((completion) => {
+          const mood = completion.mood.toLowerCase();
+          if (moodDistribution.hasOwnProperty(mood)) {
+            moodDistribution[mood]++;
+          }
+        });
+      }
+
+      // Calculate current streak
+      function calculateCurrentStreak() {
+        if (
+          allChallengeCompletions.length === 0 &&
+          allAssessments.length === 0
+        ) {
+          currentStreak = 0;
+          return;
+        }
+
+        // Combine all activities and sort by date
+        const allActivities = [
+          ...allChallengeCompletions.map((c) => new Date(c.completedAt)),
+          ...allAssessments.map((a) => new Date(a.takenAt)),
+        ].sort((a, b) => b - a);
+
+        if (allActivities.length === 0) {
+          currentStreak = 0;
+          return;
+        }
+
+        // Calculate consecutive days
+        let streak = 1;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const lastActivity = new Date(allActivities[0]);
+        lastActivity.setHours(0, 0, 0, 0);
+
+        // Check if last activity was today or yesterday
+        const daysDiff = Math.floor(
+          (today - lastActivity) / (1000 * 60 * 60 * 24)
+        );
+        if (daysDiff > 1) {
+          currentStreak = 0;
+          return;
+        }
+
+        // Count consecutive days
+        for (let i = 1; i < allActivities.length; i++) {
+          const currentDate = new Date(allActivities[i - 1]);
+          const nextDate = new Date(allActivities[i]);
+          currentDate.setHours(0, 0, 0, 0);
+          nextDate.setHours(0, 0, 0, 0);
+
+          const diffDays = Math.floor(
+            (currentDate - nextDate) / (1000 * 60 * 60 * 24)
+          );
+          if (diffDays === 1) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+
+        currentStreak = streak;
+      }
+
+      // Display overall stats
+      async function displayStats() {
+        try {
+          document.getElementById("mood-count").textContent =
+            allAssessments.length;
+          document.getElementById("challenge-count").textContent =
+            allChallengeCompletions.length;
+          document.getElementById("streak-count").textContent =
+            currentStreak + " days";
+        } catch (error) {
+          console.error("Error displaying stats:", error);
+        }
+      }
+
+      // Load challenges progress
+      async function loadChallengesProgress() {
+        try {
+          const container = document.getElementById("challenges-progress");
+          container.innerHTML = "";
+
+          // Calculate progress for each mood
+          moods.forEach((mood) => {
+            const moodCompletions = allChallengeCompletions.filter(
+              (c) => c.mood.toLowerCase() === mood.toLowerCase()
+            );
+            const completionCount = moodCompletions.length;
+            const progress =
+              completionCount > 0
+                ? Math.min((completionCount / 3) * 100, 100)
+                : 0;
+
+            const div = document.createElement("div");
+            div.className = "progress-container";
+            div.innerHTML = `
+                        <div class="progress-label">
+                            <span><i class="far ${moodIcons[mood]}"></i> ${
+              mood.charAt(0).toUpperCase() + mood.slice(1)
+            } Challenges</span>
+                            <span class="completion-count">${completionCount} completed</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width:0%;"></div>
+                        </div>
+                    `;
+            container.appendChild(div);
+
+            // Animate the progress bar
+            setTimeout(() => {
+              div.querySelector(
+                ".progress-bar-fill"
+              ).style.width = `${progress}%`;
+            }, 100);
+          });
+        } catch (error) {
+          console.error("Error loading challenges:", error);
+          document.getElementById("challenges-progress").innerHTML = `
+                    <div class="error">Failed to load challenge progress</div>
+                `;
+        }
+      }
+
+      // Display all challenge completions
+      async function displayAllChallengeCompletions() {
+        try {
+          const listDiv = document.getElementById("challenge-completions");
+          listDiv.innerHTML = "";
+
+          if (allChallengeCompletions.length === 0) {
+            listDiv.innerHTML =
+              "<p style='text-align:center; color:#fff;'>No challenges completed yet.</p>";
+            return;
+          }
+
+          allChallengeCompletions.slice(0, 5).forEach((completion) => {
+            const div = document.createElement("div");
+            div.className = "challenge-completion-item";
+            const date = new Date(completion.completedAt).toLocaleDateString();
+            const moodText =
+              completion.mood.charAt(0).toUpperCase() +
+              completion.mood.slice(1);
+            div.innerHTML = `
+                        <i class="fas fa-trophy"></i>
+                        <span>${moodText} challenge: ${completion.challenge} - ${date}</span>
+                    `;
+            listDiv.appendChild(div);
+          });
+        } catch (error) {
+          console.error("Error displaying completions:", error);
+        }
+      }
+
+      // Load Assessment/Quiz History
+      async function loadAssessments() {
+        try {
+          const listDiv = document.getElementById("assessment-list");
+          listDiv.innerHTML = "";
+
+          if (allAssessments.length === 0) {
+            listDiv.innerHTML =
+              "<p style='text-align:center; color:#fff;'>No quizzes or assessments taken yet.</p>";
+            return;
+          }
+
+          allAssessments.slice(0, 5).forEach((assessment) => {
+            const div = document.createElement("div");
+            div.className = "assessment-item";
+            const date = new Date(assessment.takenAt).toLocaleDateString();
+            const moodText =
+              assessment.mood.charAt(0).toUpperCase() +
+              assessment.mood.slice(1);
+            div.innerHTML = `
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>${moodText} assessment on ${date}</span>
+                    `;
+            listDiv.appendChild(div);
+          });
+        } catch (error) {
+          console.error("Error loading assessments:", error);
+        }
+      }
+
+      // Generate mood chart based on real data
+      function generateMoodChart() {
+        const chartContainer = document.getElementById("mood-chart");
+        chartContainer.innerHTML = "";
+
+        const maxValue = Math.max(...Object.values(moodDistribution), 1);
+
+        moods.forEach((mood) => {
+          const value = moodDistribution[mood] || 0;
+          const height = maxValue > 0 ? (value / maxValue) * 150 : 10;
+
+          const bar = document.createElement("div");
+          bar.className = "mood-bar";
+          bar.style.height = `${height}px`;
+          bar.innerHTML = `
+                    ${value}
+                    <div class="mood-label">${
+                      mood.charAt(0).toUpperCase() + mood.slice(1)
+                    }</div>
+                `;
+
+          chartContainer.appendChild(bar);
+        });
+      }
+
+      // Generate personalized suggestions based on real data
+      function generateSuggestions() {
+        const container = document.getElementById("suggestions-container");
+        container.innerHTML = "";
+
+        const suggestions = [];
+
+        // Find moods with no activity
+        const inactiveMoods = moods.filter(
+          (mood) => moodDistribution[mood] === 0
+        );
+        if (inactiveMoods.length > 0) {
+          suggestions.push({
+            icon: "fa-target",
+            title: `Explore ${
+              inactiveMoods[0].charAt(0).toUpperCase() +
+              inactiveMoods[0].slice(1)
+            } Activities`,
+            content: `You haven't completed any ${inactiveMoods[0]} challenges or assessments yet. Try exploring activities in this mood category to build a more comprehensive emotional toolkit.`,
+          });
+        }
+
+        // Streak motivation
+        if (currentStreak > 0) {
+          suggestions.push({
+            icon: "fa-fire",
+            title: "Maintain Your Streak",
+            content: `Congratulations on your ${currentStreak}-day streak! Keep up the momentum by completing at least one activity daily to build consistent mental wellness habits.`,
+          });
+        } else if (
+          allChallengeCompletions.length > 0 ||
+          allAssessments.length > 0
+        ) {
+          suggestions.push({
+            icon: "fa-calendar",
+            title: "Restart Your Journey",
+            content:
+              "You've shown great progress in the past! Consider getting back into your routine to rebuild your wellness streak.",
+          });
+        }
+
+        // Balance recommendations
+        const mostActiveMood = Object.keys(moodDistribution).reduce((a, b) =>
+          moodDistribution[a] > moodDistribution[b] ? a : b
+        );
+        const leastActiveMood = Object.keys(moodDistribution).reduce((a, b) =>
+          moodDistribution[a] < moodDistribution[b] ? a : b
+        );
+
+        if (
+          moodDistribution[mostActiveMood] >
+          moodDistribution[leastActiveMood] + 2
+        ) {
+          suggestions.push({
+            icon: "fa-balance-scale",
+            title: "Balance Your Emotional Range",
+            content: `You're doing great with ${mostActiveMood} activities! Consider exploring ${leastActiveMood} challenges to develop a more balanced emotional skill set.`,
+          });
+        }
+
+        // Achievement milestones
+        const totalActivities =
+          allChallengeCompletions.length + allAssessments.length;
+        if (totalActivities >= 10) {
+          const nextMilestone = Math.ceil(totalActivities / 10) * 10;
+          suggestions.push({
+            icon: "fa-trophy",
+            title: "Achievement Progress",
+            content: `Outstanding work! You've completed ${totalActivities} activities. You're ${
+              nextMilestone - totalActivities
+            } activities away from your next milestone!`,
+          });
+        } else if (totalActivities > 0) {
+          suggestions.push({
+            icon: "fa-seedling",
+            title: "Building Momentum",
+            content: `You're off to a great start with ${totalActivities} activities completed! Try to reach 10 total activities to unlock your first major milestone.`,
+          });
+        }
+
+        // Default suggestion if no data
+        if (suggestions.length === 0) {
+          suggestions.push({
+            icon: "fa-rocket",
+            title: "Begin Your Journey",
+            content:
+              "Start your mental wellness journey by taking a mood assessment or completing your first challenge. Every step counts toward building better emotional resilience!",
+          });
+        }
+
+        // Limit to 4 suggestions
+        suggestions.slice(0, 4).forEach((suggestion) => {
+          const card = document.createElement("div");
+          card.className = "suggestion-card";
+          card.innerHTML = `
+                    <h4><i class="fas ${suggestion.icon}"></i> ${suggestion.title}</h4>
+                    <p>${suggestion.content}</p>
+                `;
+          container.appendChild(card);
+        });
+      }
+
+      // Clear all data
+      // Updated clear all data function
+      async function clearAll() {
+        if (
+          !confirm(
+            "Are you sure you want to clear all your progress? This action cannot be undone."
+          )
+        ) {
+          return;
+        }
+
+        try {
+          // Show loading state
+          const clearButton = document.querySelector(".btn-clear");
+          const originalText = clearButton.innerHTML;
+          clearButton.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Clearing...';
+          clearButton.disabled = true;
+
+          // Clear backend data if user is authenticated
+          if (token && currentUserId !== "guest") {
+            try {
+              // Clear challenge completions from backend
+              const challengeResponse = await fetch(
+                `${API_BASE}/progress/clear-challenges`,
+                {
+                  method: "DELETE",
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              // Clear assessments from backend
+              const assessmentResponse = await fetch(
+                `${API_BASE}/progress/clear-assessments`,
+                {
+                  method: "DELETE",
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              // Log any backend errors but don't stop the clear process
+              if (!challengeResponse.ok) {
+                console.warn(
+                  "Failed to clear challenges from backend:",
+                  challengeResponse.statusText
+                );
+              }
+              if (!assessmentResponse.ok) {
+                console.warn(
+                  "Failed to clear assessments from backend:",
+                  assessmentResponse.statusText
+                );
+              }
+            } catch (backendError) {
+              console.warn(
+                "Backend clear failed, continuing with localStorage clear:",
+                backendError
+              );
+            }
+          }
+
+          // Clear localStorage data
+          if (currentUserId) {
+            localStorage.removeItem(getUserSpecificKey("completedChallenges"));
+            localStorage.removeItem(getUserSpecificKey("progress"));
+            localStorage.removeItem(getUserSpecificKey("currentMood"));
+
+            // Also clear any other related data
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && key.includes(currentUserId)) {
+                keysToRemove.push(key);
+              }
+            }
+            keysToRemove.forEach((key) => localStorage.removeItem(key));
+          }
+
+          // Reset in-memory data arrays
+          allChallengeCompletions = [];
+          allAssessments = [];
+          moodDistribution = {};
+          currentStreak = 0;
+
+          // Initialize empty mood distribution
+          moods.forEach((mood) => (moodDistribution[mood] = 0));
+
+          // Refresh all UI components
+          await displayStats();
+          await loadChallengesProgress();
+          await displayAllChallengeCompletions();
+          await loadAssessments();
+          generateMoodChart();
+          generateSuggestions();
+
+          // Restore button state
+          clearButton.innerHTML = originalText;
+          clearButton.disabled = false;
+
+          alert("All progress data has been cleared successfully!");
+        } catch (error) {
+          console.error("Error clearing data:", error);
+
+          // Restore button state on error
+          const clearButton = document.querySelector(".btn-clear");
+          clearButton.innerHTML = '<i class="fas fa-trash"></i> Clear Progress';
+          clearButton.disabled = false;
+
+          alert("There was an error clearing your data. Please try again.");
+        }
+      }
+
+      // Alternative solution: Add a force reload after clear
+      async function clearAllWithReload() {
+        if (
+          !confirm(
+            "Are you sure you want to clear all your progress? This action cannot be undone. The page will reload after clearing."
+          )
+        ) {
+          return;
+        }
+
+        try {
+          // Clear backend data if authenticated
+          if (token && currentUserId !== "guest") {
+            try {
+              await Promise.all([
+                fetch(`${API_BASE}/progress/clear-challenges`, {
+                  method: "DELETE",
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                }),
+                fetch(`${API_BASE}/progress/clear-assessments`, {
+                  method: "DELETE",
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                }),
+              ]);
+            } catch (backendError) {
+              console.warn("Backend clear failed:", backendError);
+            }
+          }
+
+          // Clear localStorage
+          if (currentUserId) {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (
+                key &&
+                (key.includes(currentUserId) ||
+                  key.includes("completedChallenges") ||
+                  key.includes("progress"))
+              ) {
+                keysToRemove.push(key);
+              }
+            }
+            keysToRemove.forEach((key) => localStorage.removeItem(key));
+          }
+
+          // Show success message and reload
+          alert(
+            "All progress data has been cleared successfully! The page will now reload."
+          );
+          window.location.reload();
+        } catch (error) {
+          console.error("Error clearing data:", error);
+          alert("There was an error clearing your data. Please try again.");
+        }
+      }
+
+      // Download PDF function with real data
+      async function downloadPDF() {
+        const modal = document.getElementById("progressModal");
+        const progressBar = document.getElementById("modalProgressBar");
+        const progressStatus = document.getElementById("progressStatus");
+
+        // Show modal
+        modal.style.display = "flex";
+        progressBar.style.width = "5%";
+        progressStatus.textContent = "Gathering data...";
+
+        try {
+          // Simulate progress
+          const updateProgress = (percent, status) => {
+            progressBar.style.width = percent + "%";
+            progressStatus.textContent = status;
+          };
+
+          // Simulate processing steps
+          setTimeout(
+            () => updateProgress(20, "Processing user information..."),
+            600
+          );
+          setTimeout(
+            () => updateProgress(40, "Analyzing challenge progress..."),
+            1200
+          );
+          setTimeout(
+            () => updateProgress(60, "Compiling assessment history..."),
+            1800
+          );
+          setTimeout(
+            () => updateProgress(80, "Generating recommendations..."),
+            2400
+          );
+          setTimeout(() => updateProgress(95, "Finalizing report..."), 3000);
+
+          // Create a new PDF document with real data
+          setTimeout(() => {
+            const doc = new jsPDF();
+
+            // Add header
+            doc.setFillColor(94, 96, 206);
+            doc.rect(0, 0, 210, 60, "F");
+            doc.setFontSize(28);
+            doc.setTextColor(255, 255, 255);
+            doc.text("MindProgress Report", 105, 35, { align: "center" });
+
+            // Add date
+            const today = new Date();
+            const dateStr = today.toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            });
+            doc.setFontSize(12);
+            doc.text(`Generated on: ${dateStr}`, 105, 48, { align: "center" });
+
+            // User Information Section
+            doc.setFillColor(240, 240, 240);
+            doc.rect(10, 70, 190, 25, "F");
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(16);
+            doc.text("USER INFORMATION", 105, 82, { align: "center" });
+
+            doc.setFontSize(12);
+            let yPosition = 100;
+            const username = document.getElementById("username").textContent;
+            doc.text(`Name: ${username}`, 20, yPosition);
+            doc.text(
+              `User Type: ${currentUser ? "Registered User" : "Guest User"}`,
+              20,
+              yPosition + 8
+            );
+
+            // Statistics
+            yPosition += 25;
+            doc.setFillColor(240, 240, 240);
+            doc.rect(10, yPosition, 190, 25, "F");
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(16);
+            doc.text("PROGRESS STATISTICS", 105, yPosition + 12, {
+              align: "center",
+            });
+
+            yPosition += 35;
+            doc.setFontSize(12);
+            doc.text(
+              `Challenges Completed: ${allChallengeCompletions.length}`,
+              20,
+              yPosition
+            );
+            doc.text(
+              `Assessments Taken: ${allAssessments.length}`,
+              20,
+              yPosition + 8
+            );
+            doc.text(
+              `Current Streak: ${currentStreak} days`,
+              20,
+              yPosition + 16
+            );
+            doc.text(
+              `Total Activities: ${
+                allChallengeCompletions.length + allAssessments.length
+              }`,
+              20,
+              yPosition + 24
+            );
+
+            // Mood Distribution Chart
+            yPosition += 40;
+            doc.setFillColor(240, 240, 240);
+            doc.rect(10, yPosition, 190, 25, "F");
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(16);
+            doc.text("MOOD DISTRIBUTION", 105, yPosition + 12, {
+              align: "center",
+            });
+
+            yPosition += 35;
+            const maxValue = Math.max(...Object.values(moodDistribution), 1);
+            const barWidth = 15;
+            const chartWidth = 150;
+            const startX = (210 - chartWidth) / 2;
+
+            // Draw bars and labels
+            let x = startX;
+            moods.forEach((mood) => {
+              const value = moodDistribution[mood] || 0;
+              const height = maxValue > 0 ? (value / maxValue) * 40 : 5;
+
+              // Draw bar
+              doc.setFillColor(100, 150, 240);
+              doc.rect(x, yPosition + 40 - height, barWidth, height, "F");
+
+              // Add value on top
+              doc.setTextColor(0, 0, 0);
+              doc.setFontSize(10);
+              doc.text(
+                value.toString(),
+                x + barWidth / 2,
+                yPosition + 35 - height,
+                { align: "center" }
+              );
+
+              // Add mood label
+              doc.text(
+                mood.charAt(0).toUpperCase() + mood.slice(1),
+                x + barWidth / 2,
+                yPosition + 52,
+                { align: "center" }
+              );
+
+              x += barWidth + 5;
+            });
+
+            // Recent Activities Section
+            yPosition += 70;
+            if (yPosition > 250) {
+              doc.addPage();
+              yPosition = 20;
+            }
+
+            doc.setFillColor(240, 240, 240);
+            doc.rect(10, yPosition, 190, 25, "F");
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(16);
+            doc.text("RECENT ACTIVITIES", 105, yPosition + 12, {
+              align: "center",
+            });
+
+            yPosition += 30;
+            doc.setFontSize(11);
+
+            // List recent challenges
+            const recentChallenges = allChallengeCompletions.slice(0, 3);
+            if (recentChallenges.length > 0) {
+              doc.text("Recent Challenge Completions:", 15, yPosition);
+              yPosition += 10;
+              recentChallenges.forEach((challenge, index) => {
+                const date = new Date(
+                  challenge.completedAt
+                ).toLocaleDateString();
+                doc.text(
+                  `• ${challenge.mood} challenge: ${challenge.challenge} (${date})`,
+                  20,
+                  yPosition
+                );
+                yPosition += 7;
+              });
+              yPosition += 5;
+            }
+
+            // List recent assessments
+            const recentAssessments = allAssessments.slice(0, 3);
+            if (recentAssessments.length > 0) {
+              doc.text("Recent Assessment History:", 15, yPosition);
+              yPosition += 10;
+              recentAssessments.forEach((assessment, index) => {
+                const date = new Date(assessment.takenAt).toLocaleDateString();
+                doc.text(
+                  `• ${assessment.mood} assessment taken on ${date}`,
+                  20,
+                  yPosition
+                );
+                yPosition += 7;
+              });
+            }
+
+            // Personalized Recommendations Section
+            if (yPosition > 220) {
+              doc.addPage();
+              yPosition = 20;
+            } else {
+              yPosition += 15;
+            }
+
+            doc.setFillColor(240, 240, 240);
+            doc.rect(10, yPosition, 190, 25, "F");
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(16);
+            doc.text("PERSONALIZED RECOMMENDATIONS", 105, yPosition + 12, {
+              align: "center",
+            });
+
+            yPosition += 30;
+            doc.setFontSize(11);
+
+            // Generate recommendations for PDF
+            const pdfRecommendations = [];
+            const inactiveMoods = moods.filter(
+              (mood) => moodDistribution[mood] === 0
+            );
+            if (inactiveMoods.length > 0) {
+              pdfRecommendations.push(
+                `Focus on ${inactiveMoods.join(
+                  ", "
+                )} activities to build comprehensive emotional skills.`
+              );
+            }
+            if (currentStreak > 0) {
+              pdfRecommendations.push(
+                `Maintain your ${currentStreak}-day streak by completing daily activities.`
+              );
+            }
+            const totalActivities =
+              allChallengeCompletions.length + allAssessments.length;
+            if (totalActivities < 10) {
+              pdfRecommendations.push(
+                `Continue building momentum - aim for ${
+                  10 - totalActivities
+                } more activities to reach your next milestone.`
+              );
+            }
+
+            if (pdfRecommendations.length === 0) {
+              pdfRecommendations.push(
+                "Begin your mental wellness journey with mood assessments and challenges."
+              );
+            }
+
+            pdfRecommendations.forEach((rec, index) => {
+              doc.text(`${index + 1}. ${rec}`, 15, yPosition);
+              yPosition += 12;
+            });
+
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+              doc.setPage(i);
+              doc.setFontSize(10);
+              doc.setTextColor(100, 100, 100);
+              doc.text(`Page ${i} of ${pageCount}`, 105, 287, {
+                align: "center",
+              });
+              doc.text(
+                "Confidential Progress Report - MindProgress Analytics",
+                105,
+                292,
+                { align: "center" }
+              );
+            }
+
+            updateProgress(100, "Report generated successfully!");
+
+            // Save the PDF after a brief delay
+            setTimeout(() => {
+              const userName = username.replace(/\s+/g, "_");
+              const timestamp = today.toISOString().split("T")[0];
+              doc.save(`${userName}_Progress_Report_${timestamp}.pdf`);
+
+              // Hide modal after a short delay
+              setTimeout(() => {
+                modal.style.display = "none";
+              }, 1000);
+            }, 800);
+          }, 3500);
+        } catch (error) {
+          console.error("Error generating PDF:", error);
+          progressStatus.textContent =
+            "Error generating report. Please try again.";
+          setTimeout(() => {
+            modal.style.display = "none";
+          }, 2000);
+        }
+      }
+
+      function goBack() {
+        // Try to go back to quizzes page, fallback to alert for demo
+        try {
+          window.location.href = "quizzes.html";
+        } catch (error) {
+          alert(
+            "Back button clicked! In a real application, this would take you to the previous page."
+          );
+        }
+      }
+    </script>
+  </body>
+</html>

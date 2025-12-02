@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FeelWise - Surprise Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="module.css">
+  <link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+  <!-- Top Header Section -->
+  <div class="top-header">
+    <div class="logo">FeelWise</div>
+  </div>
+
+  <!-- Quiz Section -->
+  <div class="container my-5" id="quizSection">
+    <div class="text-center mb-4 mainheading">
+      <h2>Joy & Surprise Assessment</h2>
+      <p>Let's discover what brings you happiness and excitement!</p>
+    </div>
+
+    <!-- Question 1 -->
+    <div class="quiz-card">
+      <h3>1. What's the best part of your day so far?</h3>
+      <div class="div1">
+        <input type="radio" name="q1" value="friends"> Spending time with friends <br />
+        <input type="radio" name="q1" value="weather"> A nice weather <br />
+        <input type="radio" name="q1" value="meal"> A good meal <br />
+        <input type="radio" name="q1" value="productive"> A productive day
+      </div>
+    </div>
+<br>
+
+    <!-- Question 2 -->
+    <div class="quiz-card">
+      <h3>2. If happiness had a flavor, what would it taste like?</h3>
+      <div class="div1">
+        <input type="radio" name="q2" value="cotton"> Cotton candy 🍭 <br />
+        <input type="radio" name="q2" value="mango"> Fresh mango 🥭 <br />
+        <input type="radio" name="q2" value="cookies"> Chocolate chip cookies 🍪 <br />
+        <input type="radio" name="q2" value="pizza"> Pizza with extra cheese 🍕
+      </div>
+    </div>
+<br>
+
+    <!-- Question 3 -->
+    <div class="quiz-card">
+      <h3>3. What's the funniest thing to receive as a gift?</h3>
+      <div class="div1">
+        <input type="radio" name="q3" value="potato"> A singing potato 🥔🎤 <br />
+        <input type="radio" name="q3" value="chicken"> A rubber chicken 🐔 <br />
+        <input type="radio" name="q3" value="bread"> A pillow shaped like bread 🍞🛏️ <br />
+        <input type="radio" name="q3" value="sherbet"> Rainbow sherbet 🌈🍨
+      </div>
+    </div>
+<br>
+
+    <!-- Question 4 -->
+    <div class="quiz-card">
+      <h3>4. Which sound feels the happiest?</h3>
+      <div class="div1">
+        <input type="radio" name="q4" value="laughter"> Baby laughter 👶😂 <br />
+        <input type="radio" name="q4" value="popcorn"> Popcorn popping 🍿 <br />
+        <input type="radio" name="q4" value="rain"> Rain after a hot day 🌧️🌞 <br />
+        <input type="radio" name="q4" value="icecream"> Ice cream truck jingle 🚚🍦
+      </div>
+    </div>
+<br>
+
+    <!-- Question 5 -->
+    <div class="quiz-card">
+      <h3>5. What's your "happy place"?</h3>
+      <div class="div1">
+        <input type="radio" name="q5" value="beach"> Beach 🏖️ <br />
+        <input type="radio" name="q5" value="mountains"> Mountains ⛰️ <br />
+        <input type="radio" name="q5" value="theme"> Theme park 🎢 <br />
+        <input type="radio" name="q5" value="room"> Your cozy room 🛋️
+      </div>
+    </div>
+
+    <!-- Question 6 -->
+    <div class="quiz-card">
+      <h3>6. What brings you the most joy lately?</h3>
+      <div class="div1">
+        <textarea rows="5" class="divArea" id="joySituation" placeholder="Share what's been making you happy and excited..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-lg btn-dark btn-submit" onclick="submitQuiz()">Complete Assessment</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="container my-5" id="resultSection" style="display:none;">
+    <div class="result-card">
+      <h2>Assessment Complete</h2>
+      <p id="quoteText"></p>
+      <div id="joyProfile"></div>
+      
+      <!-- Challenge Section -->
+      <div class="challenge-section">
+        <h3>Joy & Happiness Challenges</h3>
+        <p>Try these personalized challenges to amplify your happiness:</p>
+        
+        <div class="challenge-card" onclick="startChallenge('gratitude')">
+          <h4>Gratitude Practice</h4>
+          <p>Cultivate appreciation for life's beautiful moments</p>
+          <span class="challenge-status" id="gratitude-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('kindness')">
+          <h4>Random Acts of Kindness</h4>
+          <p>Spread joy by brightening someone else's day</p>
+          <span class="challenge-status" id="kindness-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('celebration')">
+          <h4>Celebrate Small Wins</h4>
+          <p>Find reasons to celebrate in everyday moments</p>
+          <span class="challenge-status" id="celebration-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('playfulness')">
+          <h4>Playful Activities</h4>
+          <p>Reconnect with your inner child through play</p>
+          <span class="challenge-status" id="playfulness-status"></span>
+        </div>
+      </div>
+      
+      <button class="btn btn-success mt-3" onclick="window.location.href='quizzes.html'">Back to Quizzes</button>
+    </div>
+  </div>
+
+<script>
+  const API_BASE = "http://localhost:5000/api";
+  const token = localStorage.getItem("token");
+  let currentUserId = null;
+
+  // Get user-specific localStorage key
+  function getUserSpecificKey(baseKey) {
+    return currentUserId ? `${baseKey}_${currentUserId}` : `${baseKey}_guest`;
+  }
+
+  // Initialize user context
+  async function initializeUserContext() {
+    if (token) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const user = await res.json();
+          currentUserId = user.id || user._id;
+        }
+      } catch (error) {
+        console.error("Error getting user context:", error);
+        currentUserId = 'guest';
+      }
+    } else {
+      currentUserId = 'guest';
+    }
+  }
+
+  // Complete challenge details
+  const challengeDetails = {
+    gratitude: {
+      title: "Daily Gratitude Practice",
+      description: "Cultivate appreciation and amplify positive emotions.",
+      steps: [
+        "Find a quiet moment and take three deep breaths",
+        "Think of three things you're grateful for today",
+        "Write them down or say them out loud",
+        "For each item, think about WHY you're grateful for it",
+        "Notice how your body feels as you focus on gratitude",
+        "End by saying 'Thank you' to yourself and the universe",
+        "Try to do this practice every morning or evening"
+      ]
+    },
+    kindness: {
+      title: "Random Acts of Kindness",
+      description: "Spread joy by brightening someone else's day.",
+      steps: [
+        "Think of someone in your life who could use a smile",
+        "Send them a thoughtful text or message",
+        "Compliment a stranger or hold a door open",
+        "Leave a positive review for a business you love",
+        "Share something inspiring on social media",
+        "Do a small favor for a family member or friend",
+        "Notice how acts of kindness make YOU feel happier too"
+      ]
+    },
+    celebration: {
+      title: "Celebrate Small Wins",
+      description: "Find reasons to celebrate in everyday moments.",
+      steps: [
+        "List three small things you accomplished today",
+        "Do a little happy dance for each accomplishment",
+        "Share your wins with someone who cares about you",
+        "Take a moment to feel proud of your progress",
+        "Treat yourself to something small but special",
+        "Take a photo or write about your favorite moment today",
+        "Set an intention to notice more wins tomorrow"
+      ]
+    },
+    playfulness: {
+      title: "Playful Activities",
+      description: "Reconnect with your inner child through play.",
+      steps: [
+        "Put on your favorite upbeat song and dance freely",
+        "Try drawing or doodling something silly",
+        "Play a quick game or solve a fun puzzle",
+        "Make faces at yourself in the mirror",
+        "Tell a joke or watch something funny",
+        "Play with a pet or connect with nature",
+        "Do something creative just for the joy of it"
+      ]
+    }
+  };
+
+  function submitQuiz() {
+    // Check if first 5 questions are answered
+    for (let i = 1; i <= 5; i++) {
+      if (!document.querySelector(`input[name="q${i}"]:checked`)) {
+        alert("Please answer all questions!");
+        return;
+      }
+    }
+
+    // Get answers for personalized response
+    const dayBest = document.querySelector('input[name="q1"]:checked').value;
+    const happyFlavor = document.querySelector('input[name="q2"]:checked').value;
+    const funnyGift = document.querySelector('input[name="q3"]:checked').value;
+    const happySound = document.querySelector('input[name="q4"]:checked').value;
+    const happyPlace = document.querySelector('input[name="q5"]:checked').value;
+    const joySituation = document.getElementById('joySituation').value;
+
+    // Generate personalized quote and profile
+    let quote = getPersonalizedQuote(happyPlace, dayBest);
+    let profile = generateJoyProfile(dayBest, happyFlavor, funnyGift, happySound, happyPlace);
+
+    // Show result
+    document.getElementById("quizSection").style.display = "none";
+    document.getElementById("resultSection").style.display = "block";
+    document.getElementById("quoteText").innerHTML = quote;
+    document.getElementById("joyProfile").innerHTML = profile;
+    
+    // Load challenge statuses for this user
+    loadChallengeStatuses();
+
+    // Record the quiz completion for this specific user
+    recordUserAssessment('Joy', {
+      dayBest, happyFlavor, funnyGift, happySound, happyPlace, joySituation
+    });
+  }
+
+  function getPersonalizedQuote(happyPlace, dayBest) {
+    const quotes = {
+      beach: {
+        friends: "Like waves meeting shore, friendship brings endless joy to your life.",
+        weather: "You appreciate life's natural beauty - let that wonder fill every day.",
+        meal: "You savor life's simple pleasures. That mindfulness is a gift.",
+        productive: "Your accomplishments flow like ocean tides - steady and powerful."
+      },
+      mountains: {
+        friends: "Friendship gives you strength to climb any peak life presents.",
+        weather: "You find joy in nature's majesty. Let that awe inspire your days.",
+        meal: "You appreciate life's nourishing moments - body and soul.",
+        productive: "Your achievements stand tall like mountain peaks - impressive and lasting."
+      },
+      theme: {
+        friends: "Life with friends is the ultimate adventure - full of thrills and laughter.",
+        weather: "You find excitement in every moment. That enthusiasm is infectious!",
+        meal: "You treat life like a delicious adventure to be savored fully.",
+        productive: "Your energy and accomplishments create the most amazing life experiences."
+      },
+      room: {
+        friends: "You create a warm, welcoming space wherever you go - especially in hearts.",
+        weather: "You find contentment in life's quiet moments. That peace is precious.",
+        meal: "You understand that the best joys are often the coziest, most intimate ones.",
+        productive: "Your personal space reflects your inner harmony and accomplishments."
+      }
+    };
+    return quotes[happyPlace][dayBest] || "Happiness is not something ready made. It comes from your own actions. 🌟";
+  }
+
+  function generateJoyProfile(dayBest, happyFlavor, funnyGift, happySound, happyPlace) {
+    let profile = `<div style="text-align: left; margin: 20px 0;">`;
+    profile += `<h4>Your Joy Profile:</h4>`;
+    profile += `<p><strong>Daily Highlight:</strong> ${dayBest.charAt(0).toUpperCase() + dayBest.slice(1)}</p>`;
+    profile += `<p><strong>Happiness Flavor:</strong> ${happyFlavor.charAt(0).toUpperCase() + happyFlavor.slice(1)}</p>`;
+    profile += `<p><strong>Humor Style:</strong> ${funnyGift.charAt(0).toUpperCase() + funnyGift.slice(1)}</p>`;
+    profile += `<p><strong>Joy Sound:</strong> ${happySound.charAt(0).toUpperCase() + happySound.slice(1)}</p>`;
+    profile += `<p><strong>Happy Place:</strong> ${happyPlace.charAt(0).toUpperCase() + happyPlace.slice(1)}</p>`;
+    profile += `</div>`;
+    return profile;
+  }
+
+  // Load user-specific challenge statuses
+  async function loadChallengeStatuses() {
+    const challenges = ['gratitude', 'kindness', 'celebration', 'playfulness'];
+    
+    if (token) {
+      // If logged in, get user-specific challenge completions from database
+      try {
+        const response = await fetch(`${API_BASE}/progress/all-challenge-completions`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const userCompletions = await response.json();
+          challenges.forEach(challenge => {
+            const isCompleted = userCompletions.some(c => 
+              c.mood === 'joy' && c.challenge === challenge
+            );
+            const statusElement = document.getElementById(`${challenge}-status`);
+            if (isCompleted) {
+              statusElement.textContent = '✅ Completed';
+              statusElement.parentElement.classList.add('challenge-completed');
+            } else {
+              statusElement.textContent = 'Try this challenge';
+            }
+          });
+          return;
+        }
+      } catch (error) {
+        console.log("Failed to load from database, using localStorage");
+      }
+    }
+    
+    // Fallback to user-specific localStorage
+    if (currentUserId) {
+      const userChallengesKey = getUserSpecificKey("completedChallenges");
+      const completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+      
+      challenges.forEach(challenge => {
+        const isCompleted = completedChallenges.some(c => 
+          c.mood === 'joy' && c.challenge === challenge
+        );
+        const statusElement = document.getElementById(`${challenge}-status`);
+        if (isCompleted) {
+          statusElement.textContent = '✅ Completed';
+          statusElement.parentElement.classList.add('challenge-completed');
+        } else {
+          statusElement.textContent = 'Try this challenge';
+        }
+      });
+    }
+  }
+
+  // Start challenge function
+  async function startChallenge(challengeType) {
+    const challenge = challengeDetails[challengeType];
+    if (!challenge) return;
+
+    // Create modal HTML
+    const modalHTML = `
+      <div class="challenge-modal" id="challengeModal">
+        <div class="challenge-modal-content">
+          <span class="close-modal" onclick="closeModal()">&times;</span>
+          <h3>${challenge.title}</h3>
+          <p>${challenge.description}</p>
+          <div class="steps-container">
+            ${challenge.steps.map((step, index) => `
+              <div class="step-item">
+                <strong>Step ${index + 1}:</strong> ${step}
+              </div>
+            `).join('')}
+          </div>
+          <button class="btn btn-success" onclick="completeUserChallenge('${challengeType}')">
+            Mark Challenge Complete
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Add modal to body if it doesn't exist
+    const existingModal = document.getElementById('challengeModal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('challengeModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('challengeModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  }
+
+  // Complete challenge for the current user
+  async function completeUserChallenge(challengeType) {
+    try {
+      if (token) {
+        // Save to database for logged-in user
+        const response = await fetch(`${API_BASE}/progress/complete-challenge`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ 
+            mood: 'joy', 
+            challenge: challengeType 
+          }),
+        });
+
+        if (response.ok) {
+          console.log("Challenge completion saved for user");
+        }
+      }
+      
+      // Also save to user-specific localStorage
+      if (currentUserId) {
+        const userChallengesKey = getUserSpecificKey("completedChallenges");
+        let completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+        const newCompletion = {
+          mood: 'joy',
+          challenge: challengeType,
+          time: new Date().toISOString(),
+          userId: currentUserId
+        };
+        completedChallenges.push(newCompletion);
+        localStorage.setItem(userChallengesKey, JSON.stringify(completedChallenges));
+      }
+
+      // Update UI
+      const statusElement = document.getElementById(`${challengeType}-status`);
+      if (statusElement) {
+        statusElement.textContent = '✅ Completed';
+        statusElement.parentElement.classList.add('challenge-completed');
+      }
+
+      closeModal();
+      alert(`Wonderful! You've completed the ${challengeDetails[challengeType].title}!`);
+
+      // Call parent function if available (for integration with quizzes.html)
+      if (typeof window.parent.completeChallenge === 'function') {
+        window.parent.completeChallenge('joy', challengeType);
+      }
+
+    } catch (error) {
+      console.error("Error completing challenge:", error);
+      alert("Challenge completed locally!");
+    }
+  }
+
+  // Record user-specific assessment
+  async function recordUserAssessment(mood, assessmentData) {
+    try {
+      if (token) {
+        // Save to database for logged-in user
+        await fetch(`${API_BASE}/progress/assessment`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ 
+            mood: mood.toLowerCase(), 
+            type: 'assessment',
+            data: assessmentData
+          }),
+        });
+      }
+
+      // Save to user-specific localStorage
+      if (currentUserId) {
+        const userProgressKey = getUserSpecificKey("progress");
+        let progress = JSON.parse(localStorage.getItem(userProgressKey) || "[]");
+        let today = new Date();
+        let newEntry = {
+          mood: mood,
+          date: today.toLocaleDateString(),
+          time: today.toLocaleTimeString(),
+          userId: currentUserId
+        };
+        progress.push(newEntry);
+        localStorage.setItem(userProgressKey, JSON.stringify(progress));
+      }
+
+      // Call parent function if available (from quizzes.html)
+      if (typeof window.parent.saveMoodAssessment === 'function') {
+        window.parent.saveMoodAssessment(mood);
+      } else if (typeof saveMoodAssessment === 'function') {
+        saveMoodAssessment(mood);
+      }
+    } catch (error) {
+      console.error("Error recording assessment:", error);
+    }
+  }
+
+  // Click outside modal to close
+  window.addEventListener('click', function(event) {
+    const modal = document.getElementById('challengeModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Initialize on page load
+  document.addEventListener("DOMContentLoaded", async () => {
+    await initializeUserContext();
+  });
+</script>
+
+</body>
+</html>

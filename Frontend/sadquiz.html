@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FeelWise - Emotional Sadness Assessment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+  <!-- Top Header Section -->
+  <div class="top-header">
+    <div class="logo">FeelWise</div>
+  </div>
+
+  <!-- Quiz Section -->
+  <div class="container my-5" id="quizSection">
+    <div class="text-center mb-4 mainheading">
+      <h2>Emotional Sadness Assessment</h2>
+      <p>Let's understand how you handle emotions and navigate through sadness</p>
+    </div>
+
+    <!-- Question 1 -->
+    <div class="quiz-card">
+      <h3>1. Which tiny thing cheers you up fastest?</h3>
+      <div class="div1">
+        <input type="radio" name="q1" value="hug"> A warm hug 🤗 <br />
+        <input type="radio" name="q1" value="video"> A funny video 📱😂 <br />
+        <input type="radio" name="q1" value="snack"> A surprise snack 🍫🎁 <br />
+        <input type="radio" name="q1" value="cute"> A cat wearing socks 🐱🧦
+      </div>
+    </div>
+    <br>
+
+    <!-- Question 2 -->
+    <div class="quiz-card">
+      <h3>2. Which comforting activity sounds best?</h3>
+      <div class="div1">
+        <input type="radio" name="q2" value="chocolate"> Hot chocolate with marshmallows ☕🍫 <br />
+        <input type="radio" name="q2" value="movie"> Watching a cozy movie 🎥🍿 <br />
+        <input type="radio" name="q2" value="blanket"> Wrapping in a blanket burrito 🌯🛏️ <br />
+        <input type="radio" name="q2" value="singing"> Singing loudly in the shower 🚿🎤
+      </div>
+    </div>
+    <br>
+
+    <!-- Question 3 -->
+    <div class="quiz-card">
+      <h3>3. What makes you feel sad sometimes?</h3>
+      <div class="div1">
+        <input type="radio" name="q3" value="misunderstood"> Being misunderstood 😔 <br />
+        <input type="radio" name="q3" value="missing"> Missing someone you care about 💭❤️ <br />
+        <input type="radio" name="q3" value="empathy"> Seeing someone else unhappy 😢 <br />
+        <input type="radio" name="q3" value="expectations"> Expecting from people 💔
+      </div>
+    </div>
+    <br>
+
+    <!-- Question 4 -->
+    <div class="quiz-card">
+      <h3>4. Which reminder feels best when you're down?</h3>
+      <div class="div1">
+        <input type="radio" name="q4" value="pass"> "This too shall pass." 🌅 <br />
+        <input type="radio" name="q4" value="strength"> "You've made it through tough times before." 💪 <br />
+        <input type="radio" name="q4" value="care"> "Someone out there cares about you." 🤝 <br />
+        <input type="radio" name="q4" value="progress"> "Even small steps forward matter." 👣✨
+      </div>
+    </div>
+    <br>
+
+    <!-- Question 5 -->
+    <div class="quiz-card">
+      <h3>5. Which little act of kindness lifts your mood most?</h3>
+      <div class="div1">
+        <input type="radio" name="q5" value="smile"> A smile from someone 🙂 <br />
+        <input type="radio" name="q5" value="compliment"> A random compliment 💐 <br />
+        <input type="radio" name="q5" value="listening"> Someone listening without judgment 👂❤️ <br />
+        <input type="radio" name="q5" value="gratitude"> A surprise "thank you" 🙏
+      </div>
+    </div>
+
+    <!-- Question 6 -->
+    <div class="quiz-card">
+      <h3>6. What helps you bounce back from difficult emotions?</h3>
+      <div class="div1">
+        <textarea rows="5" class="divArea" id="sadnessSituation" placeholder="Share what helps you recover from tough emotional moments..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-lg btn-dark btn-submit" onclick="submitQuiz()">Complete Assessment</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="container my-5" id="resultSection" style="display:none;">
+    <div class="result-card">
+      <h2>Assessment Complete</h2>
+      <p id="quote"></p>
+      <div id="sadnessProfile"></div>
+      
+      <!-- Challenge Section -->
+      <div class="challenge-section">
+        <h3>Emotional Healing Challenges</h3>
+        <p>Try these personalized challenges to strengthen your emotional well-being:</p>
+        
+        <div class="challenge-card" onclick="startChallenge('selfcompassion')">
+          <h4>Self-Compassion Practice</h4>
+          <p>Learn to treat yourself with the same kindness you show others</p>
+          <span class="challenge-status" id="selfcompassion-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('emotionalcheck')">
+          <h4>Daily Emotional Check-In</h4>
+          <p>Build awareness of your emotions throughout the day</p>
+          <span class="challenge-status" id="emotionalcheck-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('reframing')">
+          <h4>Positive Reframing</h4>
+          <p>Practice finding different perspectives in challenging situations</p>
+          <span class="challenge-status" id="reframing-status"></span>
+        </div>
+        
+        <div class="challenge-card" onclick="startChallenge('connection')">
+          <h4>Connection Building</h4>
+          <p>Strengthen your support network and emotional connections</p>
+          <span class="challenge-status" id="connection-status"></span>
+        </div>
+      </div>
+      
+      <button class="btn btn-success mt-3" onclick="window.location.href='quizzes.html'">Back to Quizzes</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:5000/api";
+    const token = localStorage.getItem("token");
+    let currentUserId = null;
+
+    // Get user-specific localStorage key
+    function getUserSpecificKey(baseKey) {
+      return currentUserId ? `${baseKey}_${currentUserId}` : `${baseKey}_guest`;
+    }
+
+    // Initialize user context
+    async function initializeUserContext() {
+      if (token) {
+        try {
+          const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const user = await res.json();
+            currentUserId = user.id || user._id;
+          }
+        } catch (error) {
+          console.error("Error getting user context:", error);
+          currentUserId = 'guest';
+        }
+      } else {
+        currentUserId = 'guest';
+      }
+    }
+
+    // Complete challenge details
+    const challengeDetails = {
+      selfcompassion: {
+        title: "Self-Compassion Practice",
+        description: "Learn to treat yourself with the same kindness you show others.",
+        steps: [
+          "Place your hand on your heart and take three deep breaths",
+          "Think of a recent mistake or difficult moment you experienced",
+          "Notice any harsh self-criticism that arises",
+          "Now imagine what you would say to a good friend in the same situation",
+          "Speak those same compassionate words to yourself",
+          "Remind yourself: 'I am human, and all humans struggle sometimes'",
+          "End by saying: 'May I be kind to myself in this moment'"
+        ]
+      },
+      emotionalcheck: {
+        title: "Daily Emotional Check-In",
+        description: "Build awareness of your emotions throughout the day.",
+        steps: [
+          "Set 3 gentle reminders on your phone throughout the day",
+          "When the reminder goes off, pause what you're doing",
+          "Ask yourself: 'How am I feeling right now?'",
+          "Name the emotion without trying to change it",
+          "Notice where you feel this emotion in your body",
+          "Take three conscious breaths",
+          "Thank yourself for taking time to check in"
+        ]
+      },
+      reframing: {
+        title: "Positive Reframing Challenge",
+        description: "Practice finding different perspectives in challenging situations.",
+        steps: [
+          "Think of a current challenge or frustration",
+          "Write down your initial negative thoughts about it",
+          "Ask: 'What could I learn from this situation?'",
+          "Ask: 'How might this help me grow stronger?'",
+          "Ask: 'What would I tell a friend facing this same challenge?'",
+          "Write down at least one alternative, more balanced perspective",
+          "Practice using this new perspective when the challenge arises"
+        ]
+      },
+      connection: {
+        title: "Connection Building Challenge",
+        description: "Strengthen your support network and emotional connections.",
+        steps: [
+          "Think of someone who makes you feel understood and cared for",
+          "Send them a message expressing gratitude for their presence in your life",
+          "Share one thing you're currently experiencing (joy, challenge, or growth)",
+          "Ask them how they're doing and really listen to their response",
+          "If possible, schedule a time to connect in person or video chat",
+          "Practice being vulnerable by sharing something meaningful",
+          "Notice how connection affects your emotional well-being"
+        ]
+      }
+    };
+
+    function submitQuiz() {
+      // Check if first 5 questions are answered
+      for (let i = 1; i <= 5; i++) {
+        if (!document.querySelector(`input[name="q${i}"]:checked`)) {
+          alert("Please answer all questions!");
+          return;
+        }
+      }
+
+      // Get answers for personalized response
+      const cheer = document.querySelector('input[name="q1"]:checked').value;
+      const comfort = document.querySelector('input[name="q2"]:checked').value;
+      const sadness = document.querySelector('input[name="q3"]:checked').value;
+      const reminder = document.querySelector('input[name="q4"]:checked').value;
+      const kindness = document.querySelector('input[name="q5"]:checked').value;
+      const sadnessText = document.getElementById('sadnessSituation').value;
+
+      // Generate personalized quote and profile
+      let quote = getPersonalizedQuote(sadness, reminder);
+      let profile = generateSadnessProfile(cheer, comfort, sadness, reminder, kindness);
+
+      // Show result
+      document.getElementById("quizSection").style.display = "none";
+      document.getElementById("resultSection").style.display = "block";
+      document.getElementById("quote").innerHTML = quote;
+      document.getElementById("sadnessProfile").innerHTML = profile;
+      
+      // Load challenge statuses for this user
+      loadChallengeStatuses();
+
+      // Record the quiz completion for this specific user
+      recordUserAssessment('Sad', {
+        cheer, comfort, sadness, reminder, kindness, sadnessText
+      });
+    }
+
+    function getPersonalizedQuote(sadness, reminder) {
+      const quotes = {
+        misunderstood: {
+          pass: "Being misunderstood is temporary, but your authentic self is permanent and valuable.",
+          strength: "You've overcome misunderstanding before. Your strength shines through communication.",
+          care: "Even when misunderstood, you are deeply valued by those who truly see you.",
+          progress: "Every conversation is a step toward being better understood. Keep sharing your truth."
+        },
+        missing: {
+          pass: "Missing someone shows the depth of your love. That love remains even across distance.",
+          strength: "You've carried love through separation before. Your heart knows how to hold connection.",
+          care: "The person you miss cares for you too, even when apart. Love transcends physical distance.",
+          progress: "Every day of missing someone is a step toward reunion or deeper appreciation."
+        },
+        empathy: {
+          pass: "Your empathy is a gift, even when it brings temporary sadness. Compassion heals worlds.",
+          strength: "Your ability to feel others' pain shows incredible emotional strength and wisdom.",
+          care: "Your empathy creates ripples of healing. You make the world more compassionate.",
+          progress: "Each moment of empathy, even painful ones, builds a more connected and caring world."
+        },
+        expectations: {
+          pass: "Disappointment from expectations teaches us about boundaries and realistic hope.",
+          strength: "You've learned from unmet expectations before. Wisdom comes from recalibrating hopes.",
+          care: "Even when people don't meet expectations, your worth isn't determined by their actions.",
+          progress: "Adjusting expectations is progress toward healthier relationships and inner peace."
+        }
+      };
+      return quotes[sadness][reminder] || "Believe in yourself and all that you are. Every emotion you feel makes you beautifully human. 💪";
+    }
+
+    function generateSadnessProfile(cheer, comfort, sadness, reminder, kindness) {
+      let profile = `<div style="text-align: left; margin: 20px 0;">`;
+      profile += `<h4>Your Emotional Profile:</h4>`;
+      profile += `<p><strong>Quick Mood Booster:</strong> ${cheer.charAt(0).toUpperCase() + cheer.slice(1)}</p>`;
+      profile += `<p><strong>Comfort Style:</strong> ${comfort.charAt(0).toUpperCase() + comfort.slice(1)}</p>`;
+      profile += `<p><strong>Emotional Trigger:</strong> ${sadness.charAt(0).toUpperCase() + sadness.slice(1)}</p>`;
+      profile += `<p><strong>Healing Reminder:</strong> ${reminder.charAt(0).toUpperCase() + reminder.slice(1)}</p>`;
+      profile += `<p><strong>Kindness Response:</strong> ${kindness.charAt(0).toUpperCase() + kindness.slice(1)}</p>`;
+      profile += `</div>`;
+      return profile;
+    }
+
+    // Load user-specific challenge statuses
+    async function loadChallengeStatuses() {
+      const challenges = ['selfcompassion', 'emotionalcheck', 'reframing', 'connection'];
+      
+      if (token) {
+        // If logged in, get user-specific challenge completions from database
+        try {
+          const response = await fetch(`${API_BASE}/progress/all-challenge-completions`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (response.ok) {
+            const userCompletions = await response.json();
+            challenges.forEach(challenge => {
+              const isCompleted = userCompletions.some(c => 
+                c.mood === 'sad' && c.challenge === challenge
+              );
+              const statusElement = document.getElementById(`${challenge}-status`);
+              if (isCompleted) {
+                statusElement.textContent = '✅ Completed';
+                statusElement.parentElement.classList.add('challenge-completed');
+              } else {
+                statusElement.textContent = 'Try this challenge';
+              }
+            });
+            return;
+          }
+        } catch (error) {
+          console.log("Failed to load from database, using localStorage");
+        }
+      }
+      
+      // Fallback to user-specific localStorage
+      if (currentUserId) {
+        const userChallengesKey = getUserSpecificKey("completedChallenges");
+        const completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+        
+        challenges.forEach(challenge => {
+          const isCompleted = completedChallenges.some(c => 
+            c.mood === 'sad' && c.challenge === challenge
+          );
+          const statusElement = document.getElementById(`${challenge}-status`);
+          if (isCompleted) {
+            statusElement.textContent = '✅ Completed';
+            statusElement.parentElement.classList.add('challenge-completed');
+          } else {
+            statusElement.textContent = 'Try this challenge';
+          }
+        });
+      }
+    }
+
+    // Start challenge function
+    async function startChallenge(challengeType) {
+      const challenge = challengeDetails[challengeType];
+      if (!challenge) return;
+
+      // Create modal HTML
+      const modalHTML = `
+        <div class="challenge-modal" id="challengeModal">
+          <div class="challenge-modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3>${challenge.title}</h3>
+            <p>${challenge.description}</p>
+            <div class="steps-container">
+              ${challenge.steps.map((step, index) => `
+                <div class="step-item">
+                  <strong>Step ${index + 1}:</strong> ${step}
+                </div>
+              `).join('')}
+            </div>
+            <button class="btn btn-success" onclick="completeUserChallenge('${challengeType}')">
+              Mark Challenge Complete
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Add modal to body if it doesn't exist
+      const existingModal = document.getElementById('challengeModal');
+      if (existingModal) existingModal.remove();
+      
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      document.getElementById('challengeModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('challengeModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    // Complete challenge for the current user
+    async function completeUserChallenge(challengeType) {
+      try {
+        if (token) {
+          // Save to database for logged-in user
+          const response = await fetch(`${API_BASE}/progress/complete-challenge`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ 
+              mood: 'sad', 
+              challenge: challengeType 
+            }),
+          });
+
+          if (response.ok) {
+            console.log("Challenge completion saved for user");
+          }
+        }
+        
+        // Also save to user-specific localStorage
+        if (currentUserId) {
+          const userChallengesKey = getUserSpecificKey("completedChallenges");
+          let completedChallenges = JSON.parse(localStorage.getItem(userChallengesKey) || "[]");
+          const newCompletion = {
+            mood: 'sad',
+            challenge: challengeType,
+            time: new Date().toISOString(),
+            userId: currentUserId
+          };
+          completedChallenges.push(newCompletion);
+          localStorage.setItem(userChallengesKey, JSON.stringify(completedChallenges));
+        }
+
+        // Update UI
+        const statusElement = document.getElementById(`${challengeType}-status`);
+        if (statusElement) {
+          statusElement.textContent = '✅ Completed';
+          statusElement.parentElement.classList.add('challenge-completed');
+        }
+
+        closeModal();
+        alert(`Excellent! You've completed the ${challengeDetails[challengeType].title}!`);
+
+        // Call parent function if available (for integration with quizzes.html)
+        if (typeof window.parent.completeChallenge === 'function') {
+          window.parent.completeChallenge('sad', challengeType);
+        }
+
+      } catch (error) {
+        console.error("Error completing challenge:", error);
+        alert("Challenge completed locally!");
+      }
+    }
+
+    // Record user-specific assessment
+    async function recordUserAssessment(mood, assessmentData) {
+      try {
+        if (token) {
+          // Save to database for logged-in user
+          await fetch(`${API_BASE}/progress/assessment`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ 
+              mood: mood.toLowerCase(), 
+              type: 'assessment',
+              data: assessmentData
+            }),
+          });
+        }
+
+        // Save to user-specific localStorage
+        if (currentUserId) {
+          const userProgressKey = getUserSpecificKey("progress");
+          let progress = JSON.parse(localStorage.getItem(userProgressKey) || "[]");
+          let today = new Date();
+          let newEntry = {
+            mood: mood,
+            date: today.toLocaleDateString(),
+            time: today.toLocaleTimeString(),
+            userId: currentUserId
+          };
+          progress.push(newEntry);
+          localStorage.setItem(userProgressKey, JSON.stringify(progress));
+        }
+
+        // Call parent function if available (from quizzes.html)
+        if (typeof window.parent.saveMoodAssessment === 'function') {
+          window.parent.saveMoodAssessment(mood);
+        } else if (typeof saveMoodAssessment === 'function') {
+          saveMoodAssessment(mood);
+        }
+      } catch (error) {
+        console.error("Error recording assessment:", error);
+      }
+    }
+
+    // Click outside modal to close
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('challengeModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    // Initialize on page load
+    document.addEventListener("DOMContentLoaded", async () => {
+      await initializeUserContext();
+    });
+  </script>
+</body>
+</html>

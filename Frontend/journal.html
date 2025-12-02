@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FeelWise • Journal</title>
+  <meta name="description" content="FeelWise Journal — reflect daily, analyze mood, and track progress." />
+  <link rel="stylesheet" href="journal.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js for mood trend -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <noscript>
+    <div class="noscript">This page needs JavaScript for journaling, AI analysis, and charts. Please enable JavaScript.</div>
+  </noscript>
+
+  <!-- ====== App Header ====== -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">📝</span>
+        <h1 class="brand-title">FeelWise Journal</h1>
+      </div>
+      <div class="header-meta">
+        <span id="todayDate" class="meta-chip" title="Today"></span>
+        <span id="streakChip" class="meta-chip" title="Your current streak">🔥 0-day streak</span>
+        <span id="entriesCountChip" class="meta-chip" title="Entries logged">📒 0 entries</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <button id="exportBtn" class="btn ghost" title="Export your journal as JSON/CSV">Export</button>
+      <button id="insightsBtn" class="btn primary" title="View insights & reports">Insights</button>
+    </div>
+  </header>
+
+  <!-- ====== Main Layout ====== -->
+  <main class="layout">
+    <!-- ====== Left: Entry Composer ====== -->
+    <section class="panel entry-panel" aria-labelledby="entryPanelTitle">
+      <div class="panel-header">
+        <h2 id="entryPanelTitle">New Entry</h2>
+        <div class="prompt-tools">
+          <span class="prompt-label">Prompt</span>
+          <button id="newPromptBtn" class="btn chip" title="Show another prompt">↻</button>
+        </div>
+      </div>
+
+      <!-- Smart Prompt -->
+      <div id="promptCard" class="card prompt-card" aria-live="polite" aria-atomic="true">
+        <p id="promptText">What was the best part of your day?</p>
+      </div>
+
+      <!-- Editor Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button id="recordBtn" class="btn" aria-pressed="false" title="Record voice entry">
+            <span class="icon" aria-hidden="true">🎙️</span>
+            <span>Record</span>
+          </button>
+          <input id="audioFile" class="hidden" type="file" accept="audio/*" />
+          <label for="audioFile" class="btn ghost" title="Upload an audio file">Upload Audio</label>
+        </div>
+        <div class="toolbar-right">
+          <div class="mood-tags" role="group" aria-label="Select mood">
+            <button class="tag" data-mood="happy" title="Happy">😊</button>
+            <button class="tag" data-mood="calm" title="Calm">😌</button>
+            <button class="tag" data-mood="neutral" title="Neutral">😐</button>
+            <button class="tag" data-mood="sad" title="Sad">😔</button>
+            <button class="tag" data-mood="angry" title="Angry">😠</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text Editor -->
+      <div class="editor">
+        <textarea id="journalText" rows="10" placeholder="Write freely… You can also start from the prompt above."
+          aria-label="Journal text input"></textarea>
+        <div class="editor-actions">
+          <button id="clearBtn" class="btn ghost">Clear</button>
+          <div class="spacer"></div>
+          <button id="analyzeBtn" class="btn">Analyze</button>
+          <button id="saveBtn" class="btn primary" disabled>Save Entry</button>
+        </div>
+      </div>
+
+      <!-- AI Output / Feedback -->
+      <div class="ai-output-grid">
+        <div class="card ai-card" aria-live="polite">
+          <div class="card-header">
+            <h3>AI Summary</h3>
+            <span id="summaryStatus" class="status-dot" title="Status"></span>
+          </div>
+          <p id="summaryText" class="muted">Your 1–2 line summary will appear here after analysis.</p>
+        </div>
+
+        <div class="card ai-card">
+          <div class="card-header">
+            <h3>Mood & Sentiment</h3>
+            <button id="detailsBtn" class="btn chip" title="View details">Details</button>
+          </div>
+          <div class="sentiment">
+            <div class="sentiment-primary">
+              <span id="dominantMoodEmoji" class="emoji">🙂</span>
+              <div>
+                <div id="dominantMoodText" class="sentiment-label">Neutral</div>
+                <div id="sentimentScoreText" class="muted">Score: –</div>
+              </div>
+            </div>
+            <div class="sentiment-bars" id="moodBars" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="card ai-card">
+          <div class="card-header">
+            <h3>Keywords</h3>
+            <button id="refreshKeywordsBtn" class="btn chip" title="Re-extract">↻</button>
+          </div>
+          <div id="keywordsList" class="keywords"></div>
+        </div>
+
+        <div class="card ai-card suggestion-card">
+          <div class="card-header">
+            <h3>Suggestion</h3>
+          </div>
+          <p id="suggestionText" class="muted">Suggestions appear here based on your mood (e.g., try a short breathing exercise).</p>
+          <div id="suggestionActions" class="suggestion-actions"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== Right: History & Progress ====== -->
+    <aside class="panel history-panel" aria-labelledby="historyPanelTitle">
+      <div class="panel-header">
+        <h2 id="historyPanelTitle">Your Progress</h2>
+        <div class="filters">
+          <select id="rangeSelect" aria-label="Select time range">
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="all">All time</option>
+          </select>
+          <input id="searchInput" type="search" placeholder="Search keywords…" aria-label="Search entries" />
+        </div>
+      </div>
+
+      <!-- Timeline (Horizontal Scroll) -->
+      <div class="card timeline-card">
+        <div class="timeline" id="timelineContainer" aria-live="polite">
+          <!-- Entry chips injected here -->
+        </div>
+      </div>
+
+<!-- Replace your existing canvas element with this fixed version -->
+<div class="card chart-card">
+  <div class="card-header">
+    <h3>Mood Trend</h3>
+  </div>
+  <div style="position: relative; height: 250px; width: 100%;">
+    <canvas 
+      id="moodTrendChart" 
+      width="400" 
+      height="250"
+      style="max-height: 250px !important; height: 250px !important; width: 100% !important;"
+      aria-label="Mood trend line chart" 
+      role="img">
+    </canvas>
+  </div>
+</div>
+
+        <div class="card chart-card">
+          <div class="card-header">
+            <h3>Word Cloud</h3>
+          </div>
+          <div id="wordCloud" class="word-cloud" aria-label="Frequent keywords visualization"></div>
+        </div>
+      </div>
+
+      <!-- Badges -->
+      <div class="card badges-card">
+        <div class="card-header">
+          <h3>Badges</h3>
+        </div>
+        <div id="badgesGrid" class="badges-grid" aria-live="polite">
+          <!-- Badges injected here -->
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ====== Entry Detail Modal ====== -->
+  <dialog id="entryModal" class="modal">
+    <form method="dialog" class="modal-content" aria-labelledby="entryModalTitle">
+      <header class="modal-header">
+        <h3 id="entryModalTitle">Entry Details</h3>
+        <button value="close" class="btn ghost" aria-label="Close">✕</button>
+      </header>
+      <section class="modal-body">
+        <div class="meta-row">
+          <span id="modalDate" class="meta-chip"></span>
+          <span id="modalMood" class="meta-chip"></span>
+        </div>
+        <article id="modalText" class="modal-text"></article>
+        <hr class="divider" />
+        <div>
+          <h4>AI Summary</h4>
+          <p id="modalSummary" class="muted"></p>
+        </div>
+        <div>
+          <h4>Keywords</h4>
+          <div id="modalKeywords" class="keywords"></div>
+        </div>
+      </section>
+      <footer class="modal-footer">
+        <button id="deleteEntryBtn" class="btn danger" type="button">Delete</button>
+        <div class="spacer"></div>
+        <button class="btn" value="close">Close</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ====== Templates ====== -->
+  <template id="timelineItemTemplate">
+    <button class="timeline-item" data-id="">
+      <span class="emoji">🙂</span>
+      <span class="date">2025-08-25</span>
+    </button>
+  </template>
+
+  <template id="badgeTemplate">
+    <div class="badge" title="Badge">
+      <span class="emoji" aria-hidden="true">🏆</span>
+      <div class="label">Milestone</div>
+    </div>
+  </template>
+
+  <!-- ====== Toasts ====== -->
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ====== App Script ====== -->
+  <script defer src="journal.js"></script>
+</body>
+</html>

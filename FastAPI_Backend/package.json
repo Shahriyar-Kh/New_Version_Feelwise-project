@@ -1,0 +1,22 @@
+{
+  "name": "feelwise-text-module",
+  "version": "1.0.0",
+  "description": "Text emotion analysis module with Node.js proxy and FastAPI backend",
+  "main": "main-server.js",
+  "scripts": {
+    "start": "node main-server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dns": "^0.1.2",
+    "dotenv": "^17.2.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.18.0",
+    "mongoose": "^8.18.0",
+    "multer": "^2.0.2",
+    "node-fetch": "^2.6.7"
+  }
+}
