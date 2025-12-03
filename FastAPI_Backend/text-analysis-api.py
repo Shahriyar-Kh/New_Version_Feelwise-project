@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Optional
 import uvicorn
-from analysis_utils import analyze_text  # Use the improved function!
+from analysis_utils import analyze_text_with_context  # Use the improved function!
 
 app = FastAPI()
 
@@ -23,12 +23,13 @@ class AnalysisResponse(BaseModel):
     text: str
     emotion: str
     emotion_distribution: dict
-    sarcasm_detected: Optional[bool] = False  # Add this
+    sentiment: Optional[Dict] = None
+    negation_detected: Optional[bool] = False
+    sarcasm_detected: Optional[bool] = False
 
 @app.post("/analyze", response_model=AnalysisResponse)
 def analyze(request: TextRequest):
-    result = analyze_text(request.text)
-    return result
+    return analyze_text_with_context(request.text)
 
 if __name__ == "__main__":
     uvicorn.run("text-analysis-api:app", host="0.0.0.0", port=8001, reload=True)
