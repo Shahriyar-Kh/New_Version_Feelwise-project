@@ -618,19 +618,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Show a subtle notification that report is available
     const notification = document.createElement("div");
     notification.className = "analysis-complete-notification";
-    notification.style.cssText = `
-      background: #e8f5e8;
-      border: 1px solid #4caf50;
-      color: #2e7d32;
-      padding: 10px 15px;
-      border-radius: 5px;
-      margin-top: 15px;
-      text-align: center;
-      font-size: 14px;
-    `;
-    notification.innerHTML = `
-      ✅ Analysis complete! <a href="assessment-report.html" style="color: #1976d2; text-decoration: underline;">View your detailed assessment report</a>
-    `;
+    
 
     // Remove existing notification if present
     const existingNotification = document.querySelector(
@@ -1094,6 +1082,8 @@ document.addEventListener("DOMContentLoaded", function () {
         date.toLocaleDateString(),
         date.toLocaleTimeString(),
         `"${item.text.replace(/"/g, '""')}"`, // Escape quotes in text
+        // Add space and new
+        
         item.dominantEmotion,
         item.emotions.positive.toFixed(2),
         item.emotions.negative.toFixed(2),
