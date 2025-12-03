@@ -1220,3 +1220,23 @@ document.addEventListener("DOMContentLoaded", function () {
   // Check auth status on load
   checkAuthenticationStatus();
 });
+
+
+ 
+    // Word count functionality - only shows when user types
+    const userInput = document.getElementById('userInput');
+    const wordCountEl = document.getElementById('wordCount');
+
+    userInput.addEventListener('input', function() {
+      const text = this.value.trim();
+      const words = text.split(/\s+/).filter(word => word.length > 0);
+      const wordCount = words.length;
+      
+      if (text.length > 0) {
+        wordCountEl.style.display = 'block';
+        wordCountEl.textContent = `${wordCount} word${wordCount !== 1 ? 's' : ''}`;
+      } else {
+        wordCountEl.style.display = 'none';
+      }
+    });
+  
