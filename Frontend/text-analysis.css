@@ -1128,4 +1128,45 @@ textarea:focus-visible {
     transform: scale(1);
     opacity: 1;
   }
+
+
+}
+
+
+/* Add to text-analysis.css */
+.interpretation-note {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    color: #856404;
+}
+
+.interpretation-note i {
+    margin-right: 8px;
+    color: #ffc107;
+}
+
+.emotion-label {
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+.emotion-label.positive {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.emotion-label.negative {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.emotion-label.neutral {
+    background: #fef3c7;
+    color: #92400e;
 }

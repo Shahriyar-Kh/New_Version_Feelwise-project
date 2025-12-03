@@ -102,61 +102,67 @@ document.addEventListener("DOMContentLoaded", function () {
         '<p class="error">Failed to analyze text. Please try again.</p>';
     }
   }
-
-  function formatAnalysisResults(data) {
-    const emotions = data.emotion_distribution;
+// Update the formatAnalysisResults function
+function formatAnalysisResults(data) {
+    const emotions = data.emotion_distribution || {};
+    const sentiment = data.sentiment || { positive: 0, negative: 0, neutral: 0 };
     const dominantEmotion = data.emotion;
-    const positiveEmotions = ["joy", "love", "surprise"];
-    const negativeEmotions = ["sadness", "anger", "fear"];
-
-    let positivePercent = 0;
-    let negativePercent = 0;
-    let neutralPercent = 0;
-
-    for (const [emotion, percent] of Object.entries(emotions)) {
-      if (positiveEmotions.includes(emotion)) {
-        positivePercent += percent;
-      } else if (negativeEmotions.includes(emotion)) {
-        negativePercent += percent;
-      }
+    const negationDetected = data.negation_detected || false;
+    const sarcasmDetected = data.sarcasm_detected || false;
+    
+    // If sarcasm detected, adjust interpretation
+    let interpretationNote = "";
+    if (sarcasmDetected) {
+        interpretationNote = "Sarcasm detected - results may be inverted";
     }
-
-    const total = positivePercent + negativePercent;
-    neutralPercent = Math.max(0, 100 - total);
-
+    if (negationDetected && dominantEmotion !== "neutral") {
+        interpretationNote += (interpretationNote ? "; " : "") + "Negation detected";
+    }
+    
     return {
-      text: userInput.value.trim(),
-      emotions: {
-        positive: positivePercent,
-        negative: negativePercent,
-        neutral: neutralPercent,
-      },
-      dominantEmotion: dominantEmotion,
-      emotionDetails: emotions,
-      timestamp: new Date().toISOString(),
-      userId: currentUserId,
+        text: userInput.value.trim(),
+        emotions: {
+            positive: sentiment.positive || 0,
+            negative: sentiment.negative || 0,
+            neutral: sentiment.neutral || 0
+        },
+        dominantEmotion: dominantEmotion,
+        emotionDetails: emotions,
+        interpretationNote: interpretationNote,
+        timestamp: new Date().toISOString(),
+        userId: currentUserId,
     };
-  }
+}
 
-  function displayAnalysisResults(results) {
-    let html = `<h3>Dominant Emotion: <span class="emotion-tag ${getEmotionClass(
-      results.dominantEmotion
-    )}">${results.dominantEmotion}</span></h3>`;
+// Update displayAnalysisResults
+function displayAnalysisResults(results) {
+    let html = `<h3>Dominant Emotion: <span class="emotion-tag ${getEmotionClass(results.dominantEmotion)}">${results.dominantEmotion}</span></h3>`;
+    
+    if (results.interpretationNote) {
+        html += `<div class="interpretation-note">
+                    <i class="fas fa-exclamation-triangle"></i> ${results.interpretationNote}
+                 </div>`;
+    }
+    
     html += '<div class="emotion-breakdown">';
-    html += `<p>Positive: ${results.emotions.positive.toFixed(1)}%</p>`;
-    html += `<p>Negative: ${results.emotions.negative.toFixed(1)}%</p>`;
-    html += `<p>Neutral: ${results.emotions.neutral.toFixed(1)}%</p>`;
-    html += "</div>";
-
+    html += `<p><span class="emotion-label positive">Positive:</span> ${results.emotions.positive.toFixed(1)}%</p>`;
+    html += `<p><span class="emotion-label negative">Negative:</span> ${results.emotions.negative.toFixed(1)}%</p>`;
+    html += `<p><span class="emotion-label neutral">Neutral:</span> ${results.emotions.neutral.toFixed(1)}%</p>`;
+    html += '</div>';
+    
     html += '<h4>Detailed Emotion Distribution:</h4><div class="emotion-tags">';
     for (const [emotion, percent] of Object.entries(results.emotionDetails)) {
-      html += `<span class="emotion-tag ${getEmotionClass(
-        emotion
-      )}">${emotion} (${percent.toFixed(1)}%)</span>`;
+        if (percent > 0) { // Only show emotions with > 0%
+            html += `<span class="emotion-tag ${getEmotionClass(emotion)}">
+                        ${emotion} (${percent.toFixed(1)}%)
+                    </span>`;
+        }
     }
-    html += "</div>";
+    html += '</div>';
+    
     emotionResult.innerHTML = html;
-  }
+}
+
 
   function getEmotionClass(emotion) {
     const positiveEmotions = ["joy", "love", "surprise"];
