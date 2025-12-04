@@ -4,1107 +4,868 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FeelWise - Comprehensive Assessment Report</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <link rel="stylesheet" href="fa.css">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="fa.css">
 </head>
 <body>
-    <!-- Top Header -->
+    <!-- Enhanced Header -->
     <header class="site-header">
-    <div class="header-content">
-      <div class="logo-container">
-        <h1 class="logo">
-          <i class="fas fa-brain"></i>
-          FeelWise
-        </h1>
-      </div>
-      <nav class="main-nav">
-      <a href="module.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
-        <a href="progress.html" class="nav-link"><i class="fas fa-history"></i> History</a>
-        <a href="profile.html" class="nav-link"><i class="fas fa-user"></i> Profile</a>
-      </nav>
-    </div>
-  </header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-brain"></i> FeelWise
+            </div>
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link home-btn">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="module.html" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="profile.html" class="nav-link">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
 
-    <!-- Report Container -->
+                <a href="javascript:history.back()" class="nav-link back-btn">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Report Container -->
     <div class="report-container">
+        <!-- Report Header -->
         <div class="report-header">
-            <h1>Comprehensive Emotional Assessment Report</h1>
-            <p id="reportDate">Generated on <span></span></p>
+            <div class="header-animation">
+                <div class="pulse-dot"></div>
+                <h1>Comprehensive Emotional Assessment Report</h1>
+            </div>
+            <p id="reportDate" class="report-date">
+                <i class="fas fa-calendar-alt"></i> Generated on <span></span>
+            </p>
+            
+            <!-- Quick Analysis Buttons -->
+            <div class="quick-analysis-buttons">
+                <a href="text-analysis.html" class="quick-btn text-btn">
+                    <i class="fas fa-keyboard"></i> New Text Analysis
+                </a>
+                <a href="facial-analysis.html" class="quick-btn facial-btn">
+                    <i class="fas fa-smile"></i> New Facial Analysis
+                </a>
+                <a href="speech-analysis.html" class="quick-btn speech-btn">
+                    <i class="fas fa-microphone"></i> New Speech Analysis
+                </a>
+            </div>
+            
+            <!-- Progress Indicator -->
+            <div class="completion-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="completionProgress"></div>
+                </div>
+                <p class="progress-text">Analysis Completeness: <span id="completionPercent">0%</span></p>
+            </div>
         </div>
 
+        <!-- Report Content -->
         <div class="report-content">
-            <!-- Loading State -->
+            <!-- Loading Animation -->
             <div id="loadingState" class="loading">
-                <div class="spinner"></div>
-                <h3>Generating Your Comprehensive Report...</h3>
-                <p>Analyzing your text and facial expression patterns...</p>
+                <div class="loading-animation">
+                    <div class="loader">
+                        <div class="circle"></div>
+                        <div class="circle"></div>
+                        <div class="circle"></div>
+                    </div>
+                    <h3>Generating Your Comprehensive Report</h3>
+                    <p class="loading-subtitle">Analyzing emotional patterns across all modalities...</p>
+                    <div class="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
             </div>
 
             <!-- No Data State -->
             <div id="noDataState" class="no-data" style="display: none;">
-                <h3>No Analysis Data Found</h3>
-                <p>You haven't completed any analyses yet. Start by analyzing your thoughts and facial expressions to generate your personalized report.</p>
-                <div class="action-buttons">
-                    <a href="text-analysis.html" class="action-btn btn-primary">Start Text Analysis</a>
-                    <a href="facial-analysis.html" class="action-btn btn-primary">Start Facial Analysis</a>
+                <div class="no-data-animation">
+                    <i class="fas fa-chart-line"></i>
                 </div>
+                <h3>No Analysis Data Found</h3>
+                <p>Start your emotional wellness journey by analyzing your thoughts, expressions, or voice.</p>
+
             </div>
 
-            <!-- Report Content -->
+            <!-- Report Data -->
             <div id="reportData" style="display: none;">
-                <!-- Analysis Type Tabs -->
+                <!-- Analysis Tabs -->
                 <div class="analysis-tabs">
-                    <button class="tab-button active" onclick="switchTab('overview')">Overview</button>
-                    <button class="tab-button" onclick="switchTab('text')">Text Analysis</button>
-                    <button class="tab-button" onclick="switchTab('facial')">Facial Analysis</button>
-                    <button class="tab-button" onclick="switchTab('comparison')">Comparison</button>
+                    <button class="tab-button active" onclick="switchTab('overview')">
+                        <i class="fas fa-chart-pie"></i> Overview
+                    </button>
+                    <button class="tab-button" onclick="switchTab('text')">
+                        <i class="fas fa-keyboard"></i> Text Analysis
+                    </button>
+                    <button class="tab-button" onclick="switchTab('facial')">
+                        <i class="fas fa-smile"></i> Facial Analysis
+                    </button>
+                    <button class="tab-button" onclick="switchTab('speech')">
+                        <i class="fas fa-microphone"></i> Speech Analysis
+                    </button>
+
                 </div>
 
                 <!-- Overview Tab -->
                 <div id="overviewTab" class="tab-content active">
                     <!-- Summary Stats -->
                     <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Total Text Analyses</h3>
+                        <div class="stat-card" data-aos="fade-up">
+                            <div class="stat-icon">
+                                <i class="fas fa-keyboard"></i>
+                            </div>
+                            <h3>Text Analyses</h3>
                             <p class="stat-number" id="totalTextAnalyses">0</p>
+                            <div class="stat-trend">
+                                <i class="fas fa-arrow-up trend-up"></i>
+                                <span>+12% this month</span>
+                            </div>
                         </div>
-                        <div class="stat-card">
-                            <h3>Total Facial Analyses</h3>
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                            <div class="stat-icon">
+                                <i class="fas fa-smile"></i>
+                            </div>
+                            <h3>Facial Analyses</h3>
                             <p class="stat-number" id="totalFacialAnalyses">0</p>
+                            <div class="stat-trend">
+                                <i class="fas fa-arrow-up trend-up"></i>
+                                <span>+8% this month</span>
+                            </div>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                            <div class="stat-icon">
+                                <i class="fas fa-microphone"></i>
+                            </div>
+                            <h3>Speech Analyses</h3>
+                            <p class="stat-number" id="totalSpeechAnalyses">0</p>
+                            <div class="stat-trend">
+                                <i class="fas fa-arrow-up trend-up"></i>
+                                <span>+15% this month</span>
+                            </div>
+                        </div>
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
                             <h3>Time Period</h3>
                             <p class="stat-number" id="overallTimeRange">0 days</p>
+                            <p class="stat-subtext">of emotional tracking</p>
                         </div>
-                        <div class="stat-card">
-                            <h3>Overall Dominant Emotion</h3>
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+                            <div class="stat-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <h3>Dominant Emotion</h3>
                             <p class="stat-number" id="overallDominantEmotion">-</p>
+                            <div class="emotion-badge" id="dominantEmotionBadge"></div>
                         </div>
                     </div>
 
                     <!-- Overall Emotional Distribution -->
-                    <div class="emotion-distribution">
-                        <h2 class="section-title">Overall Emotional Distribution</h2>
-                        <div class="emotion-circles">
-                            <div class="emotion-circle">
-                                <div class="circle positive" id="overallPositiveCircle">0%</div>
-                                <p><strong>Positive</strong></p>
+                    <div class="section-card" data-aos="fade-up">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-chart-pie"></i> Overall Emotional Distribution
+                            </h2>
+                            <button class="section-action" onclick="generateDistributionChart()">
+                                <i class="fas fa-expand-alt"></i> View Detailed Chart
+                            </button>
+                        </div>
+                        <div class="emotion-distribution">
+                            <div class="distribution-chart">
+                                <canvas id="overallEmotionChart"></canvas>
                             </div>
-                            <div class="emotion-circle">
-                                <div class="circle negative" id="overallNegativeCircle">0%</div>
-                                <p><strong>Negative</strong></p>
-                            </div>
-                            <div class="emotion-circle">
-                                <div class="circle neutral" id="overallNeutralCircle">0%</div>
-                                <p><strong>Neutral</strong></p>
+                            <div class="emotion-breakdown">
+                                <div class="emotion-item positive">
+                                    <div class="emotion-bar">
+                                        <div class="bar-fill" id="positiveBar"></div>
+                                    </div>
+                                    <div class="emotion-info">
+                                        <span class="emotion-label">Positive</span>
+                                        <span class="emotion-percent" id="overallPositivePercent">0%</span>
+                                    </div>
+                                </div>
+                                <div class="emotion-item negative">
+                                    <div class="emotion-bar">
+                                        <div class="bar-fill" id="negativeBar"></div>
+                                    </div>
+                                    <div class="emotion-info">
+                                        <span class="emotion-label">Negative</span>
+                                        <span class="emotion-percent" id="overallNegativePercent">0%</span>
+                                    </div>
+                                </div>
+                                <div class="emotion-item neutral">
+                                    <div class="emotion-bar">
+                                        <div class="bar-fill" id="neutralBar"></div>
+                                    </div>
+                                    <div class="emotion-info">
+                                        <span class="emotion-label">Neutral</span>
+                                        <span class="emotion-percent" id="overallNeutralPercent">0%</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Cross-Analysis Insights -->
-                    <div class="correlation-insights">
-                        <h4>Cross-Analysis Insights</h4>
-                        <div id="correlationInsights"></div>
+                    <!-- Multi-Modal Insights -->
+                    <div class="section-card insights-card" data-aos="fade-up">
+                        <h2 class="section-title">
+                            <i class="fas fa-lightbulb"></i> Cross-Modal Insights
+                        </h2>
+                        <div class="insights-grid" id="correlationInsights">
+                            <!-- Insights will be populated here -->
+                        </div>
                     </div>
 
-                    <!-- Combined Recommendations -->
-                    <div class="recommendations-section">
-                        <h2 class="section-title">Personalized Recommendations</h2>
-                        <div id="combinedRecommendations"></div>
+                    <!-- Recommendations -->
+                    <div class="section-card recommendations-card" data-aos="fade-up">
+                        <h2 class="section-title">
+                            <i class="fas fa-hands-helping"></i> Personalized Recommendations
+                        </h2>
+                        <div class="recommendations-grid" id="combinedRecommendations">
+                            <!-- Recommendations will be populated here -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- Text Analysis Tab -->
                 <div id="textTab" class="tab-content">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Text Analyses</h3>
-                            <p class="stat-number" id="textAnalysesCount">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Text Period</h3>
-                            <p class="stat-number" id="textTimeRange">0 days</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Text Dominant Emotion</h3>
-                            <p class="stat-number" id="textDominantEmotion">-</p>
-                        </div>
-                    </div>
-
-                    <div class="emotion-distribution">
-                        <h2 class="section-title">Text Emotional Distribution</h2>
-                        <div class="emotion-circles">
-                            <div class="emotion-circle">
-                                <div class="circle positive" id="textPositiveCircle">0%</div>
-                                <p><strong>Positive</strong></p>
+                    <!-- Text Analysis Header -->
+                    <div class="tab-header">
+                        <div class="tab-header-content">
+                            <div class="tab-title">
+                                <div class="tab-icon">
+                                    <i class="fas fa-keyboard"></i>
+                                </div>
+                                <div>
+                                    <h2>Text Analysis Report</h2>
+                                    <p class="tab-subtitle">Detailed analysis of your written emotional expressions</p>
+                                </div>
                             </div>
-                            <div class="emotion-circle">
-                                <div class="circle negative" id="textNegativeCircle">0%</div>
-                                <p><strong>Negative</strong></p>
-                            </div>
-                            <div class="emotion-circle">
-                                <div class="circle neutral" id="textNeutralCircle">0%</div>
-                                <p><strong>Neutral</strong></p>
+                            <div class="tab-summary-stats">
+                                <div class="summary-stat">
+                                    <span class="stat-label">Total Analyses</span>
+                                    <span class="stat-value" id="textTotalAnalyses">0</span>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="stat-label">Period</span>
+                                    <span class="stat-value" id="textPeriod">0 days</span>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="stat-label">Dominant Emotion</span>
+                                    <div class="emotion-tag" id="textDominantTag">-</div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="trends-section">
-                        <h2 class="section-title">Text Emotion Frequency</h2>
-                        <div class="trends-grid" id="textEmotionTrends"></div>
+                    <!-- Text Stats Grid -->
+                    <div class="detailed-stats-grid">
+                        <div class="detailed-stat-card">
+                            <div class="stat-header">
+                                <i class="fas fa-chart-bar"></i>
+                                <h3>Emotion Distribution</h3>
+                            </div>
+                            <div class="stat-content">
+                                <div class="emotion-progress">
+                                    <div class="progress-item positive">
+                                        <span class="emotion-label">Positive</span>
+                                        <div class="progress-container">
+                                            <div class="progress-fill" id="textPositiveProgress"></div>
+                                            <span class="progress-percent" id="textPositivePercent">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress-item negative">
+                                        <span class="emotion-label">Negative</span>
+                                        <div class="progress-container">
+                                            <div class="progress-fill" id="textNegativeProgress"></div>
+                                            <span class="progress-percent" id="textNegativePercent">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress-item neutral">
+                                        <span class="emotion-label">Neutral</span>
+                                        <div class="progress-container">
+                                            <div class="progress-fill" id="textNeutralProgress"></div>
+                                            <span class="progress-percent" id="textNeutralPercent">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detailed-stat-card">
+                            <div class="stat-header">
+                                <i class="fas fa-history"></i>
+                                <h3>Recent Trends</h3>
+                            </div>
+                            <div class="stat-content">
+                                <div class="trends-container">
+                                    <div class="trend-item">
+                                        <span class="trend-label">Weekly Average</span>
+                                        <span class="trend-value" id="textWeeklyAvg">-</span>
+                                    </div>
+                                    <div class="trend-item">
+                                        <span class="trend-label">Monthly Trend</span>
+                                        <span class="trend-value positive" id="textMonthlyTrend">Stable</span>
+                                    </div>
+                                    <div class="trend-item">
+                                        <span class="trend-label">Consistency</span>
+                                        <span class="trend-value" id="textConsistency">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detailed-stat-card">
+                            <div class="stat-header">
+                                <i class="fas fa-heartbeat"></i>
+                                <h3>Emotion Insights</h3>
+                            </div>
+                            <div class="stat-content">
+                                <div class="insights-container" id="textInsights">
+                                    <div class="insight-item">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Start analyzing to get insights</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="recent-analyses">
-                        <h2 class="section-title">Recent Text Analyses</h2>
-                        <div id="recentTextAnalyses"></div>
+                    <!-- Text Charts Section -->
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-pie"></i> Emotion Frequency Distribution</h3>
+
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="textEmotionChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-line"></i> Sentiment Timeline</h3>
+
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="textTimelineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Word Cloud & Topics -->
+                    <div class="text-analysis-section">
+                        <div class="section-card">
+                            <h3 class="section-title">
+                                <i class="fas fa-cloud"></i> Common Themes & Topics
+                            </h3>
+                            <div class="word-cloud-container" id="textWordCloud">
+                                <div class="no-data-message">
+                                    <i class="fas fa-comments"></i>
+                                    <p>Word cloud will appear after multiple text analyses</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Text Analyses History -->
+                    <div class="history-section">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-history"></i> Text Analysis History
+                            </h3>
+
+                        </div>
+                        
+                        <div class="history-table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Emotion</th>
+                                        <th>Preview</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody id="textHistoryTable">
+                                    <!-- History rows will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination" id="textPagination">
+                            <!-- Pagination will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Text-Specific Recommendations -->
+                    <div class="recommendations-section">
+                        <div class="section-card">
+                            <h3 class="section-title">
+                                <i class="fas fa-lightbulb"></i> Text Analysis Recommendations
+                            </h3>
+                            <div class="recommendations-list" id="textRecommendations">
+                                <!-- Recommendations will be populated here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Facial Analysis Tab -->
                 <div id="facialTab" class="tab-content">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Facial Analyses</h3>
-                            <p class="stat-number" id="facialAnalysesCount">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Facial Period</h3>
-                            <p class="stat-number" id="facialTimeRange">0 days</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Facial Dominant Emotion</h3>
-                            <p class="stat-number" id="facialDominantEmotion">-</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Average Confidence</h3>
-                            <p class="stat-number" id="averageConfidence">0%</p>
-                        </div>
-                    </div>
-
-                    <div class="emotion-distribution">
-                        <h2 class="section-title">Facial Emotional Distribution</h2>
-                        <div class="emotion-circles">
-                            <div class="emotion-circle">
-                                <div class="circle positive" id="facialPositiveCircle">0%</div>
-                                <p><strong>Positive</strong></p>
-                            </div>
-                            <div class="emotion-circle">
-                                <div class="circle negative" id="facialNegativeCircle">0%</div>
-                                <p><strong>Negative</strong></p>
-                            </div>
-                            <div class="emotion-circle">
-                                <div class="circle neutral" id="facialNeutralCircle">0%</div>
-                                <p><strong>Neutral</strong></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="trends-section">
-                        <h2 class="section-title">Facial Emotion Frequency</h2>
-                        <div class="trends-grid" id="facialEmotionTrends"></div>
-                    </div>
-
-                    <div class="recent-analyses">
-                        <h2 class="section-title">Recent Facial Analyses</h2>
-                        <div id="recentFacialAnalyses"></div>
-                    </div>
-                </div>
-
-                <!-- Comparison Tab -->
-                <div id="comparisonTab" class="tab-content">
-                    <div class="comparison-section">
-                        <h2 class="comparison-title">Text vs Facial Analysis Comparison</h2>
-                        <div class="comparison-grid">
-                            <div class="analysis-type">
-                                <h4>Text Analysis Emotions</h4>
-                                <div class="chart-container">
-                                    <canvas id="textChart"></canvas>
+                    <!-- Facial Analysis Header -->
+                    <div class="tab-header">
+                        <div class="tab-header-content">
+                            <div class="tab-title">
+                                <div class="tab-icon">
+                                    <i class="fas fa-smile"></i>
+                                </div>
+                                <div>
+                                    <h2>Facial Analysis Report</h2>
+                                    <p class="tab-subtitle">Detailed analysis of your facial emotional expressions</p>
                                 </div>
                             </div>
-                            <div class="analysis-type">
-                                <h4>Facial Analysis Emotions</h4>
-                                <div class="chart-container">
-                                    <canvas id="facialChart"></canvas>
+                            <div class="tab-summary-stats">
+                                <div class="summary-stat">
+                                    <span class="stat-label">Total Analyses</span>
+                                    <span class="stat-value" id="facialTotalAnalyses">0</span>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="stat-label">Avg Confidence</span>
+                                    <span class="stat-value" id="facialAvgConfidence">0%</span>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="stat-label">Dominant Emotion</span>
+                                    <div class="emotion-tag" id="facialDominantTag">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facial Stats Grid -->
+                    <div class="detailed-stats-grid">
+                        <div class="detailed-stat-card">
+                            <div class="stat-header">
+                                <i class="fas fa-chart-pie"></i>
+                                <h3>Emotion Distribution</h3>
+                            </div>
+                            <div class="stat-content">
+                                <div class="emotion-donut-chart">
+                                    <canvas id="facialDonutChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detailed-stat-card">
+                            <div class="stat-header">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>Expression Trends</h3>
+                            </div>
+                            <div class="stat-content">
+                                <div class="trend-indicators">
+                                    <div class="trend-indicator positive">
+                                        <span class="indicator-label">Happiness Frequency</span>
+                                        <div class="indicator-bar">
+                                            <div class="indicator-fill" id="happinessIndicator"></div>
+                                        </div>
+                                        <span class="indicator-value" id="happinessValue">0%</span>
+                                    </div>
+                                    <div class="trend-indicator negative">
+                                        <span class="indicator-label">Sadness Frequency</span>
+                                        <div class="indicator-bar">
+                                            <div class="indicator-fill" id="sadnessIndicator"></div>
+                                        </div>
+                                        <span class="indicator-value" id="sadnessValue">0%</span>
+                                    </div>
+                                    <div class="trend-indicator neutral">
+                                        <span class="indicator-label">Neutral Frequency</span>
+                                        <div class="indicator-bar">
+                                            <div class="indicator-fill" id="neutralIndicator"></div>
+                                        </div>
+                                        <span class="indicator-value" id="neutralValue">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detailed-stat-card">
+                            <div class="stat-header">
+                                <i class="fas fa-brain"></i>
+                                <h3>Analysis Insights</h3>
+                            </div>
+                            <div class="stat-content">
+                                <div class="insights-container" id="facialInsights">
+                                    <div class="insight-item">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Start facial analysis to get insights</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facial Charts Section -->
+                    <div class="charts-section">
+                        <div class="chart-card wide">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-bar"></i> Emotion Intensity Over Time</h3>
+                                <div class="chart-actions">
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="facialIntensityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expression Gallery -->
+                    <div class="gallery-section">
+                        <div class="section-card">
+                            <h3 class="section-title">
+                                <i class="fas fa-images"></i> Recent Expression Analysis
+                            </h3>
+                            <div class="expression-gallery" id="facialGallery">
+                                <div class="gallery-placeholder">
+                                    <i class="fas fa-camera"></i>
+                                    <p>Recent facial analyses will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facial Analysis History -->
+                    <div class="history-section">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-history"></i> Facial Analysis History
+                            </h3>
+                            <div class="history-controls">
+                                <select id="facialHistoryFilter" onchange="filterFacialHistory()">
+                                    <option value="all">All Emotions</option>
+                                    <option value="happy">Happy</option>
+                                    <option value="sad">Sad</option>
+                                    <option value="angry">Angry</option>
+                                    <option value="surprised">Surprised</option>
+                                    <option value="neutral">Neutral</option>
+                                </select>
+                                <div class="date-range">
+                                    <input type="date" id="facialDateFrom" onchange="filterFacialHistory()">
+                                    <span>to</span>
+                                    <input type="date" id="facialDateTo" onchange="filterFacialHistory()">
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="correlation-insights">
-                            <h4>Analysis Correlation</h4>
-                            <div id="comparisonInsights"></div>
+                        <div class="history-cards" id="facialHistoryCards">
+                            <!-- History cards will be populated here -->
+                        </div>
+                        
+                        <div class="pagination" id="facialPagination">
+                            <!-- Pagination will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Facial-Specific Recommendations -->
+                    <div class="recommendations-section">
+                        <div class="section-card">
+                            <h3 class="section-title">
+                                <i class="fas fa-lightbulb"></i> Facial Expression Recommendations
+                            </h3>
+                            <div class="recommendations-grid" id="facialRecommendations">
+                                <!-- Recommendations will be populated here -->
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Speech Analysis Tab -->
+                <div id="speechTab" class="tab-content">
+                    <!-- Speech Analysis Header -->
+                    <div class="tab-header">
+                        <div class="tab-header-content">
+                            <div class="tab-title">
+                                <div class="tab-icon">
+                                    <i class="fas fa-microphone"></i>
+                                </div>
+                                <div>
+                                    <h2>Speech Analysis Report</h2>
+                                    <p class="tab-subtitle">Detailed analysis of your vocal emotional expressions</p>
+                                </div>
+                            </div>
+                            <div class="tab-summary-stats">
+                                <div class="summary-stat">
+                                    <span class="stat-label">Total Analyses</span>
+                                    <span class="stat-value" id="speechTotalAnalyses">0</span>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="stat-label">Avg Confidence</span>
+                                    <span class="stat-value" id="speechAvgConfidence">0%</span>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="stat-label">Dominant Emotion</span>
+                                    <div class="emotion-tag" id="speechDominantTag">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speech Stats Grid -->
+                    <div class="detailed-stats-grid">
+                        <div class="detailed-stat-card">
+                            <div class="stat-header">
+                                <i class="fas fa-chart-pie"></i>
+                                <h3>Vocal Emotion Distribution</h3>
+                            </div>
+                            <div class="stat-content">
+                                <div class="radar-chart-container">
+                                    <canvas id="speechRadarChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detailed-stat-card">
+                            <div class="stat-header">
+                                <i class="fas fa-wave-square"></i>
+                                <h3>Voice Characteristics</h3>
+                            </div>
+                            <div class="stat-content">
+                                <div class="voice-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Pitch Variation</span>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" id="pitchVariation"></div>
+                                        </div>
+                                        <span class="metric-value" id="pitchValue">Medium</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Speech Rate</span>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" id="speechRate"></div>
+                                        </div>
+                                        <span class="metric-value" id="rateValue">Normal</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Volume Stability</span>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" id="volumeStability"></div>
+                                        </div>
+                                        <span class="metric-value" id="volumeValue">Stable</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detailed-stat-card">
+                            <div class="stat-header">
+                                <i class="fas fa-comments"></i>
+                                <h3>Speech Patterns</h3>
+                            </div>
+                            <div class="stat-content">
+                                <div class="patterns-container" id="speechPatterns">
+                                    <div class="pattern-item">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>No speech patterns detected yet</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speech Charts Section -->
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-bar"></i> Emotion Frequency</h3>
+                       
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="speechBarChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-line"></i> Confidence Trend</h3>
+                    
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="speechConfidenceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transcription Samples -->
+                    <div class="transcription-section">
+                        <div class="section-card">
+                            <h3 class="section-title">
+                                <i class="fas fa-file-alt"></i> Recent Transcripts
+                            </h3>
+                            <div class="transcripts-container" id="speechTranscripts">
+                                <div class="no-transcripts">
+                                    <i class="fas fa-microphone-alt"></i>
+                                    <p>No speech transcripts available yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speech Analysis History -->
+                    <div class="history-section">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-history"></i> Speech Analysis History
+                            </h3>
+        
+                        </div>
+                        
+                        <div class="history-table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Duration</th>
+                                        <th>Emotion</th>
+
+                                        <th>Transcript Preview</th>
+                                       
+                                    </tr>
+                                </thead>
+                                <tbody id="speechHistoryTable">
+                                    <!-- History rows will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination" id="speechPagination">
+                            <!-- Pagination will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Speech-Specific Recommendations -->
+                    <div class="recommendations-section">
+                        <div class="section-card">
+                            <h3 class="section-title">
+                                <i class="fas fa-lightbulb"></i> Voice & Speech Recommendations
+                            </h3>
+                            <div class="recommendations-list" id="speechRecommendations">
+                                <!-- Recommendations will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons" id="actionButtons" style="display: none;">
-            <button onclick="window.print()" class="action-btn btn-primary">Print Report</button>
-            <button onclick="exportCombinedReport()" class="action-btn btn-secondary">Export Combined Data</button>
-            <button onclick="exportTextReport()" class="action-btn btn-secondary">Export Text Data</button>
-            <button onclick="exportFacialReport()" class="action-btn btn-secondary">Export Facial Data</button>
-            <a href="text-analysis.html" class="action-btn btn-secondary">New Text Analysis</a>
-            <a href="facial-analysis.html" class="action-btn btn-secondary">New Facial Analysis</a>
+<!-- Action Buttons -->
+<div class="action-buttons" id="actionButtons" style="display: none;">
+    <div class="btn-group-primary">
+        <button onclick="window.print()" class="action-btn btn-primary">
+            <i class="fas fa-print"></i> Print Report
+        </button>
+        <button onclick="exportCombinedPDF()" class="action-btn btn-primary">
+            <i class="fas fa-file-pdf"></i> Export Full PDF
+        </button>
+    </div>
+    <div class="btn-group-secondary">
+        <button onclick="exportTextPDF()" class="action-btn btn-secondary">
+            <i class="fas fa-keyboard"></i> Text Report PDF
+        </button>
+        <button onclick="exportFacialPDF()" class="action-btn btn-secondary">
+            <i class="fas fa-smile"></i> Facial Report PDF
+        </button>
+        <button onclick="exportSpeechPDF()" class="action-btn btn-secondary">
+            <i class="fas fa-microphone"></i> Speech Report PDF
+        </button>
+    </div>
+    <div class="btn-group-tertiary">
+        <a href="progress.html" class="action-btn btn-tertiary">
+            <i class="fas fa-history"></i> History
+        </a>
+    </div>
+</div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-brain"></i> FeelWise</h3>
+                <p>Your emotional intelligence companion. Track, understand, and improve your emotional well-being.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Analysis Modules</h4>
+                <a href="text-analysis.html">Text Analysis</a>
+                <a href="facial-analysis.html">Facial Analysis</a>
+                <a href="speech-analysis.html">Speech Analysis</a>
+                <a href="full_assessment.html">Comprehensive Report</a>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <a href="insights.html">Emotional Insights</a>
+                <a href="exercises.html">Wellness Exercises</a>
+                <a href="articles.html">Articles</a>
+                <a href="faq.html">FAQ</a>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <a href="contact.html">Contact Us</a>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
+                <a href="help.html">Help Center</a>
+            </div>
         </div>
-    </div>
-    <br>
-    <br>
-      <footer class="site-footer">
-    <div class="footer-content">
-      <div class="footer-section">
-        <h3>FeelWise</h3>
-        <p>Understanding emotions through AI-powered analysis</p>
-      </div>
-      <div class="footer-section">
-        <h4>Resources</h4>
-        <a href="#">Blog</a>
-        <a href="#">Guides</a>
-        <a href="#">Support</a>
-      </div>
-      <div class="footer-section">
-        <h4>Company</h4>
-        <a href="#">About Us</a>
-        <a href="#">Careers</a>
-        <a href="#">Contact</a>
-      </div>
-      <div class="footer-section">
-        <h4>Connect</h4>
-        <div class="social-links">
-          <a href="#"><i class="fab fa-twitter"></i></a>
-          <a href="#"><i class="fab fa-facebook"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-linkedin"></i></a>
+        <div class="footer-bottom">
+            <p>&copy; 2025 FeelWise. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="sitemap.html">Sitemap</a>
+                <a href="cookies.html">Cookie Policy</a>
+                <a href="accessibility.html">Accessibility</a>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2023 FeelWise. All rights reserved.</p>
-      <div class="footer-links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Cookie Policy</a>
-      </div>
-    </div>
-  </footer>
+    </footer>
+
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-
+    <!-- Custom Scripts -->
+    <script src="full_assessment_updated.js"></script>
+    
     <script>
-        const API_BASE = "http://localhost:5000/api";
-        const token = localStorage.getItem("token");
-        let currentUserId = null;
-        let textChart, facialChart;
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', async function() {
-            document.getElementById('reportDate').querySelector('span').textContent = 
-                new Date().toLocaleDateString() + ' at ' + new Date().toLocaleTimeString();
-
-            await initializeUserContext();
-            await loadComprehensiveAssessmentReport();
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 100
+            });
         });
-
-        // Initialize user context
-        async function initializeUserContext() {
-            if (token) {
-                try {
-                    const res = await fetch(`${API_BASE}/auth/me`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    if (res.ok) {
-                        const user = await res.json();
-                        currentUserId = user.id || user._id;
-                    }
-                } catch (error) {
-                    console.error("Error getting user context:", error);
-                    currentUserId = "guest";
-                }
-            } else {
-                currentUserId = "guest";
-            }
-        }
-
-        // Get user-specific localStorage key
-        function getUserSpecificKey(baseKey) {
-            return currentUserId ? `${baseKey}_${currentUserId}` : `${baseKey}_guest`;
-        }
-
-        // Switch tabs
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName + 'Tab').classList.add('active');
-            
-            // Add active class to clicked button
-            event.target.classList.add('active');
-        }
-
-        // Load comprehensive assessment report
-        async function loadComprehensiveAssessmentReport() {
-            try {
-                // Load both text and facial analysis data
-                const textData = await loadAnalysisData('text');
-                const facialData = await loadAnalysisData('facial');
-
-                if (textData.length === 0 && facialData.length === 0) {
-                    showNoDataState();
-                    return;
-                }
-
-                // Generate comprehensive report
-                const reportData = generateComprehensiveReport(textData, facialData);
-                displayComprehensiveReport(reportData);
-
-            } catch (error) {
-                console.error('Error loading comprehensive assessment report:', error);
-                showNoDataState();
-            }
-        }
-
-        // Load analysis data (text or facial)
-        async function loadAnalysisData(type) {
-            let analyses = [];
-            const historyKey = type === 'text' ? 'emotionHistory' : 'facialAnalysisHistory';
-            const apiEndpoint = type === 'text' ? 'text-analysis' : 'facial-analysis';
-            
-            // Try backend first if logged in
-            if (token && currentUserId !== "guest") {
-                try {
-                    const res = await fetch(`${API_BASE}/${apiEndpoint}/history`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (res.ok) {
-                        analyses = await res.json();
-                    }
-                } catch (error) {
-                    console.log(`Failed to load ${type} analysis from backend, using localStorage`);
-                }
-            }
-
-            // Fallback to localStorage
-            if (analyses.length === 0) {
-                const userHistoryKey = getUserSpecificKey(historyKey);
-                analyses = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
-            }
-
-            return analyses;
-        }
-
-        // Generate comprehensive report
-        function generateComprehensiveReport(textData, facialData) {
-            const now = new Date();
-            
-            // Calculate time ranges
-            const allTimestamps = [
-                ...textData.map(d => new Date(d.timestamp)),
-                ...facialData.map(d => new Date(d.timestamp))
-            ];
-            
-            const oldestAnalysis = allTimestamps.length > 0 ? new Date(Math.min(...allTimestamps)) : now;
-            const daysDiff = Math.ceil((now - oldestAnalysis) / (1000 * 60 * 60 * 24));
-
-            // Process text data
-            const textReport = textData.length > 0 ? generateReportData(textData) : null;
-            
-            // Process facial data
-            const facialReport = generateFacialReportData(facialData);
-
-            // Calculate overall statistics
-            const overallStats = calculateOverallStats(textData, facialData);
-
-            return {
-                textReport,
-                facialReport,
-                overallStats,
-                timeRange: `${daysDiff} days`,
-                correlationInsights: generateCorrelationInsights(textData, facialData),
-                combinedRecommendations: generateCombinedRecommendations(textData, facialData)
-            };
-        }
-
-        // Generate facial report data
-        function generateFacialReportData(facialData) {
-            if (facialData.length === 0) {
-                return null;
-            }
-
-            const now = new Date();
-            const oldestAnalysis = new Date(Math.min(...facialData.map(d => new Date(d.timestamp))));
-            const daysDiff = Math.ceil((now - oldestAnalysis) / (1000 * 60 * 60 * 24));
-
-            // Calculate emotion trends
-            const emotionTrends = {};
-            let totalConfidence = 0;
-            const totalEmotions = { positive: 0, negative: 0, neutral: 0 };
-
-            facialData.forEach(analysis => {
-                const emotion = analysis.emotion;
-                emotionTrends[emotion] = (emotionTrends[emotion] || 0) + 1;
-                totalConfidence += analysis.confidence || 75;
-                
-                totalEmotions.positive += analysis.emotionDistribution.positive;
-                totalEmotions.negative += analysis.emotionDistribution.negative;
-                totalEmotions.neutral += analysis.emotionDistribution.neutral;
-            });
-
-            const averageEmotions = {
-                positive: totalEmotions.positive / facialData.length,
-                negative: totalEmotions.negative / facialData.length,
-                neutral: totalEmotions.neutral / facialData.length
-            };
-
-            const averageConfidence = totalConfidence / facialData.length;
-            const dominantEmotion = Object.entries(emotionTrends).reduce((a, b) => a[1] > b[1] ? a : b)[0];
-
-            return {
-                totalAnalyses: facialData.length,
-                timeRange: `${daysDiff} days`,
-                emotionTrends,
-                averageEmotions,
-                averageConfidence,
-                dominantEmotion,
-                recentAnalyses: facialData.slice(-5).reverse()
-            };
-        }
-
-        // Calculate overall statistics combining both analysis types
-        function calculateOverallStats(textData, facialData) {
-            const allData = [...textData, ...facialData];
-            
-            if (allData.length === 0) {
-                return {
-                    totalAnalyses: 0,
-                    averageEmotions: { positive: 0, negative: 0, neutral: 0 },
-                    dominantEmotion: 'none'
-                };
-            }
-
-            // Combine emotion distributions
-            let totalPositive = 0, totalNegative = 0, totalNeutral = 0;
-            const combinedEmotions = {};
-
-            // Process text data
-            textData.forEach(analysis => {
-                totalPositive += analysis.emotions?.positive || 0;
-                totalNegative += analysis.emotions?.negative || 0;
-                totalNeutral += analysis.emotions?.neutral || 0;
-                
-                const emotion = analysis.dominantEmotion;
-                combinedEmotions[emotion] = (combinedEmotions[emotion] || 0) + 1;
-            });
-
-            // Process facial data
-            facialData.forEach(analysis => {
-                totalPositive += analysis.emotionDistribution?.positive || 0;
-                totalNegative += analysis.emotionDistribution?.negative || 0;
-                totalNeutral += analysis.emotionDistribution?.neutral || 0;
-                
-                const emotion = analysis.emotion;
-                combinedEmotions[emotion] = (combinedEmotions[emotion] || 0) + 1;
-            });
-
-            const totalCount = textData.length + facialData.length;
-            const averageEmotions = {
-                positive: totalPositive / totalCount,
-                negative: totalNegative / totalCount,
-                neutral: totalNeutral / totalCount
-            };
-
-            const dominantEmotion = Object.keys(combinedEmotions).length > 0 
-                ? Object.entries(combinedEmotions).reduce((a, b) => a[1] > b[1] ? a : b)[0]
-                : 'none';
-
-            return {
-                totalAnalyses: totalCount,
-                averageEmotions,
-                dominantEmotion,
-                combinedEmotions
-            };
-        }
-
-        // Generate correlation insights between text and facial analysis
-        function generateCorrelationInsights(textData, facialData) {
-            const insights = [];
-
-            if (textData.length === 0 && facialData.length === 0) {
-                return ['No analysis data available for correlation insights.'];
-            }
-
-            if (textData.length === 0) {
-                insights.push('Only facial analysis data available. Consider adding text analysis for deeper insights.');
-                return insights;
-            }
-
-            if (facialData.length === 0) {
-                insights.push('Only text analysis data available. Consider adding facial analysis for more comprehensive assessment.');
-                return insights;
-            }
-
-            // Calculate averages for comparison
-            const textAvg = {
-                positive: textData.reduce((sum, a) => sum + (a.emotions?.positive || 0), 0) / textData.length,
-                negative: textData.reduce((sum, a) => sum + (a.emotions?.negative || 0), 0) / textData.length
-            };
-
-            const facialAvg = {
-                positive: facialData.reduce((sum, a) => sum + (a.emotionDistribution?.positive || 0), 0) / facialData.length,
-                negative: facialData.reduce((sum, a) => sum + (a.emotionDistribution?.negative || 0), 0) / facialData.length
-            };
-
-            // Generate insights based on comparison
-            const positiveDiff = Math.abs(textAvg.positive - facialAvg.positive);
-            const negativeDiff = Math.abs(textAvg.negative - facialAvg.negative);
-
-            if (positiveDiff < 10 && negativeDiff < 10) {
-                insights.push('Your written emotions align closely with your facial expressions, indicating good emotional awareness.');
-            } else if (textAvg.positive > facialAvg.positive + 15) {
-                insights.push('Your written expressions tend to be more positive than your facial expressions. Consider if you might be masking emotions.');
-            } else if (facialAvg.positive > textAvg.positive + 15) {
-                insights.push('Your facial expressions tend to be more positive than your written thoughts. This suggests good emotional resilience.');
-            }
-
-            if (textAvg.negative > facialAvg.negative + 15) {
-                insights.push('Your written expressions show more negative emotions than your face. Writing may help you process difficult feelings.');
-            } else if (facialAvg.negative > textAvg.negative + 15) {
-                insights.push('Your facial expressions show more stress than your written thoughts. Consider stress management techniques.');
-            }
-
-            // Analysis frequency insights
-            if (textData.length > facialData.length * 2) {
-                insights.push('You engage more with text analysis. Consider balancing with facial expression analysis for complete self-awareness.');
-            } else if (facialData.length > textData.length * 2) {
-                insights.push('You engage more with facial analysis. Consider adding text analysis to explore your inner emotional landscape.');
-            } else {
-                insights.push('You maintain a good balance between text and facial analysis methods.');
-            }
-
-            return insights;
-        }
-
-        // Generate combined recommendations
-        function generateCombinedRecommendations(textData, facialData) {
-            const recommendations = [];
-
-            if (textData.length === 0 && facialData.length === 0) {
-                return ['Start with either text or facial analysis to begin understanding your emotional patterns.'];
-            }
-
-            // Get individual recommendations
-            if (textData.length > 0) {
-                const textReport = generateReportData(textData);
-                recommendations.push(...textReport.recommendations.slice(0, 3));
-            }
-
-            if (facialData.length > 0) {
-                recommendations.push('Practice facial relaxation exercises to reduce emotional tension.');
-                recommendations.push('Use mirror work to increase facial expression awareness.');
-            }
-
-            // Add correlation-based recommendations
-            if (textData.length > 0 && facialData.length > 0) {
-                recommendations.push('Continue using both analysis methods for comprehensive emotional intelligence.');
-                recommendations.push('Compare your results across methods to identify emotional patterns.');
-            }
-
-            // General wellness recommendations
-            recommendations.push('Practice daily mindfulness to increase emotional awareness across all contexts.');
-            recommendations.push('Maintain consistent sleep and exercise routines for emotional stability.');
-
-            return recommendations.slice(0, 8); // Limit to 8 recommendations
-        }
-
-        // Generate text report data (reuse from text analysis)
-        function generateReportData(history) {
-            if (history.length === 0) {
-                return null;
-            }
-
-            const now = new Date();
-            const oldestAnalysis = new Date(Math.min(...history.map(h => new Date(h.timestamp))));
-            const daysDiff = Math.ceil((now - oldestAnalysis) / (1000 * 60 * 60 * 24));
-
-            // Calculate trends
-            const emotionalTrends = {};
-            const totalEmotions = { positive: 0, negative: 0, neutral: 0 };
-
-            history.forEach(analysis => {
-                const dominant = analysis.dominantEmotion;
-                emotionalTrends[dominant] = (emotionalTrends[dominant] || 0) + 1;
-                
-                totalEmotions.positive += analysis.emotions?.positive || 0;
-                totalEmotions.negative += analysis.emotions?.negative || 0;
-                totalEmotions.neutral += analysis.emotions?.neutral || 0;
-            });
-
-            const averageEmotions = {
-                positive: totalEmotions.positive / history.length,
-                negative: totalEmotions.negative / history.length,
-                neutral: totalEmotions.neutral / history.length
-            };
-
-            // Generate insights and recommendations
-            const insights = generateInsights(emotionalTrends, averageEmotions, history);
-            const recommendations = generatePersonalizedRecommendations(emotionalTrends, averageEmotions);
-
-            return {
-                totalAnalyses: history.length,
-                timeRange: `${daysDiff} days`,
-                emotionalTrends,
-                averageEmotions,
-                insights,
-                recommendations,
-                recentAnalyses: history.slice(-5).reverse(),
-                dominantEmotion: Object.entries(emotionalTrends).reduce((a, b) => a[1] > b[1] ? a : b)[0]
-            };
-        }
-
-        // Display comprehensive report
-        function displayComprehensiveReport(reportData) {
-            // Hide loading and show report
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('reportData').style.display = 'block';
-            document.getElementById('actionButtons').style.display = 'flex';
-
-            // Populate overview tab
-            populateOverviewTab(reportData);
-
-            // Populate individual tabs
-            if (reportData.textReport) {
-                populateTextTab(reportData.textReport);
-            }
-
-            if (reportData.facialReport) {
-                populateFacialTab(reportData.facialReport);
-            }
-
-            // Populate comparison tab
-            populateComparisonTab(reportData);
-        }
-
-        // Populate overview tab
-        function populateOverviewTab(reportData) {
-            const textCount = reportData.textReport ? reportData.textReport.totalAnalyses : 0;
-            const facialCount = reportData.facialReport ? reportData.facialReport.totalAnalyses : 0;
-
-            document.getElementById('totalTextAnalyses').textContent = textCount;
-            document.getElementById('totalFacialAnalyses').textContent = facialCount;
-            document.getElementById('overallTimeRange').textContent = reportData.timeRange;
-            document.getElementById('overallDominantEmotion').textContent = 
-                reportData.overallStats.dominantEmotion.charAt(0).toUpperCase() + 
-                reportData.overallStats.dominantEmotion.slice(1);
-
-            // Overall emotional distribution
-            document.getElementById('overallPositiveCircle').textContent = 
-                reportData.overallStats.averageEmotions.positive.toFixed(1) + '%';
-            document.getElementById('overallNegativeCircle').textContent = 
-                reportData.overallStats.averageEmotions.negative.toFixed(1) + '%';
-            document.getElementById('overallNeutralCircle').textContent = 
-                reportData.overallStats.averageEmotions.neutral.toFixed(1) + '%';
-
-            // Correlation insights
-            const correlationContainer = document.getElementById('correlationInsights');
-            correlationContainer.innerHTML = '';
-            reportData.correlationInsights.forEach(insight => {
-                const p = document.createElement('p');
-                p.textContent = insight;
-                p.style.marginBottom = '10px';
-                correlationContainer.appendChild(p);
-            });
-
-            // Combined recommendations
-            const recsContainer = document.getElementById('combinedRecommendations');
-            recsContainer.innerHTML = '';
-            reportData.combinedRecommendations.forEach(rec => {
-                const recItem = document.createElement('div');
-                recItem.className = 'rec-item';
-                recItem.innerHTML = `
-                    <span class="checkmark">✓</span>
-                    <span>${rec}</span>
-                `;
-                recsContainer.appendChild(recItem);
-            });
-        }
-
-        // Populate text analysis tab
-        function populateTextTab(textReport) {
-            document.getElementById('textAnalysesCount').textContent = textReport.totalAnalyses;
-            document.getElementById('textTimeRange').textContent = textReport.timeRange;
-            document.getElementById('textDominantEmotion').textContent = 
-                textReport.dominantEmotion.charAt(0).toUpperCase() + textReport.dominantEmotion.slice(1);
-
-            // Text emotional distribution
-            document.getElementById('textPositiveCircle').textContent = textReport.averageEmotions.positive.toFixed(1) + '%';
-            document.getElementById('textNegativeCircle').textContent = textReport.averageEmotions.negative.toFixed(1) + '%';
-            document.getElementById('textNeutralCircle').textContent = textReport.averageEmotions.neutral.toFixed(1) + '%';
-
-            // Text emotion trends
-            const textTrendsContainer = document.getElementById('textEmotionTrends');
-            textTrendsContainer.innerHTML = '';
-            Object.entries(textReport.emotionalTrends).forEach(([emotion, count]) => {
-                const trendItem = document.createElement('div');
-                trendItem.className = 'trend-item';
-                trendItem.innerHTML = `
-                    <div class="emotion-name">${emotion}</div>
-                    <div class="count">${count}</div>
-                `;
-                textTrendsContainer.appendChild(trendItem);
-            });
-
-            // Recent text analyses
-            const recentTextContainer = document.getElementById('recentTextAnalyses');
-            recentTextContainer.innerHTML = '';
-            if (textReport.recentAnalyses.length > 0) {
-                textReport.recentAnalyses.forEach(analysis => {
-                    const recentItem = document.createElement('div');
-                    recentItem.className = 'recent-item';
-                    recentItem.innerHTML = `
-                        <div class="date">${new Date(analysis.timestamp).toLocaleDateString()}</div>
-                        <div class="emotion">Dominant Emotion: ${analysis.dominantEmotion}</div>
-                        <div class="text-preview">"${analysis.text.substring(0, 150)}${analysis.text.length > 150 ? '...' : ''}"</div>
-                    `;
-                    recentTextContainer.appendChild(recentItem);
-                });
-            } else {
-                recentTextContainer.innerHTML = '<p class="text-muted">No recent text analyses to display.</p>';
-            }
-        }
-
-        // Populate facial analysis tab
-        function populateFacialTab(facialReport) {
-            document.getElementById('facialAnalysesCount').textContent = facialReport.totalAnalyses;
-            document.getElementById('facialTimeRange').textContent = facialReport.timeRange;
-            document.getElementById('facialDominantEmotion').textContent = 
-                facialReport.dominantEmotion.charAt(0).toUpperCase() + facialReport.dominantEmotion.slice(1);
-            document.getElementById('averageConfidence').textContent = facialReport.averageConfidence.toFixed(1) + '%';
-
-            // Facial emotional distribution
-            document.getElementById('facialPositiveCircle').textContent = facialReport.averageEmotions.positive.toFixed(1) + '%';
-            document.getElementById('facialNegativeCircle').textContent = facialReport.averageEmotions.negative.toFixed(1) + '%';
-            document.getElementById('facialNeutralCircle').textContent = facialReport.averageEmotions.neutral.toFixed(1) + '%';
-
-            // Facial emotion trends
-            const facialTrendsContainer = document.getElementById('facialEmotionTrends');
-            facialTrendsContainer.innerHTML = '';
-            Object.entries(facialReport.emotionalTrends).forEach(([emotion, count]) => {
-                const trendItem = document.createElement('div');
-                trendItem.className = 'trend-item';
-                trendItem.innerHTML = `
-                    <div class="emotion-name">${emotion}</div>
-                    <div class="count">${count}</div>
-                `;
-                facialTrendsContainer.appendChild(trendItem);
-            });
-
-            // Recent facial analyses
-            const recentFacialContainer = document.getElementById('recentFacialAnalyses');
-            recentFacialContainer.innerHTML = '';
-            if (facialReport.recentAnalyses.length > 0) {
-                facialReport.recentAnalyses.forEach(analysis => {
-                    const recentItem = document.createElement('div');
-                    recentItem.className = 'recent-item';
-                    recentItem.innerHTML = `
-                        <div class="date">${new Date(analysis.timestamp).toLocaleDateString()}</div>
-                        <div class="emotion">Detected Emotion: ${analysis.emotion} (${analysis.confidence.toFixed(1)}% confidence)</div>
-                        <div class="text-preview">Facial expression analysis completed</div>
-                    `;
-                    recentFacialContainer.appendChild(recentItem);
-                });
-            } else {
-                recentFacialContainer.innerHTML = '<p class="text-muted">No recent facial analyses to display.</p>';
-            }
-        }
-
-        // Populate comparison tab
-        function populateComparisonTab(reportData) {
-            // Create comparison charts
-            if (reportData.textReport && reportData.facialReport) {
-                createComparisonCharts(reportData.textReport, reportData.facialReport);
-            }
-
-            // Populate comparison insights
-            const comparisonContainer = document.getElementById('comparisonInsights');
-            comparisonContainer.innerHTML = '';
-            reportData.correlationInsights.forEach(insight => {
-                const p = document.createElement('p');
-                p.textContent = insight;
-                p.style.marginBottom = '10px';
-                comparisonContainer.appendChild(p);
-            });
-        }
-
-        // Create comparison charts
-        function createComparisonCharts(textReport, facialReport) {
-            // Text analysis chart
-            const textCtx = document.getElementById('textChart').getContext('2d');
-            if (textChart) textChart.destroy();
-            textChart = new Chart(textCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Positive', 'Negative', 'Neutral'],
-                    datasets: [{
-                        data: [
-                            textReport.averageEmotions.positive,
-                            textReport.averageEmotions.negative,
-                            textReport.averageEmotions.neutral
-                        ],
-                        backgroundColor: ['#66bb6a', '#ef5350', '#ffca28'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // Facial analysis chart
-            const facialCtx = document.getElementById('facialChart').getContext('2d');
-            if (facialChart) facialChart.destroy();
-            facialChart = new Chart(facialCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Positive', 'Negative', 'Neutral'],
-                    datasets: [{
-                        data: [
-                            facialReport.averageEmotions.positive,
-                            facialReport.averageEmotions.negative,
-                            facialReport.averageEmotions.neutral
-                        ],
-                        backgroundColor: ['#66bb6a', '#ef5350', '#ffca28'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-
-        // Show no data state
-        function showNoDataState() {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('noDataState').style.display = 'block';
-        }
-
-        // Generate insights (reuse from text analysis)
-        function generateInsights(trends, averages, history) {
-            const insights = [];
-            
-            const mostCommon = Object.entries(trends).reduce((a, b) => a[1] > b[1] ? a : b);
-            insights.push(`Your most frequent emotional state is ${mostCommon[0]} (${mostCommon[1]} times)`);
-            
-            if (averages.positive > averages.negative) {
-                insights.push(`You maintain a positive emotional outlook ${averages.positive.toFixed(1)}% of the time`);
-            } else if (averages.negative > averages.positive) {
-                insights.push(`Your emotional state shows ${averages.negative.toFixed(1)}% negative sentiment - consider focusing on self-care`);
-            } else {
-                insights.push('You maintain a balanced emotional state');
-            }
-            
-            if (history.length >= 3) {
-                const recent = history.slice(-3);
-                const recentPositive = recent.reduce((sum, a) => sum + (a.emotions?.positive || 0), 0) / 3;
-                const overallPositive = averages.positive;
-                
-                if (recentPositive > overallPositive + 5) {
-                    insights.push('Your recent emotional state shows improvement - keep it up!');
-                } else if (recentPositive < overallPositive - 5) {
-                    insights.push('Your recent emotional state shows some challenges - consider additional support');
-                }
-            }
-            
-            return insights;
-        }
-
-        // Generate personalized recommendations (reuse from text analysis)
-        function generatePersonalizedRecommendations(trends, averages) {
-            const recommendations = [];
-            
-            if (averages.negative > 40) {
-                recommendations.push('Consider practicing daily mindfulness meditation (10-15 minutes)');
-                recommendations.push('Schedule regular check-ins with a trusted friend or counselor');
-                recommendations.push('Engage in physical activity to improve mood naturally');
-            }
-            
-            if (averages.positive > 60) {
-                recommendations.push('Your positive outlook is a strength - consider mentoring others');
-                recommendations.push('Use your positive energy to tackle challenging goals');
-            }
-            
-            const dominantEmotion = Object.entries(trends).reduce((a, b) => a[1] > b[1] ? a : b)[0];
-            
-            const emotionRecs = {
-                sadness: ['Practice gratitude journaling', 'Engage in creative activities', 'Spend time in nature'],
-                anger: ['Try progressive muscle relaxation', 'Practice assertive communication', 'Consider anger management techniques'],
-                fear: ['Practice exposure therapy with small steps', 'Learn grounding techniques', 'Build a support network'],
-                joy: ['Share your joy with others', 'Capture positive moments in a journal', 'Plan enjoyable activities regularly'],
-                love: ['Express appreciation to loved ones', 'Practice self-compassion', 'Consider volunteer work'],
-                surprise: ['Embrace new experiences', 'Stay curious and open-minded', 'Reflect on unexpected positive outcomes']
-            };
-            
-            if (emotionRecs[dominantEmotion]) {
-                recommendations.push(...emotionRecs[dominantEmotion]);
-            }
-            
-            return recommendations.slice(0, 6);
-        }
-
-        // Export functions
-        async function exportCombinedReport() {
-            try {
-                const textData = await loadAnalysisData('text');
-                const facialData = await loadAnalysisData('facial');
-                
-                if (textData.length === 0 && facialData.length === 0) {
-                    alert('No analysis data to export');
-                    return;
-                }
-
-                const csvContent = convertCombinedToCSV(textData, facialData);
-                downloadCSV(csvContent, 'combined_emotional_analysis');
-            } catch (error) {
-                console.error('Error exporting combined report:', error);
-                alert('Error exporting data. Please try again.');
-            }
-        }
-
-        async function exportTextReport() {
-            try {
-                const textData = await loadAnalysisData('text');
-                if (textData.length === 0) {
-                    alert('No text analysis data to export');
-                    return;
-                }
-                const csvContent = convertTextToCSV(textData);
-                downloadCSV(csvContent, 'text_analysis');
-            } catch (error) {
-                console.error('Error exporting text report:', error);
-                alert('Error exporting data. Please try again.');
-            }
-        }
-
-        async function exportFacialReport() {
-            try {
-                const facialData = await loadAnalysisData('facial');
-                if (facialData.length === 0) {
-                    alert('No facial analysis data to export');
-                    return;
-                }
-                const csvContent = convertFacialToCSV(facialData);
-                downloadCSV(csvContent, 'facial_analysis');
-            } catch (error) {
-                console.error('Error exporting facial report:', error);
-                alert('Error exporting data. Please try again.');
-            }
-        }
-
-        // CSV conversion functions
-        function convertCombinedToCSV(textData, facialData) {
-            const headers = ['Date', 'Time', 'Analysis Type', 'Content/Emotion', 'Positive %', 'Negative %', 'Neutral %', 'Confidence/Details'];
-            const rows = [];
-
-            // Add text data
-            textData.forEach(item => {
-                const date = new Date(item.timestamp);
-                rows.push([
-                    date.toLocaleDateString(),
-                    date.toLocaleTimeString(),
-                    'Text Analysis',
-                    `"${item.text.replace(/"/g, '""')}"`,
-                    item.emotions.positive.toFixed(2),
-                    item.emotions.negative.toFixed(2),
-                    item.emotions.neutral.toFixed(2),
-                    item.dominantEmotion
-                ].join(','));
-            });
-
-            // Add facial data
-            facialData.forEach(item => {
-                const date = new Date(item.timestamp);
-                rows.push([
-                    date.toLocaleDateString(),
-                    date.toLocaleTimeString(),
-                    'Facial Analysis',
-                    item.emotion,
-                    item.emotionDistribution.positive.toFixed(2),
-                    item.emotionDistribution.negative.toFixed(2),
-                    item.emotionDistribution.neutral.toFixed(2),
-                    `${item.confidence.toFixed(2)}% confidence`
-                ].join(','));
-            });
-
-            return [headers.join(','), ...rows].join('\n');
-        }
-
-        function convertTextToCSV(data) {
-            const headers = ['Date', 'Time', 'Text', 'Dominant Emotion', 'Positive %', 'Negative %', 'Neutral %'];
-            const rows = data.map(item => {
-                const date = new Date(item.timestamp);
-                return [
-                    date.toLocaleDateString(),
-                    date.toLocaleTimeString(),
-                    `"${item.text.replace(/"/g, '""')}"`,
-                    item.dominantEmotion,
-                    item.emotions.positive.toFixed(2),
-                    item.emotions.negative.toFixed(2),
-                    item.emotions.neutral.toFixed(2)
-                ].join(',');
-            });
-            return [headers.join(','), ...rows].join('\n');
-        }
-
-        function convertFacialToCSV(data) {
-            const headers = ['Date', 'Time', 'Detected Emotion', 'Confidence %', 'Positive %', 'Negative %', 'Neutral %'];
-            const rows = data.map(item => {
-                const date = new Date(item.timestamp);
-                return [
-                    date.toLocaleDateString(),
-                    date.toLocaleTimeString(),
-                    item.emotion,
-                    item.confidence.toFixed(2),
-                    item.emotionDistribution.positive.toFixed(2),
-                    item.emotionDistribution.negative.toFixed(2),
-                    item.emotionDistribution.neutral.toFixed(2)
-                ].join(',');
-            });
-            return [headers.join(','), ...rows].join('\n');
-        }
-
-        function downloadCSV(csvContent, filename) {
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        }
     </script>
 </body>
 </html>
