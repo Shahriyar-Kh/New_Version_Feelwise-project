@@ -66,9 +66,9 @@ function showForgotPasswordForm() {
             </div>
         </div>
         
-        <h2>Reset Password</h2>
+        <h2>Forgot Password?</h2>
         <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 25px; font-size: 0.95rem;">
-            Enter your email address and we'll help you reset your password.
+            Enter your email address and we'll send you a link to reset your password.
         </p>
         
         <form id="forgot-password-form">
@@ -80,7 +80,9 @@ function showForgotPasswordForm() {
             <p class="error-message" id="forgot-error"></p>
             <p class="success-message" id="forgot-success"></p>
             
-            <button type="submit">Send Reset Instructions <i class="fas fa-paper-plane" style="margin-left: 8px;"></i></button>
+            <button type="submit" id="send-reset-btn">
+                Send Reset Link <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
+            </button>
         </form>
         
         <p style="margin-top: 20px;">
@@ -97,6 +99,7 @@ function showForgotPasswordForm() {
     const backToLogin = document.getElementById('back-to-login');
     const forgotError = document.getElementById('forgot-error');
     const forgotSuccess = document.getElementById('forgot-success');
+    const sendResetBtn = document.getElementById('send-reset-btn');
 
     forgotForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -104,6 +107,18 @@ function showForgotPasswordForm() {
         forgotSuccess.style.display = "none";
 
         const email = document.getElementById('reset-email').value.trim();
+
+        // Validate email format
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailPattern.test(email)) {
+            forgotError.style.display = "block";
+            forgotError.textContent = "Please enter a valid email address";
+            return;
+        }
+
+        // Disable button and show loading state
+        sendResetBtn.disabled = true;
+        sendResetBtn.innerHTML = 'Sending... <i class="fas fa-spinner fa-spin" style="margin-left: 8px;"></i>';
 
         try {
             const res = await fetch(`${API_BASE}/forgot-password`, {
@@ -116,133 +131,32 @@ function showForgotPasswordForm() {
 
             if (!res.ok) {
                 forgotError.style.display = "block";
-                forgotError.textContent = data.error || "Failed to send reset instructions";
+                
+                if (res.status === 404) {
+                    forgotError.textContent = "No account found with this email address. Please check your email and try again.";
+                } else {
+                    forgotError.textContent = data.error || "Failed to send reset instructions";
+                }
+                
+                sendResetBtn.disabled = false;
+                sendResetBtn.innerHTML = 'Send Reset Link <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>';
                 return;
             }
 
             forgotSuccess.style.display = "block";
-            forgotSuccess.textContent = "Reset instructions sent! Check your email.";
+            forgotSuccess.textContent = "Password reset link sent! Please check your email inbox (and spam folder).";
             
-            // Show password reset form after successful email submission
-            setTimeout(() => showPasswordResetForm(email), 2000);
+            // Disable input and button after success
+            document.getElementById('reset-email').disabled = true;
+            sendResetBtn.innerHTML = 'Email Sent! <i class="fas fa-check" style="margin-left: 8px;"></i>';
             
         } catch (err) {
             console.error("Forgot password error:", err);
             forgotError.style.display = "block";
-            forgotError.textContent = "An error occurred. Please try again.";
-        }
-    });
-
-    backToLogin.addEventListener('click', (e) => {
-        e.preventDefault();
-        loginContainer.innerHTML = originalContent;
-        // Re-add event listeners
-        initializeLoginForm();
-    });
-}
-
-function showPasswordResetForm(email) {
-    const loginContainer = document.querySelector('.login-container');
-    
-    loginContainer.innerHTML = `
-        <div class="logo">
-            <div class="logo-circle">
-                <i class="fas fa-brain"></i>
-            </div>
-            <div class="logo-text">
-                <h1>FeelWise</h1>
-                <p>Emotional Intelligence Platform</p>
-            </div>
-        </div>
-        
-        <h2>Set New Password</h2>
-        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 25px; font-size: 0.95rem;">
-            Enter your new password for <strong>${email}</strong>
-        </p>
-        
-        <form id="reset-password-form">
-            <div class="input-group">
-                <i class="fas fa-lock input-icon"></i>
-                <input type="password" id="new-password" placeholder="New Password" required minlength="6"/>
-            </div>
+            forgotError.textContent = "An error occurred. Please check your internet connection and try again.";
             
-            <div class="input-group">
-                <i class="fas fa-lock input-icon"></i>
-                <input type="password" id="confirm-password" placeholder="Confirm New Password" required minlength="6"/>
-            </div>
-            
-            <p class="error-message" id="reset-error"></p>
-            <p class="success-message" id="reset-success"></p>
-            
-            <button type="submit">Update Password <i class="fas fa-check" style="margin-left: 8px;"></i></button>
-        </form>
-        
-        <p style="margin-top: 20px;">
-            <a href="#" id="back-to-login-final">← Back to Login</a>
-        </p>
-        
-        <div class="footer">
-            <p>© 2023 FeelWise. All rights reserved.</p>
-        </div>
-    `;
-
-    // Add event listeners for password reset form
-    const resetForm = document.getElementById('reset-password-form');
-    const backToLogin = document.getElementById('back-to-login-final');
-    const resetError = document.getElementById('reset-error');
-    const resetSuccess = document.getElementById('reset-success');
-
-    resetForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        resetError.style.display = "none";
-        resetSuccess.style.display = "none";
-
-        const newPassword = document.getElementById('new-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-
-        // Client-side validation
-        if (newPassword !== confirmPassword) {
-            resetError.style.display = "block";
-            resetError.textContent = "Passwords do not match";
-            return;
-        }
-
-        if (newPassword.length < 6) {
-            resetError.style.display = "block";
-            resetError.textContent = "Password must be at least 6 characters long";
-            return;
-        }
-
-        try {
-            const res = await fetch(`${API_BASE}/reset-password`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    email: email,
-                    newPassword: newPassword 
-                }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                resetError.style.display = "block";
-                resetError.textContent = data.error || "Failed to reset password";
-                return;
-            }
-
-            resetSuccess.style.display = "block";
-            resetSuccess.textContent = "Password updated successfully! Redirecting to login...";
-            
-            // Redirect back to login after successful password reset
-            setTimeout(() => {
-                location.reload(); // Reload the page to show login form
-            }, 2000);
-            
-        } catch (err) {
-            console.error("Password reset error:", err);
-            resetError.style.display = "block";
-            resetError.textContent = "An error occurred. Please try again.";
+            sendResetBtn.disabled = false;
+            sendResetBtn.innerHTML = 'Send Reset Link <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>';
         }
     });
 

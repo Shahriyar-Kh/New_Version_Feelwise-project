@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 
 const authRoutes = require("./routes/auth");
 const progressRoutes = require("./routes/progress"); // ADD THIS LINE
+// Serve static files from Frontend directory
+app.use(express.static(path.join(__dirname, '../Frontend')));
 
 const app = express();
 

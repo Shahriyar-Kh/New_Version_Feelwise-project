@@ -1,56 +1,119 @@
 const API_BASE = "http://localhost:5000/api/auth";
 
-document.getElementById("signup-form").addEventListener("submit", async (e) => {
+const signupForm = document.getElementById("signup-form");
+const signupError = document.getElementById("signup-error");
+const signupSuccess = document.getElementById("signup-success");
+
+signupForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  console.log("Signup clicked"); // debug
+  console.log("Signup form submitted");
+
+  // Hide previous messages
+  signupError.style.display = "none";
+  signupSuccess.style.display = "none";
 
   const fullName = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  const imageFile = document.getElementById("image")
-    ? document.getElementById("image").files[0]
-    : null;
+  const dob = document.getElementById("dob").value;
 
-  // Email validate
+  // Validate inputs
+  if (!fullName || !email || !password) {
+    signupError.style.display = "block";
+    signupError.textContent = "Please fill in all fields";
+    return;
+  }
+
+  // Email validation
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  if (!emailPattern.test(email)) return alert("Invalid email format");
+  if (!emailPattern.test(email)) {
+    signupError.style.display = "block";
+    signupError.textContent = "Invalid email format";
+    return;
+  }
+
+  // Password validation
+  if (password.length < 6) {
+    signupError.style.display = "block";
+    signupError.textContent = "Password must be at least 6 characters long";
+    return;
+  }
 
   try {
-    // Check email exists
+    // Check if email already exists
+    console.log("Checking if email exists...");
     const checkRes = await fetch(`${API_BASE}/check-email`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    const checkData = await checkRes.json();
-    if (checkData.exists) return alert("This email is already registered.");
 
-    // FormData
-    const form = new FormData();
-    form.append("username", fullName);
-    form.append("email", email);
-    form.append("password", password);
-    if (imageFile) form.append("image", imageFile);
-
-    const res = await fetch(`${API_BASE}/register`, {
-      method: "POST",
-      body: form,
-    });
-    const dataText = await res.text(); // raw response
-    console.log("Raw response:", dataText);
-    let data;
-    try {
-      data = JSON.parse(dataText);
-    } catch {
-      data = { error: dataText };
+    if (!checkRes.ok) {
+      throw new Error(`HTTP error! status: ${checkRes.status}`);
     }
 
-    if (!res.ok) return alert(data.error || "Signup failed");
+    const checkData = await checkRes.json();
+    console.log("Email check response:", checkData);
 
-    alert("Signup successful! Please login.");
-    window.location.href = "login.html";
+    if (checkData.exists) {
+      signupError.style.display = "block";
+      signupError.textContent = "This email is already registered. Please login or use a different email.";
+      return;
+    }
+
+    // Create FormData for signup
+    console.log("Registering new user...");
+    const formData = new FormData();
+    formData.append("username", fullName);
+    formData.append("email", email);
+    formData.append("password", password);
+    
+    // Optional: Add DOB if you want to store it
+    // formData.append("dob", dob);
+
+    const registerRes = await fetch(`${API_BASE}/register`, {
+      method: "POST",
+      body: formData,
+    });
+
+    console.log("Register response status:", registerRes.status);
+
+    // Get response text first
+    const responseText = await registerRes.text();
+    console.log("Register response text:", responseText);
+
+    let registerData;
+    try {
+      registerData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error("Failed to parse response:", parseError);
+      signupError.style.display = "block";
+      signupError.textContent = "Server error. Please try again later.";
+      return;
+    }
+
+    if (!registerRes.ok) {
+      signupError.style.display = "block";
+      signupError.textContent = registerData.error || "Registration failed. Please try again.";
+      return;
+    }
+
+    // Success!
+    signupSuccess.style.display = "block";
+    signupSuccess.textContent = "Account created successfully! Redirecting to login...";
+
+    // Disable form
+    signupForm.querySelectorAll('input').forEach(input => input.disabled = true);
+    signupForm.querySelector('button').disabled = true;
+
+    // Redirect to login after 2 seconds
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 2000);
+
   } catch (err) {
     console.error("Signup error:", err);
-    alert("An error occurred. Check console.");
+    signupError.style.display = "block";
+    signupError.textContent = "An error occurred. Please check your internet connection and try again.";
   }
 });

@@ -219,71 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Analyze speech function
-    async function analyzeSpeech(transcript, audioBase64) {
-        console.log("=> analyzeSpeech() starting", { transcript: transcript || "(none)", audioLength: audioBase64?.length });
-
-        const url = "http://localhost:5000/analyze-speech";
-        const payload = { transcript: transcript || "", audio: audioBase64 };
-
-        try {
-            console.log("Sending POST to", url, "payload.audio length:", (audioBase64 || "").length);
-
-            const response = await fetch(url, {
-                method: "POST",
-                mode: "cors",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "X-Request-Id": Math.random().toString(36).substring(2, 10)
-                },
-                body: JSON.stringify(payload),
-            });
-
-            console.log("Fetch completed. status:", response.status, response.statusText);
-
-            const raw = await response.text();
-            console.log("Raw response text (first 2000 chars):", raw ? raw.slice(0, 2000) : "<empty>");
-
-            if (!response.ok) {
-                console.error("Server returned non-OK:", response.status, raw);
-                transcriptDisplay.innerHTML += `<br><span style="color:red">Server error: ${response.status}</span>`;
-                resetUI();
-                return;
-            }
-
-            let data;
-            try {
-                data = raw ? JSON.parse(raw) : null;
-            } catch (parseErr) {
-                console.error("Failed to parse JSON from backend:", parseErr, "raw:", raw);
-                transcriptDisplay.innerHTML += `<br><span style="color:red">Invalid server JSON. Check console.</span>`;
-                resetUI();
-                return;
-            }
-
-            console.log("Parsed JSON result:", data);
-
-            try {
-                displayAnalysisResults(data);
-            } catch (err) {
-                console.error("displayAnalysisResults failed:", err);
-                transcriptDisplay.innerHTML += `<br><span style="color:red">UI update failed: ${err.message || err}</span>`;
-            }
-
-            try { updateRecommendations(data.emotion); } catch (e) { console.warn("updateRecommendations error:", e); }
-            try { updateDailyChallenge(data.emotion); } catch (e) { console.warn("updateDailyChallenge error:", e); }
-            try { updateProgressChart('daily'); } catch (e) { console.warn("updateProgressChart error:", e); }
-
-        } catch (err) {
-            console.error("Analysis failed (fetch/processing):", err);
-            const short = (err && err.message) ? err.message : String(err);
-            transcriptDisplay.innerHTML += `<br><span style="color:red">Analysis failed: ${short}</span>`;
-        } finally {
-            resetUI();
-            console.log("=> analyzeSpeech() finished");
-        }
-    }
-
+ 
     // Display analysis results with detailed emotion probabilities
     function displayAnalysisResults(data) {
         console.log("displayAnalysisResults called with:", data);
@@ -604,25 +540,312 @@ document.addEventListener('DOMContentLoaded', function() {
         dailyChallengeContent.innerHTML = fullChallenge;
     }
     
-    // Load daily tip
-    function loadDailyTip() {
-        const tips = [
-            "Speak slowly and clearly to help regulate your emotions.",
-            "Practice speaking with different emotional tones to become more aware of your voice.",
-            "Record yourself speaking and listen back to better understand your vocal emotions.",
-            "Deep breathing before speaking can help modulate your emotional tone.",
-            "Pay attention to your pitch - higher pitches often indicate excitement or stress.",
-            "Notice your speaking rate - faster speech may indicate anxiety or excitement.",
-            "Practice mindful speaking by being aware of each word you say.",
-            "Try humming to help regulate your vocal emotions.",
-            "Vocal warm-ups can help you express emotions more clearly.",
-            "Record positive affirmations in your own voice to boost your mood."
-        ];
-        const randomTip = tips[Math.floor(Math.random() * tips.length)];
-        dailyTipContent.innerHTML = `<p>${randomTip}</p>`;
-        console.log("[JS] Daily tip loaded");
-    }
+ // Add this enhanced function to speech-analysis.js
+
+// Enhanced Tip of the Day with emotion-specific tips and links
+function updateDailyTipWithEmotion(emotion) {
+    const normalizedEmotion = emotion.toLowerCase();
     
+    const emotionTips = {
+        anger: {
+            tip: "Your voice reveals tension. Try speaking more slowly and take deep breaths between sentences.",
+            page: "angryTips.html",
+            emoji: "😠",
+            color: "#f44336"
+        },
+        angry: {
+            tip: "Notice the intensity in your voice. Lowering your volume and pace can help calm your emotions.",
+            page: "angryTips.html",
+            emoji: "😠",
+            color: "#f44336"
+        },
+        disgust: {
+            tip: "Your tone indicates discomfort. Identify what's bothering you and express it constructively.",
+            page: "angryTips.html",
+            emoji: "😠",
+            color: "#795548"
+        },
+        fear: {
+            tip: "Your voice shows anxiety. Practice grounding techniques and speak from your diaphragm for stability.",
+            page: "fearTips.html",
+            emoji: "😰",
+            color: "#9c27b0"
+        },
+        fearful: {
+            tip: "Vocal tremors can indicate nervousness. Slow, deep breathing before speaking can help steady your voice.",
+            page: "fearTips.html",
+            emoji: "😰",
+            color: "#9c27b0"
+        },
+        happiness: {
+            tip: "Your voice radiates positivity! Sharing your joy through conversation amplifies happiness.",
+            page: "happyTips.html",
+            emoji: "😊",
+            color: "#4caf50"
+        },
+        joy: {
+            tip: "The lightness in your voice reflects inner joy. Express this happiness to spread positive energy!",
+            page: "happyTips.html",
+            emoji: "😊",
+            color: "#4caf50"
+        },
+        happy: {
+            tip: "Your upbeat tone is contagious! Use your positive voice to uplift others around you.",
+            page: "happyTips.html",
+            emoji: "😊",
+            color: "#4caf50"
+        },
+        neutral: {
+            tip: "Your voice is calm and balanced. This composure is great for clear communication and reflection.",
+            page: "wellnessTips.html",
+            emoji: "😊",
+            color: "#607d8b"
+        },
+        calm: {
+            tip: "Your steady voice indicates emotional balance. Maintain this calmness through mindful speaking.",
+            page: "wellnessTips.html",
+            emoji: "😌",
+            color: "#607d8b"
+        },
+        sadness: {
+            tip: "Your voice carries heaviness. It's okay to express sadness - speaking about feelings can be healing.",
+            page: "sadTips.html",
+            emoji: "☹️",
+            color: "#2196f3"
+        },
+        sad: {
+            tip: "The softness in your voice shows vulnerability. Reach out and share your feelings with someone you trust.",
+            page: "sadTips.html",
+            emoji: "☹️",
+            color: "#2196f3"
+        },
+        surprise: {
+            tip: "Your voice shows excitement! Embrace unexpected moments and stay open to new possibilities.",
+            page: "surpriseTips.html",
+            emoji: "😲",
+            color: "#ff9800"
+        },
+        surprised: {
+            tip: "The energy in your voice indicates surprise. Use this heightened awareness to adapt positively!",
+            page: "surpriseTips.html",
+            emoji: "😲",
+            color: "#ff9800"
+        },
+        love: {
+            tip: "Your voice conveys warmth and affection. Express your feelings openly - it strengthens connections.",
+            page: "loveTips.html",
+            emoji: "💖",
+            color: "#e91e63"
+        }
+    };
+
+    const tipData = emotionTips[normalizedEmotion] || emotionTips['neutral'];
+    
+    const html = `
+        <div style="text-align: center; padding: 1.5rem;">
+            <div style="
+                width: 85px;
+                height: 85px;
+                margin: 0 auto 1.5rem;
+                background: linear-gradient(135deg, ${tipData.color}20 0%, ${tipData.color}10 100%);
+                border: 3px solid ${tipData.color}40;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.8rem;
+                box-shadow: 0 6px 20px ${tipData.color}25;
+                animation: pulse 2s ease-in-out infinite;
+            ">
+                ${tipData.emoji}
+            </div>
+            <h4 style="
+                color: #2d3748;
+                margin-bottom: 1rem;
+                font-weight: 700;
+                font-size: 1.1rem;
+            ">Voice Emotion Insight</h4>
+            <p style="
+                margin-bottom: 1.75rem;
+                line-height: 1.8;
+                color: #4a5568;
+                font-size: 1.05rem;
+                max-width: 400px;
+                margin-left: auto;
+                margin-right: auto;
+            ">${tipData.tip}</p>
+            <a href="${tipData.page}" 
+               style="
+                 display: inline-flex;
+                 align-items: center;
+                 gap: 10px;
+                 padding: 16px 32px;
+                 background: linear-gradient(135deg, ${tipData.color} 0%, ${tipData.color}dd 100%);
+                 color: white;
+                 text-decoration: none;
+                 border-radius: 35px;
+                 font-weight: 700;
+                 font-size: 1.05rem;
+                 transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+                 box-shadow: 0 6px 20px ${tipData.color}40;
+                 text-transform: uppercase;
+                 letter-spacing: 0.5px;
+               "
+               onmouseover="this.style.transform='translateY(-4px) scale(1.05)'; this.style.boxShadow='0 10px 30px ${tipData.color}60';"
+               onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 6px 20px ${tipData.color}40';"
+            >
+                <i class="fas fa-spa" style="font-size: 1.2rem;"></i>
+                <span>Explore ${normalizedEmotion.charAt(0).toUpperCase() + normalizedEmotion.slice(1)} Wellness Tips</span>
+            </a>
+        </div>
+        <style>
+            @keyframes pulse {
+                0%, 100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+        </style>
+    `;
+    
+    dailyTipContent.innerHTML = html;
+}
+
+// Update the analyzeSpeech function to update tips
+async function analyzeSpeech(transcript, audioBase64) {
+    console.log("=> analyzeSpeech() starting", { transcript: transcript || "(none)", audioLength: audioBase64?.length });
+
+    const url = "http://localhost:5000/analyze-speech";
+    const payload = { transcript: transcript || "", audio: audioBase64 };
+
+    try {
+        console.log("Sending POST to", url, "payload.audio length:", (audioBase64 || "").length);
+
+        const response = await fetch(url, {
+            method: "POST",
+            mode: "cors",
+            headers: { 
+                "Content-Type": "application/json",
+                "X-Request-Id": Math.random().toString(36).substring(2, 10)
+            },
+            body: JSON.stringify(payload),
+        });
+
+        console.log("Fetch completed. status:", response.status, response.statusText);
+
+        const raw = await response.text();
+        console.log("Raw response text (first 2000 chars):", raw ? raw.slice(0, 2000) : "<empty>");
+
+        if (!response.ok) {
+            console.error("Server returned non-OK:", response.status, raw);
+            transcriptDisplay.innerHTML += `<br><span style="color:red">Server error: ${response.status}</span>`;
+            resetUI();
+            return;
+        }
+
+        let data;
+        try {
+            data = raw ? JSON.parse(raw) : null;
+        } catch (parseErr) {
+            console.error("Failed to parse JSON from backend:", parseErr, "raw:", raw);
+            transcriptDisplay.innerHTML += `<br><span style="color:red">Invalid server JSON. Check console.</span>`;
+            resetUI();
+            return;
+        }
+
+        console.log("Parsed JSON result:", data);
+
+        try {
+            displayAnalysisResults(data);
+        } catch (err) {
+            console.error("displayAnalysisResults failed:", err);
+            transcriptDisplay.innerHTML += `<br><span style="color:red">UI update failed: ${err.message || err}</span>`;
+        }
+
+        try { updateRecommendations(data.emotion); } catch (e) { console.warn("updateRecommendations error:", e); }
+        try { updateDailyChallenge(data.emotion); } catch (e) { console.warn("updateDailyChallenge error:", e); }
+        
+        // Update Tip of the Day with emotion-specific tip
+        try { updateDailyTipWithEmotion(data.emotion); } catch (e) { console.warn("updateDailyTipWithEmotion error:", e); }
+        
+        try { updateProgressChart('daily'); } catch (e) { console.warn("updateProgressChart error:", e); }
+
+    } catch (err) {
+        console.error("Analysis failed (fetch/processing):", err);
+        const short = (err && err.message) ? err.message : String(err);
+        transcriptDisplay.innerHTML += `<br><span style="color:red">Analysis failed: ${short}</span>`;
+    } finally {
+        resetUI();
+        console.log("=> analyzeSpeech() finished");
+    }
+}
+
+// Replace the existing loadDailyTip function with this improved version
+function loadDailyTip() {
+    const generalTips = [
+        {
+            tip: "Your voice carries emotion. Speaking slowly and clearly helps regulate your emotional state.",
+            emoji: "🎤",
+            page: "wellnessTips.html",
+            color: "#5e35b1"
+        },
+        {
+            tip: "Practice vocal warm-ups to express emotions more clearly and confidently.",
+            emoji: "🎵",
+            page: "wellnessTips.html",
+            color: "#5e35b1"
+        },
+        {
+            tip: "Deep breathing before speaking can help modulate your emotional tone and reduce stress.",
+            emoji: "🌬️",
+            page: "wellnessTips.html",
+            color: "#5e35b1"
+        }
+    ];
+    
+    const randomTip = generalTips[Math.floor(Math.random() * generalTips.length)];
+    
+    const html = `
+        <div style="text-align: center; padding: 1rem;">
+            <div style="
+                width: 70px;
+                height: 70px;
+                margin: 0 auto 1rem;
+                background: ${randomTip.color}15;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                box-shadow: 0 4px 15px ${randomTip.color}20;
+            ">
+                ${randomTip.emoji}
+            </div>
+            <p style="margin-bottom: 1.25rem; line-height: 1.7; color: #4a5568;">${randomTip.tip}</p>
+            <a href="${randomTip.page}" 
+               style="
+                 color: ${randomTip.color};
+                 text-decoration: none;
+                 font-weight: 600;
+                 transition: all 0.3s ease;
+                 display: inline-flex;
+                 align-items: center;
+                 gap: 8px;
+               "
+               onmouseover="this.style.color='${randomTip.color}dd'; this.style.gap='12px';"
+               onmouseout="this.style.color='${randomTip.color}'; this.style.gap='8px';"
+            >
+                <span>Explore All Wellness Tips</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    `;
+    
+    dailyTipContent.innerHTML = html;
+    console.log("[JS] Daily tip loaded");
+}
     // Initialize progress chart
     function initProgressChart() {
         const ctx = document.getElementById('progressChart').getContext('2d');
