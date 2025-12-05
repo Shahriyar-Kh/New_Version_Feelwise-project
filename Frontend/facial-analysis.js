@@ -101,23 +101,42 @@ analyzeEmotionBtn.addEventListener("click", () => {
 
 // Send Image to Backend for Analysis
 async function sendImageForAnalysis(base64Image) {
-    emotionResult.innerHTML = "Analyzing facial expression...";
+    emotionResult.innerHTML = `
+        <div class="placeholder-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Analyzing facial expression...</p>
+        </div>
+    `;
 
     try {
+        // IMPORTANT: Use the correct endpoint through main-server.js
         const response = await fetch("http://localhost:5000/analyze-face", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({ image: base64Image })
         });
 
+        // Check if response is ok
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error('Response not OK:', response.status, errorText);
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
 
+        // Parse response
         const data = await response.json();
+        console.log('Received data:', data);
 
+        // Check for errors in response
         if (data.error) {
-            throw new Error(data.details || "Analysis failed");
+            throw new Error(data.details || data.error || "Analysis failed");
+        }
+
+        // Verify we have emotion data
+        if (!data.emotion) {
+            throw new Error("No emotion data received from server");
         }
 
         // Format the results for consistent storage
@@ -145,51 +164,30 @@ async function sendImageForAnalysis(base64Image) {
 
     } catch (error) {
         console.error("Facial analysis error:", error);
-        emotionResult.innerHTML = "Error analyzing facial expression. Please try again.";
+        
+        // Show detailed error message
+        emotionResult.innerHTML = `
+            <div class="placeholder-content" style="color: #dc3545;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p><strong>Error analyzing facial expression</strong></p>
+                <p style="font-size: 0.9em; margin-top: 10px;">${error.message}</p>
+                <p style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                    Please make sure:
+                    <br>• The main server is running on port 5000
+                    <br>• The facial analysis API is running on port 8002
+                    <br>• Your image was captured/uploaded correctly
+                </p>
+            </div>
+        `;
     }
 }
 
-// Format facial analysis results for consistent storage
-function formatFacialAnalysisResults(data, imageData) {
-    // Map facial emotions to positive/negative/neutral categories
-    const positiveEmotions = ['joy', 'happiness', 'surprise'];
-    const negativeEmotions = ['sadness', 'anger', 'fear', 'disgust'];
-    
-    const emotion = data.emotion.toLowerCase();
-    let emotionDistribution = {
-        positive: 0,
-        negative: 0,
-        neutral: 0
-    };
-    
-    if (positiveEmotions.includes(emotion)) {
-        emotionDistribution.positive = data.confidence || 75;
-        emotionDistribution.neutral = (100 - emotionDistribution.positive) * 0.6;
-        emotionDistribution.negative = 100 - emotionDistribution.positive - emotionDistribution.neutral;
-    } else if (negativeEmotions.includes(emotion)) {
-        emotionDistribution.negative = data.confidence || 75;
-        emotionDistribution.neutral = (100 - emotionDistribution.negative) * 0.4;
-        emotionDistribution.positive = 100 - emotionDistribution.negative - emotionDistribution.neutral;
-    } else {
-        emotionDistribution.neutral = data.confidence || 70;
-        emotionDistribution.positive = (100 - emotionDistribution.neutral) * 0.6;
-        emotionDistribution.negative = 100 - emotionDistribution.neutral - emotionDistribution.positive;
-    }
+// Also update the API_BASE constant at the top of the file:
+// Change this:
+// const API_BASE = "http://localhost:5000/analyze-face";
 
-    return {
-        type: 'facial',
-        emotion: data.emotion,
-        confidence: data.confidence || 75,
-        emotionDistribution: emotionDistribution,
-        recommendation: data.recommendation,
-        challenge: data.challenge,
-        tip: data.tip,
-        trend: data.trend,
-        imageData: imageData,
-        timestamp: new Date().toISOString(),
-        userId: currentUserId
-    };
-}
+
+
 
 // Display facial analysis results
 function displayFacialAnalysisResults(results) {
@@ -408,17 +406,134 @@ function updateChart(period = 'daily') {
     });
 }
 
-// Save facial analysis to localStorage (user-specific)
-function saveFacialAnalysisToHistory(result) {
-    const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
-    let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
-    history.push(result);
-    // Keep only last 50 entries
-    if (history.length > 50) {
-        history = history.slice(-50);
+// FIXED: Remove imageData to prevent localStorage quota exceeded error
+function formatFacialAnalysisResults(data, imageData) {
+    // Map facial emotions to positive/negative/neutral categories
+    const positiveEmotions = ['joy', 'happiness', 'surprise'];
+    const negativeEmotions = ['sadness', 'anger', 'fear', 'disgust'];
+    
+    const emotion = data.emotion.toLowerCase();
+    let emotionDistribution = {
+        positive: 0,
+        negative: 0,
+        neutral: 0
+    };
+    
+    if (positiveEmotions.includes(emotion)) {
+        emotionDistribution.positive = data.confidence || 75;
+        emotionDistribution.neutral = (100 - emotionDistribution.positive) * 0.6;
+        emotionDistribution.negative = 100 - emotionDistribution.positive - emotionDistribution.neutral;
+    } else if (negativeEmotions.includes(emotion)) {
+        emotionDistribution.negative = data.confidence || 75;
+        emotionDistribution.neutral = (100 - emotionDistribution.negative) * 0.4;
+        emotionDistribution.positive = 100 - emotionDistribution.negative - emotionDistribution.neutral;
+    } else {
+        emotionDistribution.neutral = data.confidence || 70;
+        emotionDistribution.positive = (100 - emotionDistribution.neutral) * 0.6;
+        emotionDistribution.negative = 100 - emotionDistribution.neutral - emotionDistribution.positive;
     }
-    localStorage.setItem(userHistoryKey, JSON.stringify(history));
+
+    return {
+        type: 'facial',
+        emotion: data.emotion,
+        confidence: data.confidence || 75,
+        emotionDistribution: emotionDistribution,
+        recommendation: data.recommendation,
+        challenge: data.challenge,
+        tip: data.tip,
+        trend: data.trend,
+        // DON'T STORE IMAGE DATA - it's too large for localStorage!
+        // imageData: imageData,  // <-- REMOVED THIS LINE
+        timestamp: new Date().toISOString(),
+        userId: currentUserId
+    };
 }
+
+// Also update saveFacialAnalysisToHistory to add error handling
+function saveFacialAnalysisToHistory(result) {
+    try {
+        const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
+        let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
+        
+        // Remove imageData if it somehow got included
+        const resultToSave = { ...result };
+        delete resultToSave.imageData;
+        
+        history.push(resultToSave);
+        
+        // Keep only last 50 entries
+        if (history.length > 50) {
+            history = history.slice(-50);
+        }
+        
+        localStorage.setItem(userHistoryKey, JSON.stringify(history));
+        console.log('Facial analysis saved to localStorage successfully');
+    } catch (error) {
+        if (error.name === 'QuotaExceededError') {
+            console.error('localStorage quota exceeded. Clearing old data...');
+            
+            // Try to clear old data and save again
+            try {
+                const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
+                let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
+                
+                // Keep only last 20 entries instead of 50
+                history = history.slice(-20);
+                
+                const resultToSave = { ...result };
+                delete resultToSave.imageData;
+                history.push(resultToSave);
+                
+                localStorage.setItem(userHistoryKey, JSON.stringify(history));
+                console.log('Saved after clearing old data');
+            } catch (retryError) {
+                console.error('Still cannot save to localStorage:', retryError);
+                alert('Warning: Cannot save analysis history. Your localStorage is full. Some older data may be lost.');
+            }
+        } else {
+            console.error('Error saving to localStorage:', error);
+        }
+    }
+}
+
+// BONUS: Add a function to clear old localStorage data if needed
+function clearOldFacialAnalysisData() {
+    try {
+        const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
+        let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
+        
+        // Remove any entries with imageData (from old saves)
+        history = history.map(item => {
+            const cleaned = { ...item };
+            delete cleaned.imageData;
+            return cleaned;
+        });
+        
+        // Keep only last 30 entries
+        history = history.slice(-30);
+        
+        localStorage.setItem(userHistoryKey, JSON.stringify(history));
+        console.log(`Cleaned localStorage. Kept ${history.length} entries.`);
+        
+        return history.length;
+    } catch (error) {
+        console.error('Error cleaning localStorage:', error);
+        return 0;
+    }
+}
+
+// Call this function on page load to clean up any old data with images
+document.addEventListener("DOMContentLoaded", async () => {
+    // Clean up old data first
+    clearOldFacialAnalysisData();
+    
+    // Then initialize as normal
+    await initializeUserContext();
+    updateChart();
+    loadDailyTip();
+    checkAuthenticationStatus();
+});
+
 
 // Save facial analysis to backend
 async function saveFacialAnalysisToBackend(result) {
