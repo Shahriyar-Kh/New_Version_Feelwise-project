@@ -55,7 +55,13 @@ function getUserSpecificKey(baseKey) {
 
 // Initialize webcam
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: true })
+    navigator.mediaDevices.getUserMedia({ 
+        video: { 
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: "user" 
+        } 
+    })
         .then(stream => {
             video.srcObject = stream;
         })
@@ -71,6 +77,9 @@ captureBtn.addEventListener("click", () => {
     imageDataURL = canvas.toDataURL("image/png");
     imagePreview.src = imageDataURL;
     imagePreview.style.display = "block";
+    
+    // Show image quality tips
+    showImageQualityTips();
 });
 
 // Upload Image
@@ -86,6 +95,9 @@ uploadInput.addEventListener("change", () => {
         imageDataURL = reader.result;
         imagePreview.src = imageDataURL;
         imagePreview.style.display = "block";
+        
+        // Show image quality tips
+        showImageQualityTips();
     };
     reader.readAsDataURL(file);
 });
@@ -99,55 +111,109 @@ analyzeEmotionBtn.addEventListener("click", () => {
     sendImageForAnalysis(imageDataURL);
 });
 
-// Send Image to Backend for Analysis
+// Enhanced image preprocessing
+function preprocessImage(base64Image) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions
+            canvas.width = 640;
+            canvas.height = 480;
+            
+            // Draw and resize
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Apply image enhancement
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const enhancedData = enhanceImageData(imageData);
+            ctx.putImageData(enhancedData, 0, 0);
+            
+            // Convert to base64
+            const processedImage = canvas.toDataURL('image/jpeg', 0.9);
+            resolve(processedImage);
+        };
+        img.src = base64Image;
+    });
+}
+
+function enhanceImageData(imageData) {
+    const data = imageData.data;
+    const contrast = 1.2;
+    const brightness = 10;
+    
+    for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.min(255, Math.max(0, (data[i] - 128) * contrast + 128 + brightness));
+        data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - 128) * contrast + 128 + brightness));
+        data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - 128) * contrast + 128 + brightness));
+    }
+    
+    return imageData;
+}
+
+// Improved Send Image for Analysis
 async function sendImageForAnalysis(base64Image) {
     emotionResult.innerHTML = `
         <div class="placeholder-content">
             <i class="fas fa-spinner fa-spin"></i>
-            <p>Analyzing facial expression...</p>
+            <p>Analyzing facial expression with enhanced accuracy...</p>
         </div>
     `;
 
     try {
-        // IMPORTANT: Use the correct endpoint through main-server.js
+        // Preprocess image first
+        const processedImage = await preprocessImage(base64Image);
+        
         const response = await fetch("http://localhost:5000/analyze-face", {
             method: "POST",
             headers: { 
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ image: base64Image })
+            body: JSON.stringify({ 
+                image: processedImage,
+                enhanced: true,
+                timestamp: new Date().toISOString()
+            })
         });
 
-        // Check if response is ok
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Response not OK:', response.status, errorText);
-            throw new Error(`Server error: ${response.status} - ${errorText}`);
+            throw new Error(`Server error: ${response.status}`);
         }
 
-        // Parse response
         const data = await response.json();
-        console.log('Received data:', data);
-
-        // Check for errors in response
+        
         if (data.error) {
             throw new Error(data.details || data.error || "Analysis failed");
         }
 
-        // Verify we have emotion data
-        if (!data.emotion) {
-            throw new Error("No emotion data received from server");
-        }
-
-        // Format the results for consistent storage
-        const formattedResults = formatFacialAnalysisResults(data, base64Image);
+        // Enhanced results formatting
+        const formattedResults = {
+            type: 'facial',
+            emotion: data.emotion.charAt(0).toUpperCase() + data.emotion.slice(1),
+            confidence: data.confidence || 75,
+            emotionDistribution: data.emotion_distribution || {
+                positive: data.emotion_scores?.happy || 30,
+                negative: data.emotion_scores?.sad || data.emotion_scores?.angry || 30,
+                neutral: data.emotion_scores?.neutral || 40
+            },
+            emotionScores: data.emotion_scores || {},
+            recommendation: data.recommendation,
+            challenge: data.challenge,
+            tip: data.tip,
+            trend: data.trend,
+            timestamp: new Date().toISOString(),
+            userId: currentUserId,
+            enhanced: true
+        };
         
-        // Display results
-        displayFacialAnalysisResults(formattedResults);
+        // Enhanced display with more details
+        displayEnhancedFacialAnalysisResults(formattedResults);
         
-        // Update UI components
-        updateRecommendations(data.emotion);
-        updateDailyChallenge(data.emotion);
+        // Update UI components with better recommendations
+        updateEnhancedRecommendations(formattedResults);
+        updateEnhancedDailyChallenge(formattedResults);
         
         // Save to both local storage and backend
         await saveFacialAnalysisToHistory(formattedResults);
@@ -160,36 +226,452 @@ async function sendImageForAnalysis(base64Image) {
         showAssessmentReportOption();
         
         // Record challenge completion
-        await recordFacialAnalysisChallenge(data.emotion);
+        await recordFacialAnalysisChallenge(formattedResults.emotion);
 
     } catch (error) {
         console.error("Facial analysis error:", error);
         
-        // Show detailed error message
+        // Fallback to basic analysis if enhanced fails
+        await fallbackBasicAnalysis(base64Image);
+    }
+}
+
+// Show image quality tips
+function showImageQualityTips() {
+    const tips = `
+        <div class="quality-tips">
+            <p><strong>For best accuracy:</strong></p>
+            <ul>
+                <li>✅ Ensure good lighting on your face</li>
+                <li>✅ Look directly at the camera</li>
+                <li>✅ Keep a neutral expression initially</li>
+                <li>✅ Avoid shadows on your face</li>
+            </ul>
+        </div>
+    `;
+    
+    // Remove existing tips
+    const existingTips = document.querySelector('.quality-tips');
+    if (existingTips) existingTips.remove();
+    
+    // Add tips after the preview section
+    const previewSection = document.querySelector('.preview-section');
+    const tipsDiv = document.createElement('div');
+    tipsDiv.className = 'quality-tips';
+    tipsDiv.innerHTML = tips;
+    previewSection.appendChild(tipsDiv);
+}
+
+// Enhanced results display
+function displayEnhancedFacialAnalysisResults(results) {
+    let html = `<div class="emotion-report-card">`;
+    
+    // Main emotion with confidence
+    html += `
+        <div class="main-emotion">
+            <div class="emotion-icon">
+                <i class="${getEmotionIcon(results.emotion)}"></i>
+            </div>
+            <div class="emotion-details">
+                <h3>${results.emotion}</h3>
+                <div class="confidence-meter">
+                    <div class="confidence-fill" style="width: ${results.confidence}%"></div>
+                    <span class="confidence-text">${results.confidence}% confidence</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Detailed emotion breakdown
+    if (results.emotionScores && Object.keys(results.emotionScores).length > 0) {
+        html += `<div class="detailed-breakdown">`;
+        html += `<h4>Detailed Analysis:</h4>`;
+        
+        const sortedEmotions = Object.entries(results.emotionScores)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+        
+        sortedEmotions.forEach(([emotion, score]) => {
+            if (score > 5) {
+                html += `
+                    <div class="emotion-bar">
+                        <span class="emotion-name">${emotion}</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: ${score}%"></div>
+                            <span class="score">${score.toFixed(1)}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        html += `</div>`;
+    }
+    
+    // Emotion distribution
+    html += `
+        <div class="distribution-summary">
+            <div class="dist-item positive">
+                <i class="fas fa-smile"></i>
+                <span class="dist-value">${results.emotionDistribution.positive.toFixed(1)}% Positive</span>
+            </div>
+            <div class="dist-item negative">
+                <i class="fas fa-frown"></i>
+                <span class="dist-value">${results.emotionDistribution.negative.toFixed(1)}% Negative</span>
+            </div>
+            <div class="dist-item neutral">
+                <i class="fas fa-meh"></i>
+                <span class="dist-value">${results.emotionDistribution.neutral.toFixed(1)}% Neutral</span>
+            </div>
+        </div>
+    `;
+    
+    html += `</div>`;
+    emotionResult.innerHTML = html;
+    
+    // Add CSS for new styles
+    addEnhancedStyles();
+}
+
+// Helper function to get emotion icons
+function getEmotionIcon(emotion) {
+    const iconMap = {
+        'Happy': 'fas fa-smile-beam',
+        'Sad': 'fas fa-sad-tear',
+        'Angry': 'fas fa-angry',
+        'Surprise': 'fas fa-surprise',
+        'Fear': 'fas fa-fearful',
+        'Disgust': 'fas fa-grimace',
+        'Neutral': 'fas fa-meh'
+    };
+    return iconMap[emotion] || 'fas fa-smile';
+}
+
+// Enhanced recommendations
+function updateEnhancedRecommendations(results) {
+    const emotion = results.emotion.toLowerCase();
+    
+    const recMap = {
+        happy: `Your ${results.confidence > 80 ? 'strong' : 'moderate'} happiness is wonderful! 
+                ${results.confidence > 80 ? 'Consider spreading this positivity through acts of kindness.' : 
+                  'Try to identify what specifically is bringing you joy today.'}`,
+        sad: `Feeling sadness ${results.confidence > 70 ? 'is completely valid and natural.' : 'can be a signal to slow down.'}
+              ${results.confidence > 80 ? 'This might be a good time for self-compassion and reaching out for support.' :
+                'Try engaging in a comforting activity or talking to someone you trust.'}`,
+        angry: `${results.confidence > 75 ? 'Strong feelings of anger detected. ' : ''}
+                Physical movement like walking or stretching can help release this energy.`,
+        surprise: `Surprise can lead to new perspectives! 
+                   ${results.confidence > 70 ? 'Lean into this unexpected emotion.' : 'Take a moment to process what surprised you.'}`,
+        fear: `${results.confidence > 65 ? 'Fear detected at significant levels. ' : ''}
+                Grounding techniques (5-4-3-2-1 method) can help manage this feeling.`,
+        disgust: `Disgust often protects our boundaries. 
+                  ${results.confidence > 60 ? 'Consider if there are healthy boundaries to establish.' :
+                    'Reflect on what might be triggering this response.'}`,
+        neutral: `A calm, neutral state ${results.confidence > 80 ? 'indicates emotional balance.' : 'is perfectly normal.'}
+                  This can be a good time for reflection or mindfulness.`
+    };
+    
+    let baseRecommendation = recMap[emotion] || "Take a moment to check in with yourself and your feelings.";
+    
+    // Add confidence-based qualifier
+    let confidenceNote = '';
+    if (results.confidence > 85) {
+        confidenceNote = "High confidence analysis suggests this emotion is clearly present.";
+    } else if (results.confidence > 60) {
+        confidenceNote = "Moderate confidence indicates this emotion is likely present, possibly mixed with others.";
+    } else {
+        confidenceNote = "Lower confidence suggests your emotional state may be complex or mixed.";
+    }
+    
+    // Add quiz link if available
+    const quizFile = getQuizFilename(emotion);
+    let fullRecommendation = `
+        <div class="enhanced-recommendation">
+            <p><strong>Analysis Insight:</strong> ${baseRecommendation}</p>
+            <p><small>${confidenceNote}</small></p>
+    `;
+    
+    if (quizFile) {
+        const quizLink = createQuizLink(emotion, `Take the ${emotion} exploration quiz`);
+        fullRecommendation += `<p class="quiz-link">📋 <strong>Recommended:</strong> ${quizLink} to better understand this emotion.</p>`;
+    }
+    
+    fullRecommendation += `</div>`;
+    
+    recommendationsContent.innerHTML = fullRecommendation;
+}
+
+// Enhanced daily challenge
+function updateEnhancedDailyChallenge(results) {
+    const emotion = results.emotion.toLowerCase();
+    
+    const challengeMap = {
+        happy: `Share your happiness with someone through a specific compliment or act of kindness. 
+                ${results.confidence > 85 ? 'Your strong positive energy can uplift others.' : ''}`,
+        sad: `Practice self-compassion by doing one nurturing thing for yourself. 
+              ${results.confidence > 75 ? 'Allow space for these feelings without judgment.' : ''}`,
+        angry: `Channel this energy into a 10-minute physical activity (walking, stretching, cleaning).`,
+        surprise: `Stay open to unexpected opportunities today and journal about any surprises.`,
+        fear: `Identify one small fear you can face today, no matter how minor.`,
+        disgust: `Focus on finding something beautiful or positive in your immediate environment.`,
+        neutral: `Practice 5 minutes of mindfulness, focusing on your breath and bodily sensations.`
+    };
+    
+    let baseChallenge = challengeMap[emotion] || "Take time to reflect on your current emotional state.";
+    
+    // Add emotional distribution context
+    let distributionNote = '';
+    if (results.emotionDistribution.positive > 60) {
+        distributionNote = "Your predominantly positive emotional state can be leveraged for creative or social activities.";
+    } else if (results.emotionDistribution.negative > 60) {
+        distributionNote = "With more negative emotions present, gentle self-care is especially important today.";
+    }
+    
+    let fullChallenge = `
+        <div class="enhanced-challenge">
+            <p><strong>Today's Emotional Challenge:</strong> ${baseChallenge}</p>
+    `;
+    
+    if (distributionNote) {
+        fullChallenge += `<p class="distribution-note">${distributionNote}</p>`;
+    }
+    
+    // Add challenge link if available
+    const challengeFile = getChallengeFilename(emotion);
+    if (challengeFile) {
+        const challengeLink = createChallengeLink(emotion, `Access detailed ${emotion} exercises`);
+        fullChallenge += `<p class="challenge-link">🎯 <strong>Extended Practice:</strong> ${challengeLink}</p>`;
+    }
+    
+    fullChallenge += `</div>`;
+    
+    dailyChallengeContent.innerHTML = fullChallenge;
+}
+
+// Fallback basic analysis
+async function fallbackBasicAnalysis(base64Image) {
+    try {
+        // Simple fallback using basic DeepFace
+        emotionResult.innerHTML = `
+            <div class="placeholder-content">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Using basic analysis method...</p>
+            </div>
+        `;
+        
+        const response = await fetch("http://localhost:5000/analyze-face", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: base64Image })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const formattedResults = formatFacialAnalysisResults(data, base64Image);
+            displayFacialAnalysisResults(formattedResults);
+            updateRecommendations(data.emotion);
+            updateDailyChallenge(data.emotion);
+        } else {
+            throw new Error("Fallback analysis failed");
+        }
+    } catch (fallbackError) {
         emotionResult.innerHTML = `
             <div class="placeholder-content" style="color: #dc3545;">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p><strong>Error analyzing facial expression</strong></p>
-                <p style="font-size: 0.9em; margin-top: 10px;">${error.message}</p>
-                <p style="font-size: 0.85em; color: #666; margin-top: 5px;">
-                    Please make sure:
-                    <br>• The main server is running on port 5000
-                    <br>• The facial analysis API is running on port 8002
-                    <br>• Your image was captured/uploaded correctly
-                </p>
+                <p><strong>Analysis Unavailable</strong></p>
+                <p>Please try:</p>
+                <ul style="text-align: left; font-size: 0.9em;">
+                    <li>Ensure good lighting on your face</li>
+                    <li>Look directly at the camera</li>
+                    <li>Use a clear, front-facing photo</li>
+                    <li>Try uploading a different image</li>
+                </ul>
             </div>
         `;
     }
 }
 
-// Also update the API_BASE constant at the top of the file:
-// Change this:
-// const API_BASE = "http://localhost:5000/analyze-face";
+// Add enhanced CSS styles
+function addEnhancedStyles() {
+    if (document.getElementById('enhanced-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'enhanced-styles';
+    style.textContent = `
+        .emotion-report-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .main-emotion {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .emotion-icon {
+            font-size: 2.5rem;
+            color: #4a6fa5;
+        }
+        
+        .emotion-details h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        .confidence-meter {
+            width: 200px;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            margin-top: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #66bb6a, #4caf50);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .confidence-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .detailed-breakdown {
+            margin: 20px 0;
+        }
+        
+        .detailed-breakdown h4 {
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .emotion-bar {
+            margin: 8px 0;
+        }
+        
+        .emotion-name {
+            display: inline-block;
+            width: 100px;
+            text-transform: capitalize;
+        }
+        
+        .bar-container {
+            display: inline-block;
+            width: calc(100% - 120px);
+            position: relative;
+        }
+        
+        .bar {
+            height: 20px;
+            background: #4a6fa5;
+            border-radius: 4px;
+        }
+        
+        .bar .score {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            color: #333;
+        }
+        
+        .distribution-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .dist-item {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            flex: 1;
+            margin: 0 5px;
+        }
+        
+        .dist-item.positive {
+            background: rgba(102, 187, 106, 0.1);
+        }
+        
+        .dist-item.negative {
+            background: rgba(239, 83, 80, 0.1);
+        }
+        
+        .dist-item.neutral {
+            background: rgba(255, 202, 40, 0.1);
+        }
+        
+        .dist-item i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .dist-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .enhanced-recommendation, .enhanced-challenge {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .quiz-link, .challenge-link {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .distribution-note {
+            font-style: italic;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .quality-tips {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .quality-tips ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .quality-tips li {
+            margin: 5px 0;
+        }
+    `;
+    
+    document.head.appendChild(style);
+}
 
-
-
-
-// Display facial analysis results
+// Display facial analysis results (legacy function)
 function displayFacialAnalysisResults(results) {
     let html = `<strong>Detected Emotion:</strong> ${results.emotion} (${results.confidence}% confidence)`;
     html += '<div class="emotion-breakdown">';
@@ -204,7 +686,6 @@ function displayFacialAnalysisResults(results) {
 function getQuizFilename(emotion) {
     const normalizedEmotion = emotion.toLowerCase();
     
-    // Map emotions to quiz files
     const emotionQuizMap = {
         'sad': 'sadQuiz.html',
         'sadness': 'sadQuiz.html',
@@ -227,7 +708,6 @@ function getQuizFilename(emotion) {
 function getChallengeFilename(emotion) {
     const normalizedEmotion = emotion.toLowerCase();
     
-    // Map emotions to challenge files
     const emotionChallengeMap = {
         'sad': 'sad.html',
         'sadness': 'sad.html',
@@ -285,7 +765,6 @@ function updateRecommendations(emotion) {
     
     const baseRecommendation = recMap[normalizedEmotion] || "Take a moment to check in with yourself and your feelings.";
     
-    // Check if this emotion has a quiz available
     const quizFile = getQuizFilename(emotion);
     let fullRecommendation = `<p>${baseRecommendation}</p>`;
     
@@ -318,7 +797,6 @@ function updateDailyChallenge(emotion) {
     
     const baseChallenge = challengeMap[normalizedEmotion] || "Take time to reflect on your current emotional state and practice self-awareness.";
     
-    // Check if this emotion has a challenge available
     const challengeFile = getChallengeFilename(emotion);
     let fullChallenge = `<p>${baseChallenge}</p>`;
     
@@ -364,7 +842,6 @@ function updateChart(period = 'daily') {
             avgNegative /= analyses.length;
             avgNeutral /= analyses.length;
         } else {
-            // Default values
             avgPositive = Math.floor(Math.random() * 30) + 40;
             avgNegative = Math.floor(Math.random() * 20) + 15;
             avgNeutral = 100 - avgPositive - avgNegative;
@@ -406,62 +883,60 @@ function updateChart(period = 'daily') {
     });
 }
 
-// FIXED: Remove imageData to prevent localStorage quota exceeded error
 function formatFacialAnalysisResults(data, imageData) {
-    // Map facial emotions to positive/negative/neutral categories
-    const positiveEmotions = ['joy', 'happiness', 'surprise'];
-    const negativeEmotions = ['sadness', 'anger', 'fear', 'disgust'];
-    
     const emotion = data.emotion.toLowerCase();
-    let emotionDistribution = {
+    
+    let emotionDistribution = data.emotion_distribution || {
         positive: 0,
         negative: 0,
         neutral: 0
     };
     
-    if (positiveEmotions.includes(emotion)) {
-        emotionDistribution.positive = data.confidence || 75;
-        emotionDistribution.neutral = (100 - emotionDistribution.positive) * 0.6;
-        emotionDistribution.negative = 100 - emotionDistribution.positive - emotionDistribution.neutral;
-    } else if (negativeEmotions.includes(emotion)) {
-        emotionDistribution.negative = data.confidence || 75;
-        emotionDistribution.neutral = (100 - emotionDistribution.negative) * 0.4;
-        emotionDistribution.positive = 100 - emotionDistribution.negative - emotionDistribution.neutral;
-    } else {
-        emotionDistribution.neutral = data.confidence || 70;
-        emotionDistribution.positive = (100 - emotionDistribution.neutral) * 0.6;
-        emotionDistribution.negative = 100 - emotionDistribution.neutral - emotionDistribution.positive;
+    if (!data.emotion_distribution) {
+        const positiveEmotions = ['happy', 'joy', 'surprise'];
+        const negativeEmotions = ['sad', 'angry', 'fear', 'disgust'];
+        
+        if (positiveEmotions.includes(emotion)) {
+            emotionDistribution.positive = data.confidence || 75;
+            emotionDistribution.neutral = (100 - emotionDistribution.positive) * 0.6;
+            emotionDistribution.negative = 100 - emotionDistribution.positive - emotionDistribution.neutral;
+        } else if (negativeEmotions.includes(emotion)) {
+            emotionDistribution.negative = data.confidence || 75;
+            emotionDistribution.neutral = (100 - emotionDistribution.negative) * 0.4;
+            emotionDistribution.positive = 100 - emotionDistribution.negative - emotionDistribution.neutral;
+        } else {
+            emotionDistribution.neutral = data.confidence || 70;
+            emotionDistribution.positive = (100 - emotionDistribution.neutral) * 0.6;
+            emotionDistribution.negative = 100 - emotionDistribution.neutral - emotionDistribution.positive;
+        }
     }
 
     return {
         type: 'facial',
-        emotion: data.emotion,
+        emotion: data.emotion.charAt(0).toUpperCase() + data.emotion.slice(1),
         confidence: data.confidence || 75,
         emotionDistribution: emotionDistribution,
+        emotionScores: data.emotion_scores || {},
         recommendation: data.recommendation,
         challenge: data.challenge,
         tip: data.tip,
         trend: data.trend,
-        // DON'T STORE IMAGE DATA - it's too large for localStorage!
-        // imageData: imageData,  // <-- REMOVED THIS LINE
         timestamp: new Date().toISOString(),
-        userId: currentUserId
+        userId: currentUserId,
+        enhanced: !!data.enhanced
     };
 }
 
-// Also update saveFacialAnalysisToHistory to add error handling
 function saveFacialAnalysisToHistory(result) {
     try {
         const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
         let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
         
-        // Remove imageData if it somehow got included
         const resultToSave = { ...result };
         delete resultToSave.imageData;
         
         history.push(resultToSave);
         
-        // Keep only last 50 entries
         if (history.length > 50) {
             history = history.slice(-50);
         }
@@ -472,12 +947,10 @@ function saveFacialAnalysisToHistory(result) {
         if (error.name === 'QuotaExceededError') {
             console.error('localStorage quota exceeded. Clearing old data...');
             
-            // Try to clear old data and save again
             try {
                 const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
                 let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
                 
-                // Keep only last 20 entries instead of 50
                 history = history.slice(-20);
                 
                 const resultToSave = { ...result };
@@ -496,20 +969,17 @@ function saveFacialAnalysisToHistory(result) {
     }
 }
 
-// BONUS: Add a function to clear old localStorage data if needed
 function clearOldFacialAnalysisData() {
     try {
         const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
         let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
         
-        // Remove any entries with imageData (from old saves)
         history = history.map(item => {
             const cleaned = { ...item };
             delete cleaned.imageData;
             return cleaned;
         });
         
-        // Keep only last 30 entries
         history = history.slice(-30);
         
         localStorage.setItem(userHistoryKey, JSON.stringify(history));
@@ -521,19 +991,6 @@ function clearOldFacialAnalysisData() {
         return 0;
     }
 }
-
-// Call this function on page load to clean up any old data with images
-document.addEventListener("DOMContentLoaded", async () => {
-    // Clean up old data first
-    clearOldFacialAnalysisData();
-    
-    // Then initialize as normal
-    await initializeUserContext();
-    updateChart();
-    loadDailyTip();
-    checkAuthenticationStatus();
-});
-
 
 // Save facial analysis to backend
 async function saveFacialAnalysisToBackend(result) {
@@ -553,10 +1010,12 @@ async function saveFacialAnalysisToBackend(result) {
                 emotion: result.emotion,
                 confidence: result.confidence,
                 emotionDistribution: result.emotionDistribution,
+                emotionScores: result.emotionScores,
                 recommendation: result.recommendation,
                 challenge: result.challenge,
                 tip: result.tip,
-                timestamp: result.timestamp
+                timestamp: result.timestamp,
+                enhanced: result.enhanced || false
             })
         });
 
@@ -574,7 +1033,6 @@ async function saveFacialAnalysisToBackend(result) {
 async function loadFacialAnalysisHistory(period = 'all') {
     let analyses = [];
     
-    // Try backend first if logged in
     if (token && currentUserId !== "guest") {
         try {
             const res = await fetch(`${API_BASE}/facial-analysis/history/${period}`, {
@@ -588,7 +1046,6 @@ async function loadFacialAnalysisHistory(period = 'all') {
         }
     }
 
-    // Fallback to localStorage
     if (analyses.length === 0) {
         const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
         const allAnalyses = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
@@ -651,7 +1108,6 @@ async function recordFacialAnalysisChallenge(emotion) {
             type: 'facial-analysis-challenge'
         };
 
-        // If logged in, save to database
         if (token && currentUserId !== "guest") {
             await fetch(`${API_BASE}/progress/complete-challenge`, {
                 method: 'POST',
@@ -667,7 +1123,6 @@ async function recordFacialAnalysisChallenge(emotion) {
             });
         }
 
-        // Save to user-specific localStorage
         const userChallengesKey = getUserSpecificKey('completedChallenges');
         let completions = JSON.parse(localStorage.getItem(userChallengesKey)) || [];
         completions.push(newCompletion);

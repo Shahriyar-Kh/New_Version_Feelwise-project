@@ -6,8 +6,8 @@ __pycache__/
 *.env
 *.venv
 venv/
-venv310/
 venv3102/
+face-venv-testing/
 main-venv/
 *.sqlite3
 *.log
