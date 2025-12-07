@@ -65,51 +65,236 @@ document.addEventListener("DOMContentLoaded", function () {
     return currentUserId ? `${baseKey}_${currentUserId}` : `${baseKey}_guest`;
   }
 
-  async function analyzeText(text) {
-    emotionResult.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Analyzing your text...</div>';
-    try {
-      const response = await fetch("http://localhost:5000/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: text }),
-      });
+async function analyzeText(text) {
+  emotionResult.innerHTML =
+    '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Analyzing your text...</div>';
 
-      if (!response.ok) {
-        throw new Error(`Analysis failed: ${response.status} ${response.statusText}`);
-      }
+  try {
+    const response = await fetch("http://localhost:5000/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text }),
+    });
 
-      const data = await response.json();
-      
-      // Show sarcasm alert if detected
-      if (data.sarcasm_detected) {
-        showSarcasmAlert();
-      }
-      
-      if (data && data.emotion_distribution) {
-        const formattedResults = formatAnalysisResults(data);
-        displayAnalysisResults(formattedResults);
-        updateRecommendations(data.emotion_distribution, data.sarcasm_detected);
-        updateDailyChallenge(data.emotion_distribution, data.sarcasm_detected);
-
-        // Save to both local storage and backend
-        await saveAnalysisToHistory(formattedResults);
-        await saveAnalysisToBackend(formattedResults);
-
-        updateProgressChart("daily");
-
-        // Show assessment report option
-        showAssessmentReportOption();
-      } else {
-        throw new Error("Invalid data structure from server");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      emotionResult.innerHTML =
-        '<p class="error"><i class="fas fa-exclamation-circle"></i> Failed to analyze text. Please try again.</p>';
+    if (!response.ok) {
+      throw new Error(`Analysis failed: ${response.status} ${response.statusText}`);
     }
+
+    const data = await response.json();
+
+    if (data.sarcasm_detected) {
+      showSarcasmAlert();
+    }
+
+    if (data && data.emotion_distribution) {
+      const formattedResults = formatAnalysisResults(data);
+      displayAnalysisResults(formattedResults);
+
+      updateRecommendations(data.emotion_distribution, data.sarcasm_detected);
+      updateDailyChallenge(data.emotion_distribution, data.sarcasm_detected);
+
+      // ⬅️ NEW: update daily tip based on emotion
+      const dominantEmotion = Object.entries(data.emotion_distribution)
+        .reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+      updateDailyTipWithEmotion(dominantEmotion);
+
+      await saveAnalysisToHistory(formattedResults);
+      await saveAnalysisToBackend(formattedResults);
+
+      updateProgressChart("daily");
+      showAssessmentReportOption();
+    } else {
+      throw new Error("Invalid data structure from server");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    emotionResult.innerHTML =
+      '<p class="error"><i class="fas fa-exclamation-circle"></i> Failed to analyze text. Please try again.</p>';
   }
+}
+function updateRecommendations(emotionDistribution, sarcasmDetected = false) {
+  let recommendations = [];
+  const entries = Object.entries(emotionDistribution);
+
+  if (entries.length === 0) {
+    recommendationsContent.innerHTML =
+      '<p>No specific recommendations available for this analysis.</p>';
+    return;
+  }
+
+  const dominantEmotion = entries.reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+  const moodDisplayName = getMoodDisplayName(dominantEmotion);
+  const quizPageUrl = getQuizPageUrl(dominantEmotion);
+
+  const recMap = {
+    joy: [
+      "Your joy is contagious! Consider sharing your happiness with others today.",
+      "Capture this positive moment by journaling about what's making you happy.",
+      "Use this positive energy to try something new or creative.",
+      `Perform the daily ${moodDisplayName.toLowerCase()} quiz to boost your mood further.`,
+    ],
+    love: [
+      "Nurture your loving feelings - reach out to someone you care about.",
+      "Practice self-love with a small act of kindness for yourself.",
+      "Consider volunteering or helping others to spread your loving energy.",
+      `Take the ${moodDisplayName.toLowerCase()} quiz to explore your positive emotions.`,
+    ],
+    surprise: [
+      "Embrace the unexpected! Try going with the flow today.",
+      "Channel your surprise into curiosity - learn something new.",
+      "Reflect on what surprised you and how it made you feel.",
+      `Explore the ${moodDisplayName.toLowerCase()} quiz for more positive insights.`,
+    ],
+    sadness: [
+      "Be gentle with yourself. It's okay to feel sad sometimes.",
+      "Consider talking to a trusted friend about how you're feeling.",
+      "Engage in comforting activities like listening to soothing music or taking a warm bath.",
+      `Take the ${moodDisplayName.toLowerCase()} quiz to help process your emotions.`,
+    ],
+    anger: [
+      "Try physical activity to release angry energy in a healthy way.",
+      "Practice deep breathing (4-7-8 technique) to calm your nervous system.",
+      "Identify the source of your anger and consider constructive ways to address it.",
+      `Complete the ${moodDisplayName.toLowerCase()} quiz to help manage your emotions better.`,
+    ],
+    fear: [
+      "Ground yourself with the 5-4-3-2-1 technique.",
+      "Write down your fears to process them more objectively.",
+      "Practice progressive muscle relaxation to reduce physical tension.",
+      `Take the ${moodDisplayName.toLowerCase()} quiz to build confidence and reduce fear.`,
+    ],
+    neutral: [
+      "Take a moment to reflect on your current emotional state.",
+      "Practice mindfulness to become more aware of subtle emotions.",
+      "Consider keeping a mood journal to track emotional patterns.",
+      `Take a general mood quiz to explore different emotional states.`,
+    ],
+  };
+
+  recommendations.push(...(recMap[dominantEmotion] || recMap.neutral));
+
+  // Sarcasm modifier
+  if (sarcasmDetected) {
+    recommendations.unshift(
+      "Your text suggests sarcasm. It might be helpful to explore what's behind these feelings."
+    );
+  }
+
+  let html = "<ul>";
+  recommendations.forEach((rec) => (html += `<li>${rec}</li>`));
+  html += "</ul>";
+
+  html += `
+    <div style="margin-top: 15px; text-align: center;">
+      <button onclick="navigateToQuizPage('${dominantEmotion}')" class="quiz-btn">
+        <i class="fas fa-brain"></i> Take ${moodDisplayName} Quiz
+      </button>
+    </div>
+  `;
+
+  recommendationsContent.innerHTML = html;
+
+  // ⬅️ NEW: Update Daily Tip with emotion-specific content
+  updateDailyTipWithEmotion(dominantEmotion);
+}
+function updateDailyTipWithEmotion(emotion) {
+  const normalizedEmotion = emotion.toLowerCase();
+
+  const emotionTips = {
+    joy: {
+      tip: "Your joy is contagious! Sharing positive moments amplifies happiness for you and others.",
+      page: "happyTips.html",
+      emoji: "😊"
+    },
+    happiness: {
+      tip: "Happiness is a journey, not a destination. Savor this wonderful feeling!",
+      page: "happyTips.html",
+      emoji: "😊"
+    },
+    happy: {
+      tip: "Your positive energy can brighten someone's day. Keep spreading joy!",
+      page: "happyTips.html",
+      emoji: "😊"
+    },
+    sadness: {
+      tip: "It's okay to feel sad. Allow yourself to process these emotions with self-compassion.",
+      page: "sadTips.html",
+      emoji: "☹️"
+    },
+    sad: {
+      tip: "Be gentle with yourself during difficult times. Healing takes time.",
+      page: "sadTips.html",
+      emoji: "☹️"
+    },
+    anger: {
+      tip: "Take a moment to breathe before reacting. Your emotions are valid, but how you express them matters.",
+      page: "angryTips.html",
+      emoji: "😠"
+    },
+    angry: {
+      tip: "Channel your anger into positive action. Physical activity can help release tension.",
+      page: "angryTips.html",
+      emoji: "😠"
+    },
+    fear: {
+      tip: "Face your fears one small step at a time. Courage is not the absence of fear, but action despite it.",
+      page: "fearTips.html",
+      emoji: "😰"
+    },
+    surprise: {
+      tip: "Embrace the unexpected! Life's surprises can lead to growth and new opportunities.",
+      page: "surpriseTips.html",
+      emoji: "😲"
+    },
+    surprised: {
+      tip: "Stay curious and open-minded when faced with the unexpected.",
+      page: "surpriseTips.html",
+      emoji: "😲"
+    },
+    love: {
+      tip: "Love is a powerful emotion. Express it freely and nurture the connections that matter.",
+      page: "loveTips.html",
+      emoji: "💖"
+    },
+    disgust: {
+      tip: "Identify what's causing discomfort and take steps to address it constructively.",
+      page: "angryTips.html",
+      emoji: "😠"
+    },
+    neutral: {
+      tip: "Being in a calm state is an opportunity for reflection and self-awareness.",
+      page: "wellnessTips.html",
+      emoji: "😊"
+    }
+  };
+
+  const tipData = emotionTips[normalizedEmotion] || emotionTips["neutral"];
+
+  const html = `
+    <div class="tip-icon">
+      <span style="font-size: 2rem;">${tipData.emoji}</span>
+    </div>
+    <p style="margin-bottom: 1.5rem;">${tipData.tip}</p>
+    <a href="${tipData.page}"
+       style="
+         display: inline-block;
+         padding: 12px 24px;
+         background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+         color: white;
+         text-decoration: none;
+         border-radius: 25px;
+         font-weight: 600;
+         transition: all 0.3s ease;
+         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+       "
+    >
+      View ${normalizedEmotion.charAt(0).toUpperCase() + normalizedEmotion.slice(1)} Wellness Tips
+    </a>
+  `;
+
+  dailyTipContent.innerHTML = html;
+}
+
 
   function showSarcasmAlert() {
     // Create a subtle notification for sarcasm
@@ -280,88 +465,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return moodNames[emotion] || "Happy";
   }
 
-  function updateRecommendations(emotionDistribution, sarcasmDetected = false) {
-    let recommendations = [];
-    const entries = Object.entries(emotionDistribution);
-    if (entries.length === 0) {
-      recommendationsContent.innerHTML = '<p>No specific recommendations available for this analysis.</p>';
-      return;
-    }
-    
-    const dominantEmotion = entries.reduce((a, b) => a[1] > b[1] ? a : b)[0];
-    const moodDisplayName = getMoodDisplayName(dominantEmotion);
-    const quizPageUrl = getQuizPageUrl(dominantEmotion);
-
-    const recMap = {
-      joy: [
-        "Your joy is contagious! Consider sharing your happiness with others today.",
-        "Capture this positive moment by journaling about what's making you happy.",
-        "Use this positive energy to try something new or creative.",
-        `Perform the daily ${moodDisplayName.toLowerCase()} quiz to boost your mood further.`
-      ],
-      love: [
-        "Nurture your loving feelings - reach out to someone you care about.",
-        "Practice self-love with a small act of kindness for yourself.",
-        "Consider volunteering or helping others to spread your loving energy.",
-        `Take the ${moodDisplayName.toLowerCase()} quiz to explore your positive emotions.`
-      ],
-      surprise: [
-        "Embrace the unexpected! Try going with the flow today.",
-        "Channel your surprise into curiosity - learn something new.",
-        "Reflect on what surprised you and how it made you feel.",
-        `Explore the ${moodDisplayName.toLowerCase()} quiz for more positive insights.`
-      ],
-      sadness: [
-        "Be gentle with yourself. It's okay to feel sad sometimes.",
-        "Consider talking to a trusted friend about how you're feeling.",
-        "Engage in comforting activities like listening to soothing music or taking a warm bath.",
-        `Take the ${moodDisplayName.toLowerCase()} quiz to help process your emotions.`
-      ],
-      anger: [
-        "Try physical activity to release angry energy in a healthy way.",
-        "Practice deep breathing (4-7-8 technique) to calm your nervous system.",
-        "Identify the source of your anger and consider constructive ways to address it.",
-        `Complete the ${moodDisplayName.toLowerCase()} quiz to help manage your emotions better.`
-      ],
-      fear: [
-        "Ground yourself with the 5-4-3-2-1 technique: name 5 things you can see, 4 you can touch, etc.",
-        "Write down your fears to help process them more objectively.",
-        "Practice progressive muscle relaxation to reduce physical tension.",
-        `Take the ${moodDisplayName.toLowerCase()} quiz to build confidence and reduce fear.`
-      ],
-      neutral: [
-        "Take a moment to reflect on your current emotional state.",
-        "Practice mindfulness to become more aware of subtle emotions.",
-        "Consider keeping a mood journal to track emotional patterns.",
-        `Take a general mood quiz to explore different emotional states.`
-      ]
-    };
-
-    recommendations.push(...(recMap[dominantEmotion] || recMap.neutral));
-
-    // Adjust recommendations for sarcasm
-    if (sarcasmDetected) {
-      recommendations.unshift("Your text suggests sarcasm. It might be helpful to explore what's behind these feelings.");
-    }
-
-    let html = "<ul>";
-    recommendations.forEach((rec) => (html += `<li>${rec}</li>`));
-    html += "</ul>";
-
-    // Add the mood-specific quiz button for recommendations
-    html += `
-      <div style="margin-top: 15px; text-align: center;">
-        <button 
-          onclick="navigateToQuizPage('${dominantEmotion}')" 
-          class="quiz-btn"
-        >
-          <i class="fas fa-brain"></i> Take ${moodDisplayName} Quiz
-        </button>
-      </div>
-    `;
-
-    recommendationsContent.innerHTML = html;
-  }
 
   function updateDailyChallenge(emotionDistribution, sarcasmDetected = false) {
     const entries = Object.entries(emotionDistribution);

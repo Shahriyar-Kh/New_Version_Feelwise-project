@@ -53,26 +53,7 @@
       100% { transform: translateY(100vh); opacity: 0; }
     }
     
-    /* Top Header */
-    .top-header {
-      padding: 1.5rem;
-      font-size: 2rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-      background: rgba(106, 137, 204, 0.8);
-      box-shadow: 0 3px 12px rgba(0,0,0,0.2);
-      position: relative;
-      z-index: 10;
-    }
 
-    .logo {
-      text-transform: uppercase;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
 
     /* Main Card */
     .maincon1 {
@@ -242,6 +223,8 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="back-button.css">
+  <link rel="stylesheet" href="header.css">
 </head>
 <body>
   <!-- Background Bubbles -->
@@ -250,10 +233,24 @@
   <!-- Raindrops -->
   <div id="raindrops-container"></div>
   
-  <!-- Header -->
-  <div class="top-header">
-    <div class="logo"><i class="fas fa-cloud"></i> FeelWise</div>
-  </div>
+  <!-- Header with Navigation -->
+  <header class="site-header">
+    <div class="header-content">
+      <div class="logo-container">
+        <h1 class="logo">
+          <i class="fas fa-brain"></i>
+          FeelWise
+        </h1>
+      </div>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link"><i class="fas fa-chart-line"></i> Home</a>
+        <a href="module.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="progress.html" class="nav-link"><i class="fas fa-history"></i> History</a>
+        <a href="profile.html" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+        <button onclick="goBack()" class="btn-back">Back</button>
+      </nav>
+    </div>
+  </header>
 
   <!-- Main Content -->
   <div class="container maincon1 mt-5">
@@ -379,5 +376,6 @@
       });
     });
   </script>
+  <script src="back-button.js"></script>
 </body>
 </html>
