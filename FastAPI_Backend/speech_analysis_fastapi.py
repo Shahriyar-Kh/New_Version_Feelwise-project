@@ -340,6 +340,7 @@ async def upload_test(file: UploadFile = File(...)):
     emotion_idx = int(torch.argmax(probs).item())
     raw_label = id2label.get(emotion_idx, "unknown")
     emotion = standardize_emotion(raw_label)
+    
 
     # Clean up output wav
     try:

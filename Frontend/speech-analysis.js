@@ -218,6 +218,53 @@ document.addEventListener('DOMContentLoaded', function() {
             resetUI();
         }
     }
+    // --- begin: add to speech-analysis.js ---
+function saveSpeechAnalysisToHistory(result) {
+    try {
+        // keep same key scheme as full_assessment uses
+        const baseKey = 'speechAnalysisHistory';
+        const userKey = (typeof getUserSpecificKey === 'function')
+            ? getUserSpecificKey(baseKey)
+            : (localStorage.getItem('userId') ? `${baseKey}_${localStorage.getItem('userId')}` : `${baseKey}_guest`);
+
+        let history = JSON.parse(localStorage.getItem(userKey)) || [];
+
+        // Build a compact object to store (drop audio binary)
+        const entry = {
+            type: 'speech',
+            emotion: (result.emotion || result.raw_label || 'neutral'),
+            confidence: typeof result.confidence === 'number' ? result.confidence : (result.probabilities ? Math.max(...Object.values(result.probabilities)) : 0),
+            transcript: result.transcript || '',
+            top3: result.top3 || result.top_emotions || [],
+            probabilities: result.probabilities || {},
+            duration_sec: result.duration_sec || null,
+            timestamp: result.timestamp || new Date().toISOString(),
+            userId: (window.currentUserId || 'guest'),
+        };
+
+        // keep recent N entries
+        history.push(entry);
+        if (history.length > 100) history = history.slice(-100);
+
+        localStorage.setItem(userKey, JSON.stringify(history));
+        console.log('Saved speech analysis to localStorage (key):', userKey);
+    } catch (err) {
+        console.warn('Failed to save speech analysis:', err);
+        // if localStorage full, try trimming then save
+        try {
+            const userKey = (typeof getUserSpecificKey === 'function') ? getUserSpecificKey('speechAnalysisHistory') : 'speechAnalysisHistory_guest';
+            let history = JSON.parse(localStorage.getItem(userKey)) || [];
+            history = history.slice(-20); // keep last 20
+            history.push(entry);
+            localStorage.setItem(userKey, JSON.stringify(history));
+            console.log('Saved after trimming old entries');
+        } catch (e) {
+            console.error('Still could not save speech history:', e);
+        }
+    }
+}
+// --- end: add to speech-analysis.js ---
+
     
  
     // Display analysis results with detailed emotion probabilities
@@ -717,7 +764,9 @@ function updateDailyTipWithEmotion(emotion) {
 async function analyzeSpeech(transcript, audioBase64) {
     console.log("=> analyzeSpeech() starting", { transcript: transcript || "(none)", audioLength: audioBase64?.length });
 
-    const url = "http://localhost:5000/analyze-speech";
+    // In speech-analysis.js — update analyzeSpeech()
+const url = "http://127.0.0.1:8000/analyze_speech";
+
     const payload = { transcript: transcript || "", audio: audioBase64 };
 
     try {

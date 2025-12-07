@@ -59,6 +59,10 @@
           "Those who restrain anger and pardon people – and Allah loves those who do good. (Surah Al-Imran 3:134)",
         Neutral: "And He found you lost and guided you. (Surah Ad-Duha 93:7)",
       };
+      function cap(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 
       // Load user profile
       async function loadProfile() {
@@ -93,7 +97,8 @@
 
           if (user.mood) {
             moodDisplay.textContent = `Mood: ${user.mood}`;
-            ayahContainer.textContent = moodAyahs[user.mood] || "";
+            ayahContainer.textContent = moodAyahs[cap(user.mood)] || "";
+
             ayahContainer.style.display = "block";
           }
         } catch (error) {
@@ -322,7 +327,7 @@
 
           if (response.ok) {
             moodDisplay.textContent = `Mood: ${data.mood}`;
-            ayahContainer.textContent = moodAyahs[data.mood] || "";
+            ayahContainer.textContent = moodAyahs[cap(data.mood)] || "";
             ayahContainer.style.display = "block";
           } else {
             alert(data.error || "Failed to update mood");

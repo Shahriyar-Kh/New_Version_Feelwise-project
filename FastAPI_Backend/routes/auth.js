@@ -472,6 +472,7 @@ router.post("/reset-password", async (req, res) => {
 });
 
 // Get current user
+// Get current user
 router.get("/me", auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("-password");
@@ -483,8 +484,45 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
+// Update user mood
+router.post("/mood", auth, async (req, res) => {
+  try {
+    const { mood } = req.body;
+    if (!mood) {
+      return res.status(400).json({ error: "Mood is required" });
+    }
 
+    const normalizedMood = mood.toLowerCase();
+    const allowedMoods = ["happy", "sad", "angry", "neutral"];
 
+    if (!allowedMoods.includes(normalizedMood)) {
+      return res.status(400).json({ error: "Invalid mood" });
+    }
+
+    // 🔑 Use same pattern as /me
+    const userId = req.userId;
+    if (!userId) {
+      console.error("Mood route: req.userId missing");
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { mood: normalizedMood },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Frontend expects { mood: "..." }
+    return res.json({ mood: updatedUser.mood });
+  } catch (err) {
+    console.error("Mood update error:", err);
+    return res.status(500).json({ error: "Failed to update mood" });
+  }
+});
 module.exports = router;
 
 // Add this test endpoint to your routes/auth.js file
