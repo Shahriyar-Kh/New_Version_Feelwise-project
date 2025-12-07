@@ -213,7 +213,7 @@ async function sendImageForAnalysis(base64Image) {
         
         // Update UI components with better recommendations
         updateEnhancedRecommendations(formattedResults);
-        updateEnhancedDailyChallenge(formattedResults);
+        updateDailyChallenge(data.emotion);
         
         // Save to both local storage and backend
         await saveFacialAnalysisToHistory(formattedResults);
@@ -671,15 +671,114 @@ function addEnhancedStyles() {
     document.head.appendChild(style);
 }
 
-// Display facial analysis results (legacy function)
+// Display facial analysis results with beautiful UI
 function displayFacialAnalysisResults(results) {
-    let html = `<strong>Detected Emotion:</strong> ${results.emotion} (${results.confidence}% confidence)`;
-    html += '<div class="emotion-breakdown">';
-    html += `<p>Positive: ${results.emotionDistribution.positive.toFixed(1)}%</p>`;
-    html += `<p>Negative: ${results.emotionDistribution.negative.toFixed(1)}%</p>`;
-    html += `<p>Neutral: ${results.emotionDistribution.neutral.toFixed(1)}%</p>`;
-    html += '</div>';
+    // Get emotion color based on type
+    const emotionColors = {
+        happy: 'var(--color-happy)',
+        sad: 'var(--color-sad)',
+        angry: 'var(--color-angry)',
+        surprised: 'var(--color-surprised)',
+        fearful: 'var(--color-fearful)',
+        disgusted: 'var(--color-disgusted)',
+        neutral: 'var(--color-neutral)'
+    };
+    
+    const emotionColor = emotionColors[results.emotion.toLowerCase()] || 'var(--color-primary)';
+    
+    // Format emotion name
+    const formattedEmotion = results.emotion.charAt(0).toUpperCase() + results.emotion.slice(1);
+    
+    let html = `
+        <div class="emotion-card">
+            <div class="emotion-header" style="border-left-color: ${emotionColor}">
+                <div class="emotion-icon" style="background-color: ${emotionColor}">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="emotion-title">
+                    <h3>${formattedEmotion}</h3>
+                    <p class="confidence-badge">
+                        <i class="fas fa-chart-line"></i>
+                        ${results.confidence}% confidence
+                    </p>
+                </div>
+            </div>
+            
+            <div class="emotion-breakdown-section">
+                <h4><i class="fas fa-chart-pie"></i> Emotion Distribution</h4>
+                <div class="emotion-breakdown">
+                    ${createEmotionBar('positive', results.emotionDistribution.positive, '#4CAF50')}
+                    ${createEmotionBar('negative', results.emotionDistribution.negative, '#F44336')}
+                    ${createEmotionBar('neutral', results.emotionDistribution.neutral, '#9E9E9E')}
+                </div>
+                
+                <div class="emotion-stats">
+                    <div class="stat-item positive">
+                        <span class="stat-label">Positive</span>
+                        <span class="stat-value">${results.emotionDistribution.positive.toFixed(1)}%</span>
+                    </div>
+                    <div class="stat-item negative">
+                        <span class="stat-label">Negative</span>
+                        <span class="stat-value">${results.emotionDistribution.negative.toFixed(1)}%</span>
+                    </div>
+                    <div class="stat-item neutral">
+                        <span class="stat-label">Neutral</span>
+                        <span class="stat-value">${results.emotionDistribution.neutral.toFixed(1)}%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="emotion-insights">
+                <h4><i class="fas fa-lightbulb"></i> Insights</h4>
+                <p class="insight-text">${generateInsight(results.emotion, results.confidence)}</p>
+            </div>
+            
+            <div class="last-updated">
+                <i class="fas fa-clock"></i> Analyzed just now
+            </div>
+        </div>
+    `;
+    
     emotionResult.innerHTML = html;
+    emotionResult.classList.add('visible');
+}
+
+// Helper function to create emotion progress bars
+function createEmotionBar(type, value, color) {
+    return `
+        <div class="emotion-bar">
+            <div class="bar-label">
+                <span class="bar-name">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                <span class="bar-value">${value.toFixed(1)}%</span>
+            </div>
+            <div class="bar-container">
+                <div class="bar-fill ${type}" style="width: ${value}%; background-color: ${color};"></div>
+            </div>
+        </div>
+    `;
+}
+
+// Helper function to generate insights based on emotion
+function generateInsight(emotion, confidence) {
+    const insights = {
+        happy: confidence > 80 
+            ? "The subject appears very happy! This is great to see."
+            : "The subject shows signs of happiness. Consider this a positive interaction.",
+        sad: confidence > 80 
+            ? "The subject appears quite sad. Consider offering support."
+            : "There are subtle signs of sadness. Check if everything is okay.",
+        angry: confidence > 80 
+            ? "The subject appears angry. Approach with caution and empathy."
+            : "Some signs of frustration detected. This might be a tense moment.",
+        neutral: confidence > 80 
+            ? "The subject appears neutral and composed."
+            : "Emotions appear balanced and neutral at the moment.",
+        surprised: "The subject shows surprise! Something unexpected might have happened.",
+        fearful: "The subject appears fearful. Ensure a safe and comfortable environment.",
+        disgusted: "The subject shows signs of disgust. Consider what might be causing this reaction."
+    };
+    
+    return insights[emotion.toLowerCase()] || "Emotion analysis complete. Consider the context of this expression.";
 }
 
 // Get quiz filename based on emotion
@@ -1152,7 +1251,7 @@ function showAssessmentReportOption() {
         font-size: 14px;
     `;
     notification.innerHTML = `
-        ✅ Facial analysis complete! <a href="full_assessment.html" style="color: #1976d2; text-decoration: underline;">View your comprehensive assessment report</a>
+        ✅ Facial analysis complete! 
     `;
 
     const existingNotification = document.querySelector('.analysis-complete-notification');
@@ -1289,3 +1388,382 @@ window.addEventListener('storage', function(e) {
         location.reload();
     }
 });
+
+// Add this enhanced function to facial-analysis.js
+
+// Enhanced Tip of the Day with emotion-specific tips and links
+function updateDailyTipWithEmotion(emotion) {
+    const normalizedEmotion = emotion.toLowerCase();
+    
+    const emotionTips = {
+        joy: {
+            tip: "Your joyful expression reflects inner happiness. Facial expressions of joy can actually boost your mood even more!",
+            detailedTip: "Research shows that smiling triggers the release of dopamine and serotonin, creating a positive feedback loop. Keep expressing that joy!",
+            page: "happyTips.html",
+            emoji: "😊",
+            color: "#4caf50"
+        },
+        happiness: {
+            tip: "Smiling activates neural pathways that support emotional well-being. Keep smiling!",
+            detailedTip: "Even forced smiles can improve your mood. The facial feedback hypothesis suggests your brain interprets your facial expressions as genuine emotions.",
+            page: "happyTips.html",
+            emoji: "😊",
+            color: "#4caf50"
+        },
+        happy: {
+            tip: "Your happy expression is contagious! Research shows happiness spreads through facial expressions.",
+            detailedTip: "Mirror neurons in others' brains activate when they see your smile, making them more likely to smile too. Share your happiness!",
+            page: "happyTips.html",
+            emoji: "😊",
+            color: "#4caf50"
+        },
+        sadness: {
+            tip: "Your facial expression shows you're processing difficult emotions. Be gentle with yourself.",
+            detailedTip: "Facial expressions of sadness are valid and important. They signal to others that you need support and help you process grief.",
+            page: "sadTips.html",
+            emoji: "☹️",
+            color: "#2196f3"
+        },
+        sad: {
+            tip: "It's okay to show sadness. Expressing emotions through facial expressions is healthy.",
+            detailedTip: "Suppressing sad expressions can intensify negative emotions. Allow yourself to express what you're feeling naturally.",
+            page: "sadTips.html",
+            emoji: "☹️",
+            color: "#2196f3"
+        },
+        anger: {
+            tip: "Notice the tension in your facial muscles. Relaxing your face can help calm your emotions.",
+            detailedTip: "Anger creates tension in your jaw, forehead, and eyebrows. Progressive facial relaxation can reduce the intensity of angry feelings.",
+            page: "angryTips.html",
+            emoji: "😠",
+            color: "#f44336"
+        },
+        angry: {
+            tip: "Try facial relaxation exercises - consciously relax your jaw, forehead, and eyes to reduce anger.",
+            detailedTip: "Clenched jaws and furrowed brows intensify anger. Softening these muscles sends calming signals to your brain.",
+            page: "angryTips.html",
+            emoji: "😠",
+            color: "#f44336"
+        },
+        fear: {
+            tip: "Your facial expression reveals anxiety. Practice gentle facial massage to release tension.",
+            detailedTip: "Fear causes widened eyes and raised eyebrows. Gently massaging your temples and jaw can activate your relaxation response.",
+            page: "fearTips.html",
+            emoji: "😰",
+            color: "#9c27b0"
+        },
+        fearful: {
+            tip: "Notice how fear affects your facial muscles. Deep breathing while relaxing your face can help.",
+            detailedTip: "Fear creates tension around the eyes and forehead. Combining facial relaxation with slow breathing activates your parasympathetic nervous system.",
+            page: "fearTips.html",
+            emoji: "😰",
+            color: "#9c27b0"
+        },
+        surprise: {
+            tip: "Your surprised expression shows you're engaged with life! Stay open to new experiences.",
+            detailedTip: "Surprise expressions with raised eyebrows and wide eyes indicate active attention and curiosity - embrace this natural response!",
+            page: "surpriseTips.html",
+            emoji: "😲",
+            color: "#ff9800"
+        },
+        surprised: {
+            tip: "Surprise activates your attention systems. Use this heightened awareness positively!",
+            detailedTip: "The brief surprise response prepares you to quickly process new information. Channel this alertness into positive action.",
+            page: "surpriseTips.html",
+            emoji: "😲",
+            color: "#ff9800"
+        },
+        love: {
+            tip: "Your loving expression radiates warmth. Facial expressions of love strengthen relationships.",
+            detailedTip: "Soft eyes and gentle smiles signal affection and trust. These expressions trigger oxytocin release, deepening emotional bonds.",
+            page: "loveTips.html",
+            emoji: "💖",
+            color: "#e91e63"
+        },
+        disgust: {
+            tip: "Your facial expression indicates discomfort. Identify the source and address it constructively.",
+            detailedTip: "Disgust expressions (wrinkled nose, raised upper lip) are protective responses. Honor what your body is telling you needs to change.",
+            page: "angryTips.html",
+            emoji: "😖",
+            color: "#795548"
+        },
+        neutral: {
+            tip: "A neutral expression can indicate calmness and composure. Use this balance for reflection.",
+            detailedTip: "A relaxed, neutral face often accompanies mindfulness and emotional equilibrium. This is an excellent state for decision-making.",
+            page: "wellnessTips.html",
+            emoji: "😐",
+            color: "#607d8b"
+        }
+    };
+
+    const tipData = emotionTips[normalizedEmotion] || emotionTips['neutral'];
+    
+    const html = `
+        <div style="text-align: center; padding: 1rem;">
+            <div style="
+                width: 90px;
+                height: 90px;
+                margin: 0 auto 1.5rem;
+                background: linear-gradient(135deg, ${tipData.color}25 0%, ${tipData.color}10 100%);
+                border: 3px solid ${tipData.color};
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 3rem;
+                box-shadow: 0 8px 25px ${tipData.color}30;
+                animation: emotionPulse 2.5s ease-in-out infinite;
+                position: relative;
+            ">
+                <div style="
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    border: 2px solid ${tipData.color}40;
+                    animation: ripple 2s ease-out infinite;
+                "></div>
+                ${tipData.emoji}
+            </div>
+            <h4 style="
+                color: ${tipData.color};
+                margin-bottom: 0.75rem;
+                font-weight: 700;
+                font-size: 1.15rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            ">Facial Expression Insight</h4>
+            <p style="
+                margin-bottom: 1rem;
+                line-height: 1.8;
+                color: #4a5568;
+                font-size: 1.05rem;
+                font-weight: 500;
+            ">${tipData.tip}</p>
+            <p style="
+                margin-bottom: 2rem;
+                line-height: 1.7;
+                color: #718096;
+                font-size: 0.95rem;
+                padding: 1rem;
+                background: ${tipData.color}08;
+                border-radius: 12px;
+                border-left: 4px solid ${tipData.color};
+            ">
+                <i class="fas fa-lightbulb" style="color: ${tipData.color}; margin-right: 8px;"></i>
+                ${tipData.detailedTip}
+            </p>
+            <a href="${tipData.page}" 
+               style="
+                 display: inline-flex;
+                 align-items: center;
+                 justify-content: center;
+                 gap: 12px;
+                 padding: 16px 36px;
+                 background: linear-gradient(135deg, ${tipData.color} 0%, ${tipData.color}cc 100%);
+                 color: white;
+                 text-decoration: none;
+                 border-radius: 50px;
+                 font-weight: 700;
+                 font-size: 1.05rem;
+                 transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                 box-shadow: 0 6px 20px ${tipData.color}50;
+                 text-transform: uppercase;
+                 letter-spacing: 0.5px;
+                 border: 2px solid transparent;
+               "
+               onmouseover="
+                 this.style.transform='translateY(-4px) scale(1.05)'; 
+                 this.style.boxShadow='0 12px 35px ${tipData.color}60';
+                 this.style.borderColor='${tipData.color}';
+               "
+               onmouseout="
+                 this.style.transform='translateY(0) scale(1)'; 
+                 this.style.boxShadow='0 6px 20px ${tipData.color}50';
+                 this.style.borderColor='transparent';
+               "
+            >
+                <i class="fas fa-spa" style="font-size: 1.3rem;"></i>
+                <span>Explore ${normalizedEmotion.charAt(0).toUpperCase() + normalizedEmotion.slice(1)} Wellness Tips</span>
+                <i class="fas fa-arrow-right" style="font-size: 1rem;"></i>
+            </a>
+        </div>
+        <style>
+            @keyframes emotionPulse {
+                0%, 100% {
+                    transform: scale(1);
+                    box-shadow: 0 8px 25px ${tipData.color}30;
+                }
+                50% {
+                    transform: scale(1.08);
+                    box-shadow: 0 12px 35px ${tipData.color}45;
+                }
+            }
+            @keyframes ripple {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(1.5);
+                    opacity: 0;
+                }
+            }
+        </style>
+    `;
+    
+    dailyTipContent.innerHTML = html;
+}
+
+// Update the sendImageForAnalysis function to update tips
+async function sendImageForAnalysis(base64Image) {
+    emotionResult.innerHTML = "Analyzing facial expression...";
+
+    try {
+        const response = await fetch("http://localhost:5000/analyze-face", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: base64Image })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.details || "Analysis failed");
+        }
+
+        const formattedResults = formatFacialAnalysisResults(data, base64Image);
+        displayFacialAnalysisResults(formattedResults);
+        updateRecommendations(data.emotion);
+        updateDailyChallenge(data.emotion);
+        
+        // Update Tip of the Day with emotion-specific tip
+        updateDailyTipWithEmotion(data.emotion);
+
+        await saveFacialAnalysisToHistory(formattedResults);
+        await saveFacialAnalysisToBackend(formattedResults);
+        updateChart('daily');
+        showAssessmentReportOption();
+        await recordFacialAnalysisChallenge(data.emotion);
+
+    } catch (error) {
+        console.error("Facial analysis error:", error);
+        emotionResult.innerHTML = "Error analyzing facial expression. Please try again.";
+    }
+}
+
+// Replace the existing loadDailyTip function with this improved version
+function loadDailyTip() {
+    const generalTips = [
+        {
+            tip: "Facial expressions can influence how you feel - try smiling to boost your mood.",
+            detail: "The facial feedback hypothesis shows that your facial muscles send signals to your brain that can actually change your emotional state.",
+            emoji: "😊",
+            page: "wellnessTips.html",
+            color: "#6366F1"
+        },
+        {
+            tip: "Practice facial relaxation exercises to reduce tension and stress.",
+            detail: "Progressive facial muscle relaxation involves consciously tensing and releasing facial muscles to reduce overall stress levels.",
+            emoji: "😌",
+            page: "wellnessTips.html",
+            color: "#10B981"
+        },
+        {
+            tip: "Your face is a window to your emotions - use this awareness for self-care.",
+            detail: "Being mindful of your facial expressions throughout the day can help you identify and manage your emotional states more effectively.",
+            emoji: "🪞",
+            page: "wellnessTips.html",
+            color: "#8B5CF6"
+        },
+        {
+            tip: "Mirror work can help you practice positive facial expressions and self-compassion.",
+            detail: "Spending a few minutes daily looking at your reflection while expressing positive emotions can boost self-esteem and emotional well-being.",
+            emoji: "✨",
+            page: "wellnessTips.html",
+            color: "#EC4899"
+        }
+    ];
+    
+    const randomTip = generalTips[Math.floor(Math.random() * generalTips.length)];
+    
+    const html = `
+        <div style="text-align: center; padding: 1rem;">
+            <div style="
+                width: 80px;
+                height: 80px;
+                margin: 0 auto 1.25rem;
+                background: linear-gradient(135deg, ${randomTip.color}20 0%, ${randomTip.color}10 100%);
+                border: 2px solid ${randomTip.color}40;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.2rem;
+                box-shadow: 0 4px 15px ${randomTip.color}25;
+            ">
+                ${randomTip.emoji}
+            </div>
+            <h4 style="
+                color: ${randomTip.color};
+                margin-bottom: 0.75rem;
+                font-weight: 700;
+                font-size: 1.1rem;
+            ">Daily Facial Wellness Tip</h4>
+            <p style="
+                margin-bottom: 0.75rem; 
+                line-height: 1.7; 
+                color: #4a5568;
+                font-weight: 500;
+            ">${randomTip.tip}</p>
+            <p style="
+                margin-bottom: 1.5rem;
+                line-height: 1.6;
+                color: #718096;
+                font-size: 0.9rem;
+                padding: 0.75rem;
+                background: ${randomTip.color}08;
+                border-radius: 8px;
+            ">${randomTip.detail}</p>
+            <a href="${randomTip.page}" 
+               style="
+                 display: inline-flex;
+                 align-items: center;
+                 gap: 8px;
+                 color: ${randomTip.color};
+                 text-decoration: none;
+                 font-weight: 700;
+                 font-size: 1rem;
+                 transition: all 0.3s ease;
+                 padding: 10px 20px;
+                 border: 2px solid ${randomTip.color}30;
+                 border-radius: 25px;
+                 background: ${randomTip.color}05;
+               "
+               onmouseover="
+                 this.style.color='white';
+                 this.style.background='${randomTip.color}';
+                 this.style.borderColor='${randomTip.color}';
+                 this.style.transform='translateY(-2px)';
+                 this.style.boxShadow='0 6px 20px ${randomTip.color}40';
+               "
+               onmouseout="
+                 this.style.color='${randomTip.color}';
+                 this.style.background='${randomTip.color}05';
+                 this.style.borderColor='${randomTip.color}30';
+                 this.style.transform='translateY(0)';
+                 this.style.boxShadow='none';
+               "
+            >
+                <span>View All Wellness Tips</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    `;
+    
+    dailyTipContent.innerHTML = html;
+}
