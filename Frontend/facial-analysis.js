@@ -55,7 +55,13 @@ function getUserSpecificKey(baseKey) {
 
 // Initialize webcam
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: true })
+    navigator.mediaDevices.getUserMedia({ 
+        video: { 
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: "user" 
+        } 
+    })
         .then(stream => {
             video.srcObject = stream;
         })
@@ -71,6 +77,9 @@ captureBtn.addEventListener("click", () => {
     imageDataURL = canvas.toDataURL("image/png");
     imagePreview.src = imageDataURL;
     imagePreview.style.display = "block";
+    
+    // Show image quality tips
+    showImageQualityTips();
 });
 
 // Upload Image
@@ -86,6 +95,9 @@ uploadInput.addEventListener("change", () => {
         imageDataURL = reader.result;
         imagePreview.src = imageDataURL;
         imagePreview.style.display = "block";
+        
+        // Show image quality tips
+        showImageQualityTips();
     };
     reader.readAsDataURL(file);
 });
@@ -99,35 +111,108 @@ analyzeEmotionBtn.addEventListener("click", () => {
     sendImageForAnalysis(imageDataURL);
 });
 
-// Send Image to Backend for Analysis
+// Enhanced image preprocessing
+function preprocessImage(base64Image) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions
+            canvas.width = 640;
+            canvas.height = 480;
+            
+            // Draw and resize
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Apply image enhancement
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const enhancedData = enhanceImageData(imageData);
+            ctx.putImageData(enhancedData, 0, 0);
+            
+            // Convert to base64
+            const processedImage = canvas.toDataURL('image/jpeg', 0.9);
+            resolve(processedImage);
+        };
+        img.src = base64Image;
+    });
+}
+
+function enhanceImageData(imageData) {
+    const data = imageData.data;
+    const contrast = 1.2;
+    const brightness = 10;
+    
+    for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.min(255, Math.max(0, (data[i] - 128) * contrast + 128 + brightness));
+        data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - 128) * contrast + 128 + brightness));
+        data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - 128) * contrast + 128 + brightness));
+    }
+    
+    return imageData;
+}
+
+// Improved Send Image for Analysis
 async function sendImageForAnalysis(base64Image) {
-    emotionResult.innerHTML = "Analyzing facial expression...";
+    emotionResult.innerHTML = `
+        <div class="placeholder-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Analyzing facial expression with enhanced accuracy...</p>
+        </div>
+    `;
 
     try {
+        // Preprocess image first
+        const processedImage = await preprocessImage(base64Image);
+        
         const response = await fetch("http://localhost:5000/analyze-face", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: base64Image })
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ 
+                image: processedImage,
+                enhanced: true,
+                timestamp: new Date().toISOString()
+            })
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Server error: ${response.status}`);
         }
 
         const data = await response.json();
-
+        
         if (data.error) {
-            throw new Error(data.details || "Analysis failed");
+            throw new Error(data.details || data.error || "Analysis failed");
         }
 
-        // Format the results for consistent storage
-        const formattedResults = formatFacialAnalysisResults(data, base64Image);
+        // Enhanced results formatting
+        const formattedResults = {
+            type: 'facial',
+            emotion: data.emotion.charAt(0).toUpperCase() + data.emotion.slice(1),
+            confidence: data.confidence || 75,
+            emotionDistribution: data.emotion_distribution || {
+                positive: data.emotion_scores?.happy || 30,
+                negative: data.emotion_scores?.sad || data.emotion_scores?.angry || 30,
+                neutral: data.emotion_scores?.neutral || 40
+            },
+            emotionScores: data.emotion_scores || {},
+            recommendation: data.recommendation,
+            challenge: data.challenge,
+            tip: data.tip,
+            trend: data.trend,
+            timestamp: new Date().toISOString(),
+            userId: currentUserId,
+            enhanced: true
+        };
         
-        // Display results
-        displayFacialAnalysisResults(formattedResults);
+        // Enhanced display with more details
+        displayEnhancedFacialAnalysisResults(formattedResults);
         
-        // Update UI components
-        updateRecommendations(data.emotion);
+        // Update UI components with better recommendations
+        updateEnhancedRecommendations(formattedResults);
         updateDailyChallenge(data.emotion);
         
         // Save to both local storage and backend
@@ -141,72 +226,565 @@ async function sendImageForAnalysis(base64Image) {
         showAssessmentReportOption();
         
         // Record challenge completion
-        await recordFacialAnalysisChallenge(data.emotion);
+        await recordFacialAnalysisChallenge(formattedResults.emotion);
 
     } catch (error) {
         console.error("Facial analysis error:", error);
-        emotionResult.innerHTML = "Error analyzing facial expression. Please try again.";
+        
+        // Fallback to basic analysis if enhanced fails
+        await fallbackBasicAnalysis(base64Image);
     }
 }
 
-// Format facial analysis results for consistent storage
-function formatFacialAnalysisResults(data, imageData) {
-    // Map facial emotions to positive/negative/neutral categories
-    const positiveEmotions = ['joy', 'happiness', 'surprise'];
-    const negativeEmotions = ['sadness', 'anger', 'fear', 'disgust'];
+// Show image quality tips
+function showImageQualityTips() {
+    const tips = `
+        <div class="quality-tips">
+            <p><strong>For best accuracy:</strong></p>
+            <ul>
+                <li>✅ Ensure good lighting on your face</li>
+                <li>✅ Look directly at the camera</li>
+                <li>✅ Keep a neutral expression initially</li>
+                <li>✅ Avoid shadows on your face</li>
+            </ul>
+        </div>
+    `;
     
-    const emotion = data.emotion.toLowerCase();
-    let emotionDistribution = {
-        positive: 0,
-        negative: 0,
-        neutral: 0
-    };
+    // Remove existing tips
+    const existingTips = document.querySelector('.quality-tips');
+    if (existingTips) existingTips.remove();
     
-    if (positiveEmotions.includes(emotion)) {
-        emotionDistribution.positive = data.confidence || 75;
-        emotionDistribution.neutral = (100 - emotionDistribution.positive) * 0.6;
-        emotionDistribution.negative = 100 - emotionDistribution.positive - emotionDistribution.neutral;
-    } else if (negativeEmotions.includes(emotion)) {
-        emotionDistribution.negative = data.confidence || 75;
-        emotionDistribution.neutral = (100 - emotionDistribution.negative) * 0.4;
-        emotionDistribution.positive = 100 - emotionDistribution.negative - emotionDistribution.neutral;
-    } else {
-        emotionDistribution.neutral = data.confidence || 70;
-        emotionDistribution.positive = (100 - emotionDistribution.neutral) * 0.6;
-        emotionDistribution.negative = 100 - emotionDistribution.neutral - emotionDistribution.positive;
-    }
-
-    return {
-        type: 'facial',
-        emotion: data.emotion,
-        confidence: data.confidence || 75,
-        emotionDistribution: emotionDistribution,
-        recommendation: data.recommendation,
-        challenge: data.challenge,
-        tip: data.tip,
-        trend: data.trend,
-        imageData: imageData,
-        timestamp: new Date().toISOString(),
-        userId: currentUserId
-    };
+    // Add tips after the preview section
+    const previewSection = document.querySelector('.preview-section');
+    const tipsDiv = document.createElement('div');
+    tipsDiv.className = 'quality-tips';
+    tipsDiv.innerHTML = tips;
+    previewSection.appendChild(tipsDiv);
 }
 
-// Display facial analysis results
-function displayFacialAnalysisResults(results) {
-    let html = `<strong>Detected Emotion:</strong> ${results.emotion} (${results.confidence}% confidence)`;
-    html += '<div class="emotion-breakdown">';
-    html += `<p>Positive: ${results.emotionDistribution.positive.toFixed(1)}%</p>`;
-    html += `<p>Negative: ${results.emotionDistribution.negative.toFixed(1)}%</p>`;
-    html += `<p>Neutral: ${results.emotionDistribution.neutral.toFixed(1)}%</p>`;
-    html += '</div>';
+// Enhanced results display
+function displayEnhancedFacialAnalysisResults(results) {
+    let html = `<div class="emotion-report-card">`;
+    
+    // Main emotion with confidence
+    html += `
+        <div class="main-emotion">
+            <div class="emotion-icon">
+                <i class="${getEmotionIcon(results.emotion)}"></i>
+            </div>
+            <div class="emotion-details">
+                <h3>${results.emotion}</h3>
+                <div class="confidence-meter">
+                    <div class="confidence-fill" style="width: ${results.confidence}%"></div>
+                    <span class="confidence-text">${results.confidence}% confidence</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Detailed emotion breakdown
+    if (results.emotionScores && Object.keys(results.emotionScores).length > 0) {
+        html += `<div class="detailed-breakdown">`;
+        html += `<h4>Detailed Analysis:</h4>`;
+        
+        const sortedEmotions = Object.entries(results.emotionScores)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+        
+        sortedEmotions.forEach(([emotion, score]) => {
+            if (score > 5) {
+                html += `
+                    <div class="emotion-bar">
+                        <span class="emotion-name">${emotion}</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: ${score}%"></div>
+                            <span class="score">${score.toFixed(1)}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        html += `</div>`;
+    }
+    
+    // Emotion distribution
+    html += `
+        <div class="distribution-summary">
+            <div class="dist-item positive">
+                <i class="fas fa-smile"></i>
+                <span class="dist-value">${results.emotionDistribution.positive.toFixed(1)}% Positive</span>
+            </div>
+            <div class="dist-item negative">
+                <i class="fas fa-frown"></i>
+                <span class="dist-value">${results.emotionDistribution.negative.toFixed(1)}% Negative</span>
+            </div>
+            <div class="dist-item neutral">
+                <i class="fas fa-meh"></i>
+                <span class="dist-value">${results.emotionDistribution.neutral.toFixed(1)}% Neutral</span>
+            </div>
+        </div>
+    `;
+    
+    html += `</div>`;
     emotionResult.innerHTML = html;
+    
+    // Add CSS for new styles
+    addEnhancedStyles();
+}
+
+// Helper function to get emotion icons
+function getEmotionIcon(emotion) {
+    const iconMap = {
+        'Happy': 'fas fa-smile-beam',
+        'Sad': 'fas fa-sad-tear',
+        'Angry': 'fas fa-angry',
+        'Surprise': 'fas fa-surprise',
+        'Fear': 'fas fa-fearful',
+        'Disgust': 'fas fa-grimace',
+        'Neutral': 'fas fa-meh'
+    };
+    return iconMap[emotion] || 'fas fa-smile';
+}
+
+// Enhanced recommendations
+function updateEnhancedRecommendations(results) {
+    const emotion = results.emotion.toLowerCase();
+    
+    const recMap = {
+        happy: `Your ${results.confidence > 80 ? 'strong' : 'moderate'} happiness is wonderful! 
+                ${results.confidence > 80 ? 'Consider spreading this positivity through acts of kindness.' : 
+                  'Try to identify what specifically is bringing you joy today.'}`,
+        sad: `Feeling sadness ${results.confidence > 70 ? 'is completely valid and natural.' : 'can be a signal to slow down.'}
+              ${results.confidence > 80 ? 'This might be a good time for self-compassion and reaching out for support.' :
+                'Try engaging in a comforting activity or talking to someone you trust.'}`,
+        angry: `${results.confidence > 75 ? 'Strong feelings of anger detected. ' : ''}
+                Physical movement like walking or stretching can help release this energy.`,
+        surprise: `Surprise can lead to new perspectives! 
+                   ${results.confidence > 70 ? 'Lean into this unexpected emotion.' : 'Take a moment to process what surprised you.'}`,
+        fear: `${results.confidence > 65 ? 'Fear detected at significant levels. ' : ''}
+                Grounding techniques (5-4-3-2-1 method) can help manage this feeling.`,
+        disgust: `Disgust often protects our boundaries. 
+                  ${results.confidence > 60 ? 'Consider if there are healthy boundaries to establish.' :
+                    'Reflect on what might be triggering this response.'}`,
+        neutral: `A calm, neutral state ${results.confidence > 80 ? 'indicates emotional balance.' : 'is perfectly normal.'}
+                  This can be a good time for reflection or mindfulness.`
+    };
+    
+    let baseRecommendation = recMap[emotion] || "Take a moment to check in with yourself and your feelings.";
+    
+    // Add confidence-based qualifier
+    let confidenceNote = '';
+    if (results.confidence > 85) {
+        confidenceNote = "High confidence analysis suggests this emotion is clearly present.";
+    } else if (results.confidence > 60) {
+        confidenceNote = "Moderate confidence indicates this emotion is likely present, possibly mixed with others.";
+    } else {
+        confidenceNote = "Lower confidence suggests your emotional state may be complex or mixed.";
+    }
+    
+    // Add quiz link if available
+    const quizFile = getQuizFilename(emotion);
+    let fullRecommendation = `
+        <div class="enhanced-recommendation">
+            <p><strong>Analysis Insight:</strong> ${baseRecommendation}</p>
+            <p><small>${confidenceNote}</small></p>
+    `;
+    
+    if (quizFile) {
+        const quizLink = createQuizLink(emotion, `Take the ${emotion} exploration quiz`);
+        fullRecommendation += `<p class="quiz-link">📋 <strong>Recommended:</strong> ${quizLink} to better understand this emotion.</p>`;
+    }
+    
+    fullRecommendation += `</div>`;
+    
+    recommendationsContent.innerHTML = fullRecommendation;
+}
+
+// Enhanced daily challenge
+function updateEnhancedDailyChallenge(results) {
+    const emotion = results.emotion.toLowerCase();
+    
+    const challengeMap = {
+        happy: `Share your happiness with someone through a specific compliment or act of kindness. 
+                ${results.confidence > 85 ? 'Your strong positive energy can uplift others.' : ''}`,
+        sad: `Practice self-compassion by doing one nurturing thing for yourself. 
+              ${results.confidence > 75 ? 'Allow space for these feelings without judgment.' : ''}`,
+        angry: `Channel this energy into a 10-minute physical activity (walking, stretching, cleaning).`,
+        surprise: `Stay open to unexpected opportunities today and journal about any surprises.`,
+        fear: `Identify one small fear you can face today, no matter how minor.`,
+        disgust: `Focus on finding something beautiful or positive in your immediate environment.`,
+        neutral: `Practice 5 minutes of mindfulness, focusing on your breath and bodily sensations.`
+    };
+    
+    let baseChallenge = challengeMap[emotion] || "Take time to reflect on your current emotional state.";
+    
+    // Add emotional distribution context
+    let distributionNote = '';
+    if (results.emotionDistribution.positive > 60) {
+        distributionNote = "Your predominantly positive emotional state can be leveraged for creative or social activities.";
+    } else if (results.emotionDistribution.negative > 60) {
+        distributionNote = "With more negative emotions present, gentle self-care is especially important today.";
+    }
+    
+    let fullChallenge = `
+        <div class="enhanced-challenge">
+            <p><strong>Today's Emotional Challenge:</strong> ${baseChallenge}</p>
+    `;
+    
+    if (distributionNote) {
+        fullChallenge += `<p class="distribution-note">${distributionNote}</p>`;
+    }
+    
+    // Add challenge link if available
+    const challengeFile = getChallengeFilename(emotion);
+    if (challengeFile) {
+        const challengeLink = createChallengeLink(emotion, `Access detailed ${emotion} exercises`);
+        fullChallenge += `<p class="challenge-link">🎯 <strong>Extended Practice:</strong> ${challengeLink}</p>`;
+    }
+    
+    fullChallenge += `</div>`;
+    
+    dailyChallengeContent.innerHTML = fullChallenge;
+}
+
+// Fallback basic analysis
+async function fallbackBasicAnalysis(base64Image) {
+    try {
+        // Simple fallback using basic DeepFace
+        emotionResult.innerHTML = `
+            <div class="placeholder-content">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Using basic analysis method...</p>
+            </div>
+        `;
+        
+        const response = await fetch("http://localhost:5000/analyze-face", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: base64Image })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const formattedResults = formatFacialAnalysisResults(data, base64Image);
+            displayFacialAnalysisResults(formattedResults);
+            updateRecommendations(data.emotion);
+            updateDailyChallenge(data.emotion);
+        } else {
+            throw new Error("Fallback analysis failed");
+        }
+    } catch (fallbackError) {
+        emotionResult.innerHTML = `
+            <div class="placeholder-content" style="color: #dc3545;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p><strong>Analysis Unavailable</strong></p>
+                <p>Please try:</p>
+                <ul style="text-align: left; font-size: 0.9em;">
+                    <li>Ensure good lighting on your face</li>
+                    <li>Look directly at the camera</li>
+                    <li>Use a clear, front-facing photo</li>
+                    <li>Try uploading a different image</li>
+                </ul>
+            </div>
+        `;
+    }
+}
+
+// Add enhanced CSS styles
+function addEnhancedStyles() {
+    if (document.getElementById('enhanced-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'enhanced-styles';
+    style.textContent = `
+        .emotion-report-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .main-emotion {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .emotion-icon {
+            font-size: 2.5rem;
+            color: #4a6fa5;
+        }
+        
+        .emotion-details h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        .confidence-meter {
+            width: 200px;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            margin-top: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #66bb6a, #4caf50);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .confidence-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .detailed-breakdown {
+            margin: 20px 0;
+        }
+        
+        .detailed-breakdown h4 {
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .emotion-bar {
+            margin: 8px 0;
+        }
+        
+        .emotion-name {
+            display: inline-block;
+            width: 100px;
+            text-transform: capitalize;
+        }
+        
+        .bar-container {
+            display: inline-block;
+            width: calc(100% - 120px);
+            position: relative;
+        }
+        
+        .bar {
+            height: 20px;
+            background: #4a6fa5;
+            border-radius: 4px;
+        }
+        
+        .bar .score {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            color: #333;
+        }
+        
+        .distribution-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .dist-item {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            flex: 1;
+            margin: 0 5px;
+        }
+        
+        .dist-item.positive {
+            background: rgba(102, 187, 106, 0.1);
+        }
+        
+        .dist-item.negative {
+            background: rgba(239, 83, 80, 0.1);
+        }
+        
+        .dist-item.neutral {
+            background: rgba(255, 202, 40, 0.1);
+        }
+        
+        .dist-item i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .dist-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .enhanced-recommendation, .enhanced-challenge {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .quiz-link, .challenge-link {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .distribution-note {
+            font-style: italic;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .quality-tips {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .quality-tips ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .quality-tips li {
+            margin: 5px 0;
+        }
+    `;
+    
+    document.head.appendChild(style);
+}
+
+// Display facial analysis results with beautiful UI
+function displayFacialAnalysisResults(results) {
+    // Get emotion color based on type
+    const emotionColors = {
+        happy: 'var(--color-happy)',
+        sad: 'var(--color-sad)',
+        angry: 'var(--color-angry)',
+        surprised: 'var(--color-surprised)',
+        fearful: 'var(--color-fearful)',
+        disgusted: 'var(--color-disgusted)',
+        neutral: 'var(--color-neutral)'
+    };
+    
+    const emotionColor = emotionColors[results.emotion.toLowerCase()] || 'var(--color-primary)';
+    
+    // Format emotion name
+    const formattedEmotion = results.emotion.charAt(0).toUpperCase() + results.emotion.slice(1);
+    
+    let html = `
+        <div class="emotion-card">
+            <div class="emotion-header" style="border-left-color: ${emotionColor}">
+                <div class="emotion-icon" style="background-color: ${emotionColor}">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="emotion-title">
+                    <h3>${formattedEmotion}</h3>
+                    <p class="confidence-badge">
+                        <i class="fas fa-chart-line"></i>
+                        ${results.confidence}% confidence
+                    </p>
+                </div>
+            </div>
+            
+            <div class="emotion-breakdown-section">
+                <h4><i class="fas fa-chart-pie"></i> Emotion Distribution</h4>
+                <div class="emotion-breakdown">
+                    ${createEmotionBar('positive', results.emotionDistribution.positive, '#4CAF50')}
+                    ${createEmotionBar('negative', results.emotionDistribution.negative, '#F44336')}
+                    ${createEmotionBar('neutral', results.emotionDistribution.neutral, '#9E9E9E')}
+                </div>
+                
+                <div class="emotion-stats">
+                    <div class="stat-item positive">
+                        <span class="stat-label">Positive</span>
+                        <span class="stat-value">${results.emotionDistribution.positive.toFixed(1)}%</span>
+                    </div>
+                    <div class="stat-item negative">
+                        <span class="stat-label">Negative</span>
+                        <span class="stat-value">${results.emotionDistribution.negative.toFixed(1)}%</span>
+                    </div>
+                    <div class="stat-item neutral">
+                        <span class="stat-label">Neutral</span>
+                        <span class="stat-value">${results.emotionDistribution.neutral.toFixed(1)}%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="emotion-insights">
+                <h4><i class="fas fa-lightbulb"></i> Insights</h4>
+                <p class="insight-text">${generateInsight(results.emotion, results.confidence)}</p>
+            </div>
+            
+            <div class="last-updated">
+                <i class="fas fa-clock"></i> Analyzed just now
+            </div>
+        </div>
+    `;
+    
+    emotionResult.innerHTML = html;
+    emotionResult.classList.add('visible');
+}
+
+// Helper function to create emotion progress bars
+function createEmotionBar(type, value, color) {
+    return `
+        <div class="emotion-bar">
+            <div class="bar-label">
+                <span class="bar-name">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                <span class="bar-value">${value.toFixed(1)}%</span>
+            </div>
+            <div class="bar-container">
+                <div class="bar-fill ${type}" style="width: ${value}%; background-color: ${color};"></div>
+            </div>
+        </div>
+    `;
+}
+
+// Helper function to generate insights based on emotion
+function generateInsight(emotion, confidence) {
+    const insights = {
+        happy: confidence > 80 
+            ? "The subject appears very happy! This is great to see."
+            : "The subject shows signs of happiness. Consider this a positive interaction.",
+        sad: confidence > 80 
+            ? "The subject appears quite sad. Consider offering support."
+            : "There are subtle signs of sadness. Check if everything is okay.",
+        angry: confidence > 80 
+            ? "The subject appears angry. Approach with caution and empathy."
+            : "Some signs of frustration detected. This might be a tense moment.",
+        neutral: confidence > 80 
+            ? "The subject appears neutral and composed."
+            : "Emotions appear balanced and neutral at the moment.",
+        surprised: "The subject shows surprise! Something unexpected might have happened.",
+        fearful: "The subject appears fearful. Ensure a safe and comfortable environment.",
+        disgusted: "The subject shows signs of disgust. Consider what might be causing this reaction."
+    };
+    
+    return insights[emotion.toLowerCase()] || "Emotion analysis complete. Consider the context of this expression.";
 }
 
 // Get quiz filename based on emotion
 function getQuizFilename(emotion) {
     const normalizedEmotion = emotion.toLowerCase();
     
-    // Map emotions to quiz files
     const emotionQuizMap = {
         'sad': 'sadQuiz.html',
         'sadness': 'sadQuiz.html',
@@ -229,7 +807,6 @@ function getQuizFilename(emotion) {
 function getChallengeFilename(emotion) {
     const normalizedEmotion = emotion.toLowerCase();
     
-    // Map emotions to challenge files
     const emotionChallengeMap = {
         'sad': 'sad.html',
         'sadness': 'sad.html',
@@ -287,7 +864,6 @@ function updateRecommendations(emotion) {
     
     const baseRecommendation = recMap[normalizedEmotion] || "Take a moment to check in with yourself and your feelings.";
     
-    // Check if this emotion has a quiz available
     const quizFile = getQuizFilename(emotion);
     let fullRecommendation = `<p>${baseRecommendation}</p>`;
     
@@ -320,7 +896,6 @@ function updateDailyChallenge(emotion) {
     
     const baseChallenge = challengeMap[normalizedEmotion] || "Take time to reflect on your current emotional state and practice self-awareness.";
     
-    // Check if this emotion has a challenge available
     const challengeFile = getChallengeFilename(emotion);
     let fullChallenge = `<p>${baseChallenge}</p>`;
     
@@ -351,73 +926,408 @@ function loadDailyTip() {
 }
 
 // Emotional Progress Chart
+// Emotional Progress Chart with Beautiful UI
 function updateChart(period = 'daily') {
+    // Update period buttons active state
+    document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.period === period) {
+            btn.classList.add('active');
+        }
+    });
+
     loadFacialAnalysisHistory(period).then(analyses => {
         let avgPositive = 0, avgNegative = 0, avgNeutral = 0;
+        let totalAnalyses = analyses.length;
         
-        if (analyses.length > 0) {
+        if (totalAnalyses > 0) {
             analyses.forEach(analysis => {
                 avgPositive += analysis.emotionDistribution.positive;
                 avgNegative += analysis.emotionDistribution.negative;
                 avgNeutral += analysis.emotionDistribution.neutral;
             });
             
-            avgPositive /= analyses.length;
-            avgNegative /= analyses.length;
-            avgNeutral /= analyses.length;
+            avgPositive /= totalAnalyses;
+            avgNegative /= totalAnalyses;
+            avgNeutral /= totalAnalyses;
+            
+            // Update stats display
+            updateStatsDisplay(avgPositive, avgNegative, avgNeutral, totalAnalyses);
         } else {
-            // Default values
+            // Show demo data with beautiful empty state
             avgPositive = Math.floor(Math.random() * 30) + 40;
             avgNegative = Math.floor(Math.random() * 20) + 15;
             avgNeutral = 100 - avgPositive - avgNegative;
+            showEmptyState(period);
         }
 
-        const ctx = progressChart.getContext("2d");
-        const chartData = {
-            labels: ["Positive", "Negative", "Neutral"],
-            datasets: [{
-                label: "Facial Emotion Distribution",
-                data: [avgPositive, avgNegative, avgNeutral],
-                backgroundColor: [
-                    "rgba(102, 187, 106, 0.7)",
-                    "rgba(239, 83, 80, 0.7)",
-                    "rgba(255, 202, 40, 0.7)"
-                ],
-                borderColor: [
-                    "rgba(102, 187, 106, 1)",
-                    "rgba(239, 83, 80, 1)",
-                    "rgba(255, 202, 40, 1)"
-                ],
-                borderWidth: 2
-            }]
-        };
-
-        if (chart) chart.destroy();
-        chart = new Chart(ctx, {
-            type: "doughnut",
-            data: chartData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
+        // Create beautiful chart
+        renderProgressChart(avgPositive, avgNegative, avgNeutral, period);
+        
+        // Update insights
+        updateChartInsights(avgPositive, avgNegative, avgNeutral, period);
     });
 }
 
-// Save facial analysis to localStorage (user-specific)
-function saveFacialAnalysisToHistory(result) {
-    const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
-    let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
-    history.push(result);
-    // Keep only last 50 entries
-    if (history.length > 50) {
-        history = history.slice(-50);
+function renderProgressChart(positive, negative, neutral, period) {
+    const ctx = progressChart.getContext("2d");
+    
+    // Destroy previous chart if exists
+    if (chart) chart.destroy();
+    
+    // Create gradient backgrounds
+    const positiveGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    positiveGradient.addColorStop(0, 'rgba(76, 175, 80, 0.8)');
+    positiveGradient.addColorStop(1, 'rgba(76, 175, 80, 0.2)');
+    
+    const negativeGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    negativeGradient.addColorStop(0, 'rgba(244, 67, 54, 0.8)');
+    negativeGradient.addColorStop(1, 'rgba(244, 67, 54, 0.2)');
+    
+    const neutralGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    neutralGradient.addColorStop(0, 'rgba(158, 158, 158, 0.8)');
+    neutralGradient.addColorStop(1, 'rgba(158, 158, 158, 0.2)');
+
+    chart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: ["Positive", "Negative", "Neutral"],
+            datasets: [{
+                data: [positive, negative, neutral],
+                backgroundColor: [positiveGradient, negativeGradient, neutralGradient],
+                borderColor: [
+                    "rgba(76, 175, 80, 1)",
+                    "rgba(244, 67, 54, 1)",
+                    "rgba(158, 158, 158, 1)"
+                ],
+                borderWidth: 3,
+                borderJoinStyle: 'round',
+                borderRadius: 10,
+                hoverOffset: 20,
+                hoverBackgroundColor: [
+                    "rgba(76, 175, 80, 0.9)",
+                    "rgba(244, 67, 54, 0.9)",
+                    "rgba(158, 158, 158, 0.9)"
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 13,
+                            family: "'Inter', sans-serif",
+                            weight: '600'
+                        },
+                        color: '#555'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    titleColor: '#333',
+                    bodyColor: '#666',
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 10,
+                    padding: 12,
+                    boxPadding: 6,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw.toFixed(1)}%`;
+                        }
+                    }
+                }
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true,
+                duration: 1500,
+                easing: 'easeOutQuart'
+            },
+            elements: {
+                arc: {
+                    borderWidth: 2
+                }
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            afterDraw: (chart) => {
+                const { ctx, chartArea: { width, height } } = chart;
+                ctx.save();
+                
+                // Draw center circle
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                // Background circle
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.stroke();
+                
+                // Main percentage text
+                ctx.font = 'bold 28px "Inter", sans-serif';
+                ctx.fillStyle = getDominantColor(positive, negative, neutral);
+                ctx.textAlign = 'center';
+                ctx.fillText(`${Math.max(positive, negative, neutral).toFixed(0)}%`, centerX, centerY - 5);
+                
+                // Subtitle
+                ctx.font = '600 12px "Inter", sans-serif';
+                ctx.fillStyle = '#666';
+                ctx.fillText(getDominantEmotion(positive, negative, neutral), centerX, centerY + 20);
+                
+                ctx.restore();
+            }
+        }]
+    });
+}
+
+function updateStatsDisplay(positive, negative, neutral, totalAnalyses) {
+    const statsContainer = document.querySelector('.chart-stats');
+    if (!statsContainer) return;
+    
+    const periodText = document.querySelector('.period-btn.active')?.textContent || 'Daily';
+    
+    statsContainer.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card positive">
+                <div class="stat-icon">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="stat-content">
+                    <h4>${positive.toFixed(1)}%</h4>
+                    <p>Positive</p>
+                </div>
+            </div>
+            <div class="stat-card negative">
+                <div class="stat-icon">
+                    <i class="fas fa-frown"></i>
+                </div>
+                <div class="stat-content">
+                    <h4>${negative.toFixed(1)}%</h4>
+                    <p>Negative</p>
+                </div>
+            </div>
+            <div class="stat-card neutral">
+                <div class="stat-icon">
+                    <i class="fas fa-meh"></i>
+                </div>
+                <div class="stat-content">
+                    <h4>${neutral.toFixed(1)}%</h4>
+                    <p>Neutral</p>
+                </div>
+            </div>
+            <div class="stat-card total">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h4>${totalAnalyses}</h4>
+                    <p>Analyses (${periodText})</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function updateChartInsights(positive, negative, neutral, period) {
+    const insightsContainer = document.querySelector('.chart-insights');
+    if (!insightsContainer) return;
+    
+    const periodText = period === 'daily' ? 'today' : period === 'weekly' ? 'this week' : 'this month';
+    const dominantEmotion = getDominantEmotion(positive, negative, neutral);
+    
+    let insight = '';
+    if (positive > 60) {
+        insight = `Great! You've been mostly positive ${periodText}. Keep up the positive energy!`;
+    } else if (negative > 40) {
+        insight = `You've experienced more negative emotions ${periodText}. Consider what might be affecting your mood.`;
+    } else if (neutral > 50) {
+        insight = `Your emotions have been mostly balanced ${periodText}. You're maintaining good emotional stability.`;
+    } else {
+        insight = `Your emotional balance shows a healthy mix of different states ${periodText}.`;
     }
-    localStorage.setItem(userHistoryKey, JSON.stringify(history));
+    
+    insightsContainer.innerHTML = `
+        <div class="insight-card">
+            <div class="insight-header">
+                <i class="fas fa-chart-pie"></i>
+                <h4>Emotional Insights</h4>
+            </div>
+            <p class="insight-text">${insight}</p>
+            <div class="insight-footer">
+                <span class="trend-indicator ${positive > negative ? 'up' : 'down'}">
+                    <i class="fas fa-arrow-${positive > negative ? 'up' : 'down'}"></i>
+                    ${Math.abs(positive - negative).toFixed(1)}% ${positive > negative ? 'more positive' : 'more negative'}
+                </span>
+            </div>
+        </div>
+    `;
+}
+
+function showEmptyState(period) {
+    const periodText = period === 'daily' ? 'today' : period === 'weekly' ? 'this week' : 'this month';
+    
+    const statsContainer = document.querySelector('.chart-stats');
+    if (statsContainer) {
+        statsContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-chart-bar"></i>
+                <p>No analysis data available ${periodText}</p>
+                <small>Start analyzing your emotions to see progress here</small>
+            </div>
+        `;
+    }
+}
+
+// Helper functions for chart
+function getDominantColor(positive, negative, neutral) {
+    if (positive >= negative && positive >= neutral) return '#4CAF50';
+    if (negative >= positive && negative >= neutral) return '#F44336';
+    return '#9E9E9E';
+}
+
+function getDominantEmotion(positive, negative, neutral) {
+    if (positive >= negative && positive >= neutral) return 'Positive';
+    if (negative >= positive && negative >= neutral) return 'Negative';
+    return 'Neutral';
+}
+
+// Helper function to create emotion progress bars (for emotion card display)
+function createEmotionBar(type, value, color) {
+    return `
+        <div class="emotion-bar">
+            <div class="bar-label">
+                <span class="bar-name">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                <span class="bar-value">${value.toFixed(1)}%</span>
+            </div>
+            <div class="bar-container">
+                <div class="bar-fill ${type}" style="width: ${value}%; background-color: ${color};"></div>
+            </div>
+        </div>
+    `;
+}
+
+function formatFacialAnalysisResults(data, imageData) {
+    const emotion = data.emotion.toLowerCase();
+    
+    let emotionDistribution = data.emotion_distribution || {
+        positive: 0,
+        negative: 0,
+        neutral: 0
+    };
+    
+    if (!data.emotion_distribution) {
+        const positiveEmotions = ['happy', 'joy', 'surprise'];
+        const negativeEmotions = ['sad', 'angry', 'fear', 'disgust'];
+        
+        if (positiveEmotions.includes(emotion)) {
+            emotionDistribution.positive = data.confidence || 75;
+            emotionDistribution.neutral = (100 - emotionDistribution.positive) * 0.6;
+            emotionDistribution.negative = 100 - emotionDistribution.positive - emotionDistribution.neutral;
+        } else if (negativeEmotions.includes(emotion)) {
+            emotionDistribution.negative = data.confidence || 75;
+            emotionDistribution.neutral = (100 - emotionDistribution.negative) * 0.4;
+            emotionDistribution.positive = 100 - emotionDistribution.negative - emotionDistribution.neutral;
+        } else {
+            emotionDistribution.neutral = data.confidence || 70;
+            emotionDistribution.positive = (100 - emotionDistribution.neutral) * 0.6;
+            emotionDistribution.negative = 100 - emotionDistribution.neutral - emotionDistribution.positive;
+        }
+    }
+
+    return {
+        type: 'facial',
+        emotion: data.emotion.charAt(0).toUpperCase() + data.emotion.slice(1),
+        confidence: data.confidence || 75,
+        emotionDistribution: emotionDistribution,
+        emotionScores: data.emotion_scores || {},
+        recommendation: data.recommendation,
+        challenge: data.challenge,
+        tip: data.tip,
+        trend: data.trend,
+        timestamp: new Date().toISOString(),
+        userId: currentUserId,
+        enhanced: !!data.enhanced
+    };
+}
+
+function saveFacialAnalysisToHistory(result) {
+    try {
+        const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
+        let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
+        
+        const resultToSave = { ...result };
+        delete resultToSave.imageData;
+        
+        history.push(resultToSave);
+        
+        if (history.length > 50) {
+            history = history.slice(-50);
+        }
+        
+        localStorage.setItem(userHistoryKey, JSON.stringify(history));
+        console.log('Facial analysis saved to localStorage successfully');
+    } catch (error) {
+        if (error.name === 'QuotaExceededError') {
+            console.error('localStorage quota exceeded. Clearing old data...');
+            
+            try {
+                const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
+                let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
+                
+                history = history.slice(-20);
+                
+                const resultToSave = { ...result };
+                delete resultToSave.imageData;
+                history.push(resultToSave);
+                
+                localStorage.setItem(userHistoryKey, JSON.stringify(history));
+                console.log('Saved after clearing old data');
+            } catch (retryError) {
+                console.error('Still cannot save to localStorage:', retryError);
+                alert('Warning: Cannot save analysis history. Your localStorage is full. Some older data may be lost.');
+            }
+        } else {
+            console.error('Error saving to localStorage:', error);
+        }
+    }
+}
+
+function clearOldFacialAnalysisData() {
+    try {
+        const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
+        let history = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
+        
+        history = history.map(item => {
+            const cleaned = { ...item };
+            delete cleaned.imageData;
+            return cleaned;
+        });
+        
+        history = history.slice(-30);
+        
+        localStorage.setItem(userHistoryKey, JSON.stringify(history));
+        console.log(`Cleaned localStorage. Kept ${history.length} entries.`);
+        
+        return history.length;
+    } catch (error) {
+        console.error('Error cleaning localStorage:', error);
+        return 0;
+    }
 }
 
 // Save facial analysis to backend
@@ -438,10 +1348,12 @@ async function saveFacialAnalysisToBackend(result) {
                 emotion: result.emotion,
                 confidence: result.confidence,
                 emotionDistribution: result.emotionDistribution,
+                emotionScores: result.emotionScores,
                 recommendation: result.recommendation,
                 challenge: result.challenge,
                 tip: result.tip,
-                timestamp: result.timestamp
+                timestamp: result.timestamp,
+                enhanced: result.enhanced || false
             })
         });
 
@@ -459,7 +1371,6 @@ async function saveFacialAnalysisToBackend(result) {
 async function loadFacialAnalysisHistory(period = 'all') {
     let analyses = [];
     
-    // Try backend first if logged in
     if (token && currentUserId !== "guest") {
         try {
             const res = await fetch(`${API_BASE}/facial-analysis/history/${period}`, {
@@ -473,7 +1384,6 @@ async function loadFacialAnalysisHistory(period = 'all') {
         }
     }
 
-    // Fallback to localStorage
     if (analyses.length === 0) {
         const userHistoryKey = getUserSpecificKey('facialAnalysisHistory');
         const allAnalyses = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
@@ -536,7 +1446,6 @@ async function recordFacialAnalysisChallenge(emotion) {
             type: 'facial-analysis-challenge'
         };
 
-        // If logged in, save to database
         if (token && currentUserId !== "guest") {
             await fetch(`${API_BASE}/progress/complete-challenge`, {
                 method: 'POST',
@@ -552,7 +1461,6 @@ async function recordFacialAnalysisChallenge(emotion) {
             });
         }
 
-        // Save to user-specific localStorage
         const userChallengesKey = getUserSpecificKey('completedChallenges');
         let completions = JSON.parse(localStorage.getItem(userChallengesKey)) || [];
         completions.push(newCompletion);
@@ -582,7 +1490,7 @@ function showAssessmentReportOption() {
         font-size: 14px;
     `;
     notification.innerHTML = `
-        ✅ Facial analysis complete! <a href="assessment-report.html" style="color: #1976d2; text-decoration: underline;">View your comprehensive assessment report</a>
+        ✅ Facial analysis complete! 
     `;
 
     const existingNotification = document.querySelector('.analysis-complete-notification');
@@ -719,3 +1627,382 @@ window.addEventListener('storage', function(e) {
         location.reload();
     }
 });
+
+// Add this enhanced function to facial-analysis.js
+
+// Enhanced Tip of the Day with emotion-specific tips and links
+function updateDailyTipWithEmotion(emotion) {
+    const normalizedEmotion = emotion.toLowerCase();
+    
+    const emotionTips = {
+        joy: {
+            tip: "Your joyful expression reflects inner happiness. Facial expressions of joy can actually boost your mood even more!",
+            detailedTip: "Research shows that smiling triggers the release of dopamine and serotonin, creating a positive feedback loop. Keep expressing that joy!",
+            page: "happyTips.html",
+            emoji: "😊",
+            color: "#4caf50"
+        },
+        happiness: {
+            tip: "Smiling activates neural pathways that support emotional well-being. Keep smiling!",
+            detailedTip: "Even forced smiles can improve your mood. The facial feedback hypothesis suggests your brain interprets your facial expressions as genuine emotions.",
+            page: "happyTips.html",
+            emoji: "😊",
+            color: "#4caf50"
+        },
+        happy: {
+            tip: "Your happy expression is contagious! Research shows happiness spreads through facial expressions.",
+            detailedTip: "Mirror neurons in others' brains activate when they see your smile, making them more likely to smile too. Share your happiness!",
+            page: "happyTips.html",
+            emoji: "😊",
+            color: "#4caf50"
+        },
+        sadness: {
+            tip: "Your facial expression shows you're processing difficult emotions. Be gentle with yourself.",
+            detailedTip: "Facial expressions of sadness are valid and important. They signal to others that you need support and help you process grief.",
+            page: "sadTips.html",
+            emoji: "☹️",
+            color: "#2196f3"
+        },
+        sad: {
+            tip: "It's okay to show sadness. Expressing emotions through facial expressions is healthy.",
+            detailedTip: "Suppressing sad expressions can intensify negative emotions. Allow yourself to express what you're feeling naturally.",
+            page: "sadTips.html",
+            emoji: "☹️",
+            color: "#2196f3"
+        },
+        anger: {
+            tip: "Notice the tension in your facial muscles. Relaxing your face can help calm your emotions.",
+            detailedTip: "Anger creates tension in your jaw, forehead, and eyebrows. Progressive facial relaxation can reduce the intensity of angry feelings.",
+            page: "angryTips.html",
+            emoji: "😠",
+            color: "#f44336"
+        },
+        angry: {
+            tip: "Try facial relaxation exercises - consciously relax your jaw, forehead, and eyes to reduce anger.",
+            detailedTip: "Clenched jaws and furrowed brows intensify anger. Softening these muscles sends calming signals to your brain.",
+            page: "angryTips.html",
+            emoji: "😠",
+            color: "#f44336"
+        },
+        fear: {
+            tip: "Your facial expression reveals anxiety. Practice gentle facial massage to release tension.",
+            detailedTip: "Fear causes widened eyes and raised eyebrows. Gently massaging your temples and jaw can activate your relaxation response.",
+            page: "fearTips.html",
+            emoji: "😰",
+            color: "#9c27b0"
+        },
+        fearful: {
+            tip: "Notice how fear affects your facial muscles. Deep breathing while relaxing your face can help.",
+            detailedTip: "Fear creates tension around the eyes and forehead. Combining facial relaxation with slow breathing activates your parasympathetic nervous system.",
+            page: "fearTips.html",
+            emoji: "😰",
+            color: "#9c27b0"
+        },
+        surprise: {
+            tip: "Your surprised expression shows you're engaged with life! Stay open to new experiences.",
+            detailedTip: "Surprise expressions with raised eyebrows and wide eyes indicate active attention and curiosity - embrace this natural response!",
+            page: "surpriseTips.html",
+            emoji: "😲",
+            color: "#ff9800"
+        },
+        surprised: {
+            tip: "Surprise activates your attention systems. Use this heightened awareness positively!",
+            detailedTip: "The brief surprise response prepares you to quickly process new information. Channel this alertness into positive action.",
+            page: "surpriseTips.html",
+            emoji: "😲",
+            color: "#ff9800"
+        },
+        love: {
+            tip: "Your loving expression radiates warmth. Facial expressions of love strengthen relationships.",
+            detailedTip: "Soft eyes and gentle smiles signal affection and trust. These expressions trigger oxytocin release, deepening emotional bonds.",
+            page: "loveTips.html",
+            emoji: "💖",
+            color: "#e91e63"
+        },
+        disgust: {
+            tip: "Your facial expression indicates discomfort. Identify the source and address it constructively.",
+            detailedTip: "Disgust expressions (wrinkled nose, raised upper lip) are protective responses. Honor what your body is telling you needs to change.",
+            page: "angryTips.html",
+            emoji: "😖",
+            color: "#795548"
+        },
+        neutral: {
+            tip: "A neutral expression can indicate calmness and composure. Use this balance for reflection.",
+            detailedTip: "A relaxed, neutral face often accompanies mindfulness and emotional equilibrium. This is an excellent state for decision-making.",
+            page: "wellnessTips.html",
+            emoji: "😐",
+            color: "#607d8b"
+        }
+    };
+
+    const tipData = emotionTips[normalizedEmotion] || emotionTips['neutral'];
+    
+    const html = `
+        <div style="text-align: center; padding: 1rem;">
+            <div style="
+                width: 90px;
+                height: 90px;
+                margin: 0 auto 1.5rem;
+                background: linear-gradient(135deg, ${tipData.color}25 0%, ${tipData.color}10 100%);
+                border: 3px solid ${tipData.color};
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 3rem;
+                box-shadow: 0 8px 25px ${tipData.color}30;
+                animation: emotionPulse 2.5s ease-in-out infinite;
+                position: relative;
+            ">
+                <div style="
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    border: 2px solid ${tipData.color}40;
+                    animation: ripple 2s ease-out infinite;
+                "></div>
+                ${tipData.emoji}
+            </div>
+            <h4 style="
+                color: ${tipData.color};
+                margin-bottom: 0.75rem;
+                font-weight: 700;
+                font-size: 1.15rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            ">Facial Expression Insight</h4>
+            <p style="
+                margin-bottom: 1rem;
+                line-height: 1.8;
+                color: #4a5568;
+                font-size: 1.05rem;
+                font-weight: 500;
+            ">${tipData.tip}</p>
+            <p style="
+                margin-bottom: 2rem;
+                line-height: 1.7;
+                color: #718096;
+                font-size: 0.95rem;
+                padding: 1rem;
+                background: ${tipData.color}08;
+                border-radius: 12px;
+                border-left: 4px solid ${tipData.color};
+            ">
+                <i class="fas fa-lightbulb" style="color: ${tipData.color}; margin-right: 8px;"></i>
+                ${tipData.detailedTip}
+            </p>
+            <a href="${tipData.page}" 
+               style="
+                 display: inline-flex;
+                 align-items: center;
+                 justify-content: center;
+                 gap: 12px;
+                 padding: 16px 36px;
+                 background: linear-gradient(135deg, ${tipData.color} 0%, ${tipData.color}cc 100%);
+                 color: white;
+                 text-decoration: none;
+                 border-radius: 50px;
+                 font-weight: 700;
+                 font-size: 1.05rem;
+                 transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                 box-shadow: 0 6px 20px ${tipData.color}50;
+                 text-transform: uppercase;
+                 letter-spacing: 0.5px;
+                 border: 2px solid transparent;
+               "
+               onmouseover="
+                 this.style.transform='translateY(-4px) scale(1.05)'; 
+                 this.style.boxShadow='0 12px 35px ${tipData.color}60';
+                 this.style.borderColor='${tipData.color}';
+               "
+               onmouseout="
+                 this.style.transform='translateY(0) scale(1)'; 
+                 this.style.boxShadow='0 6px 20px ${tipData.color}50';
+                 this.style.borderColor='transparent';
+               "
+            >
+                <i class="fas fa-spa" style="font-size: 1.3rem;"></i>
+                <span>Explore ${normalizedEmotion.charAt(0).toUpperCase() + normalizedEmotion.slice(1)} Wellness Tips</span>
+                <i class="fas fa-arrow-right" style="font-size: 1rem;"></i>
+            </a>
+        </div>
+        <style>
+            @keyframes emotionPulse {
+                0%, 100% {
+                    transform: scale(1);
+                    box-shadow: 0 8px 25px ${tipData.color}30;
+                }
+                50% {
+                    transform: scale(1.08);
+                    box-shadow: 0 12px 35px ${tipData.color}45;
+                }
+            }
+            @keyframes ripple {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(1.5);
+                    opacity: 0;
+                }
+            }
+        </style>
+    `;
+    
+    dailyTipContent.innerHTML = html;
+}
+
+// Update the sendImageForAnalysis function to update tips
+async function sendImageForAnalysis(base64Image) {
+    emotionResult.innerHTML = "Analyzing facial expression...";
+
+    try {
+        const response = await fetch("http://localhost:5000/analyze-face", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: base64Image })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.details || "Analysis failed");
+        }
+
+        const formattedResults = formatFacialAnalysisResults(data, base64Image);
+        displayFacialAnalysisResults(formattedResults);
+        updateRecommendations(data.emotion);
+        updateDailyChallenge(data.emotion);
+        
+        // Update Tip of the Day with emotion-specific tip
+        updateDailyTipWithEmotion(data.emotion);
+
+        await saveFacialAnalysisToHistory(formattedResults);
+        await saveFacialAnalysisToBackend(formattedResults);
+        updateChart('daily');
+        showAssessmentReportOption();
+        await recordFacialAnalysisChallenge(data.emotion);
+
+    } catch (error) {
+        console.error("Facial analysis error:", error);
+        emotionResult.innerHTML = "Error analyzing facial expression. Please try again.";
+    }
+}
+
+// Replace the existing loadDailyTip function with this improved version
+function loadDailyTip() {
+    const generalTips = [
+        {
+            tip: "Facial expressions can influence how you feel - try smiling to boost your mood.",
+            detail: "The facial feedback hypothesis shows that your facial muscles send signals to your brain that can actually change your emotional state.",
+            emoji: "😊",
+            page: "wellnessTips.html",
+            color: "#6366F1"
+        },
+        {
+            tip: "Practice facial relaxation exercises to reduce tension and stress.",
+            detail: "Progressive facial muscle relaxation involves consciously tensing and releasing facial muscles to reduce overall stress levels.",
+            emoji: "😌",
+            page: "wellnessTips.html",
+            color: "#10B981"
+        },
+        {
+            tip: "Your face is a window to your emotions - use this awareness for self-care.",
+            detail: "Being mindful of your facial expressions throughout the day can help you identify and manage your emotional states more effectively.",
+            emoji: "🪞",
+            page: "wellnessTips.html",
+            color: "#8B5CF6"
+        },
+        {
+            tip: "Mirror work can help you practice positive facial expressions and self-compassion.",
+            detail: "Spending a few minutes daily looking at your reflection while expressing positive emotions can boost self-esteem and emotional well-being.",
+            emoji: "✨",
+            page: "wellnessTips.html",
+            color: "#EC4899"
+        }
+    ];
+    
+    const randomTip = generalTips[Math.floor(Math.random() * generalTips.length)];
+    
+    const html = `
+        <div style="text-align: center; padding: 1rem;">
+            <div style="
+                width: 80px;
+                height: 80px;
+                margin: 0 auto 1.25rem;
+                background: linear-gradient(135deg, ${randomTip.color}20 0%, ${randomTip.color}10 100%);
+                border: 2px solid ${randomTip.color}40;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.2rem;
+                box-shadow: 0 4px 15px ${randomTip.color}25;
+            ">
+                ${randomTip.emoji}
+            </div>
+            <h4 style="
+                color: ${randomTip.color};
+                margin-bottom: 0.75rem;
+                font-weight: 700;
+                font-size: 1.1rem;
+            ">Daily Facial Wellness Tip</h4>
+            <p style="
+                margin-bottom: 0.75rem; 
+                line-height: 1.7; 
+                color: #4a5568;
+                font-weight: 500;
+            ">${randomTip.tip}</p>
+            <p style="
+                margin-bottom: 1.5rem;
+                line-height: 1.6;
+                color: #718096;
+                font-size: 0.9rem;
+                padding: 0.75rem;
+                background: ${randomTip.color}08;
+                border-radius: 8px;
+            ">${randomTip.detail}</p>
+            <a href="${randomTip.page}" 
+               style="
+                 display: inline-flex;
+                 align-items: center;
+                 gap: 8px;
+                 color: ${randomTip.color};
+                 text-decoration: none;
+                 font-weight: 700;
+                 font-size: 1rem;
+                 transition: all 0.3s ease;
+                 padding: 10px 20px;
+                 border: 2px solid ${randomTip.color}30;
+                 border-radius: 25px;
+                 background: ${randomTip.color}05;
+               "
+               onmouseover="
+                 this.style.color='white';
+                 this.style.background='${randomTip.color}';
+                 this.style.borderColor='${randomTip.color}';
+                 this.style.transform='translateY(-2px)';
+                 this.style.boxShadow='0 6px 20px ${randomTip.color}40';
+               "
+               onmouseout="
+                 this.style.color='${randomTip.color}';
+                 this.style.background='${randomTip.color}05';
+                 this.style.borderColor='${randomTip.color}30';
+                 this.style.transform='translateY(0)';
+                 this.style.boxShadow='none';
+               "
+            >
+                <span>View All Wellness Tips</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    `;
+    
+    dailyTipContent.innerHTML = html;
+}

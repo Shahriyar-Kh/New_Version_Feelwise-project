@@ -22,7 +22,7 @@ start cmd /k "cd FastAPI_Backend && call main-venv\Scripts\activate && uvicorn j
 REM === Start Face Analysis API (Python 3.10) ===
 echo.
 echo ▶ Starting Face Analysis API (port 8002)...
-start cmd /k "cd FastAPI_Backend && call face-venv\Scripts\activate && uvicorn face-analysis-api:app --reload --port 8002"
+start cmd /k "cd FastAPI_Backend && call venv3102\Scripts\activate && uvicorn face-analysis-api:app --reload --port 8002"
 
 REM === Start Node.js Main Server ===
 echo.

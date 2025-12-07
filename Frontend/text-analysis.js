@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function analyzeText(text) {
-    emotionResult.innerHTML = "<p>Analyzing your text...</p>";
+    emotionResult.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Analyzing your text...</div>';
     try {
       const response = await fetch("http://localhost:5000/analyze", {
         method: "POST",
@@ -76,14 +76,22 @@ document.addEventListener("DOMContentLoaded", function () {
         body: JSON.stringify({ text: text }),
       });
 
-      if (!response.ok) throw new Error("Analysis failed");
+      if (!response.ok) {
+        throw new Error(`Analysis failed: ${response.status} ${response.statusText}`);
+      }
 
       const data = await response.json();
+      
+      // Show sarcasm alert if detected
+      if (data.sarcasm_detected) {
+        showSarcasmAlert();
+      }
+      
       if (data && data.emotion_distribution) {
         const formattedResults = formatAnalysisResults(data);
         displayAnalysisResults(formattedResults);
-        updateRecommendations(data.emotion_distribution);
-        updateDailyChallenge(data.emotion_distribution);
+        updateRecommendations(data.emotion_distribution, data.sarcasm_detected);
+        updateDailyChallenge(data.emotion_distribution, data.sarcasm_detected);
 
         // Save to both local storage and backend
         await saveAnalysisToHistory(formattedResults);
@@ -99,62 +107,126 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (error) {
       console.error("Error:", error);
       emotionResult.innerHTML =
-        '<p class="error">Failed to analyze text. Please try again.</p>';
+        '<p class="error"><i class="fas fa-exclamation-circle"></i> Failed to analyze text. Please try again.</p>';
     }
   }
 
-  function formatAnalysisResults(data) {
-    const emotions = data.emotion_distribution;
-    const dominantEmotion = data.emotion;
-    const positiveEmotions = ["joy", "love", "surprise"];
-    const negativeEmotions = ["sadness", "anger", "fear"];
-
-    let positivePercent = 0;
-    let negativePercent = 0;
-    let neutralPercent = 0;
-
-    for (const [emotion, percent] of Object.entries(emotions)) {
-      if (positiveEmotions.includes(emotion)) {
-        positivePercent += percent;
-      } else if (negativeEmotions.includes(emotion)) {
-        negativePercent += percent;
+  function showSarcasmAlert() {
+    // Create a subtle notification for sarcasm
+    const existingAlert = document.querySelector('.sarcasm-alert');
+    if (existingAlert) existingAlert.remove();
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'sarcasm-alert';
+    alertDiv.innerHTML = `
+      <i class="fas fa-theater-masks"></i>
+      <span>Sarcasm detected in your text. Analysis adjusted accordingly.</span>
+      <button class="close-alert">&times;</button>
+    `;
+    
+    document.querySelector('.input-section').appendChild(alertDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (alertDiv.parentNode) {
+        alertDiv.style.opacity = '0';
+        setTimeout(() => alertDiv.parentNode.removeChild(alertDiv), 300);
       }
+    }, 5000);
+    
+    // Close button
+    alertDiv.querySelector('.close-alert').addEventListener('click', () => {
+      alertDiv.parentNode.removeChild(alertDiv);
+    });
+  }
+
+  function formatAnalysisResults(data) {
+    const emotions = data.emotion_distribution || {};
+    const sentiment = data.sentiment || { positive: 0, negative: 0, neutral: 0 };
+    const dominantEmotion = data.emotion;
+    const negationDetected = data.negation_detected || false;
+    const sarcasmDetected = data.sarcasm_detected || false;
+    
+    // Create interpretation note
+    let interpretationNote = "";
+    if (sarcasmDetected) {
+        interpretationNote = "Sarcasm detected - sentiment results inverted";
     }
-
-    const total = positivePercent + negativePercent;
-    neutralPercent = Math.max(0, 100 - total);
-
+    if (negationDetected) {
+        interpretationNote += (interpretationNote ? "; " : "") + "Negation detected";
+    }
+    
     return {
-      text: userInput.value.trim(),
-      emotions: {
-        positive: positivePercent,
-        negative: negativePercent,
-        neutral: neutralPercent,
-      },
-      dominantEmotion: dominantEmotion,
-      emotionDetails: emotions,
-      timestamp: new Date().toISOString(),
-      userId: currentUserId,
+        text: userInput.value.trim(),
+        emotions: {
+            positive: sentiment.positive || 0,
+            negative: sentiment.negative || 0,
+            neutral: sentiment.neutral || 0
+        },
+        dominantEmotion: dominantEmotion,
+        emotionDetails: emotions,
+        interpretationNote: interpretationNote,
+        sarcasmDetected: sarcasmDetected,
+        negationDetected: negationDetected,
+        timestamp: new Date().toISOString(),
+        userId: currentUserId,
     };
   }
 
   function displayAnalysisResults(results) {
-    let html = `<h3>Dominant Emotion: <span class="emotion-tag ${getEmotionClass(
-      results.dominantEmotion
-    )}">${results.dominantEmotion}</span></h3>`;
-    html += '<div class="emotion-breakdown">';
-    html += `<p>Positive: ${results.emotions.positive.toFixed(1)}%</p>`;
-    html += `<p>Negative: ${results.emotions.negative.toFixed(1)}%</p>`;
-    html += `<p>Neutral: ${results.emotions.neutral.toFixed(1)}%</p>`;
-    html += "</div>";
-
-    html += '<h4>Detailed Emotion Distribution:</h4><div class="emotion-tags">';
-    for (const [emotion, percent] of Object.entries(results.emotionDetails)) {
-      html += `<span class="emotion-tag ${getEmotionClass(
-        emotion
-      )}">${emotion} (${percent.toFixed(1)}%)</span>`;
+    let html = `<h3>Dominant Emotion: <span class="emotion-tag ${getEmotionClass(results.dominantEmotion)}">${results.dominantEmotion}</span></h3>`;
+    
+    if (results.interpretationNote) {
+        html += `<div class="interpretation-note ${results.sarcasmDetected ? 'sarcasm' : ''}">
+                    <i class="fas fa-${results.sarcasmDetected ? 'theater-masks' : 'exclamation-triangle'}"></i> 
+                    ${results.interpretationNote}
+                 </div>`;
     }
-    html += "</div>";
+    
+    html += '<div class="emotion-breakdown">';
+    html += `<div class="meter">
+                <div class="meter-label">
+                    <span>Positive</span>
+                    <span>${results.emotions.positive.toFixed(1)}%</span>
+                </div>
+                <div class="meter-bar">
+                    <div class="meter-fill positive" style="width: ${results.emotions.positive}%"></div>
+                </div>
+            </div>`;
+    
+    html += `<div class="meter">
+                <div class="meter-label">
+                    <span>Negative</span>
+                    <span>${results.emotions.negative.toFixed(1)}%</span>
+                </div>
+                <div class="meter-bar">
+                    <div class="meter-fill negative" style="width: ${results.emotions.negative}%"></div>
+                </div>
+            </div>`;
+    
+    html += `<div class="meter">
+                <div class="meter-label">
+                    <span>Neutral</span>
+                    <span>${results.emotions.neutral.toFixed(1)}%</span>
+                </div>
+                <div class="meter-bar">
+                    <div class="meter-fill neutral" style="width: ${results.emotions.neutral}%"></div>
+                </div>
+            </div>`;
+    html += '</div>';
+    
+    // Show emotion details only if there are significant emotions
+    const significantEmotions = Object.entries(results.emotionDetails).filter(([_, percent]) => percent > 5);
+    if (significantEmotions.length > 0) {
+        html += '<h4>Detailed Emotion Distribution:</h4><div class="emotion-tags">';
+        significantEmotions.sort((a, b) => b[1] - a[1]).forEach(([emotion, percent]) => {
+            html += `<span class="emotion-tag ${getEmotionClass(emotion)}" title="${emotion}: ${percent.toFixed(1)}%">
+                        ${emotion} (${percent.toFixed(1)}%)
+                    </span>`;
+        });
+        html += '</div>';
+    }
+    
     emotionResult.innerHTML = html;
   }
 
@@ -170,47 +242,53 @@ document.addEventListener("DOMContentLoaded", function () {
   function getQuizPageUrl(emotion) {
     const quizPages = {
       joy: "happyQuiz.html",
-      love: "happyQuiz.html", // Use happy quiz or create loveQuiz.html
-      surprise: "happyQuiz.html", // Use happy quiz or create surpriseQuiz.html
+      love: "happyQuiz.html",
+      surprise: "happyQuiz.html",
       sadness: "sadQuiz.html",
-      anger: "angryQuiz.html", // You may need to create this page
-      fear: "anxiousQuiz.html", // You may need to create this page
+      anger: "angryQuiz.html",
+      fear: "anxiousQuiz.html",
+      neutral: "happyQuiz.html"
     };
-    return quizPages[emotion] || "happyQuiz.html"; // Default to happyQuiz.html
+    return quizPages[emotion] || "happyQuiz.html";
   }
 
   // Helper function to get challenge page URL for daily challenges
   function getChallengePageUrl(emotion) {
     const challengePages = {
       joy: "happy.html",
-      love: "happy.html", // Use happy page or create love.html
-      surprise: "happy.html", // Use happy page or create surprise.html
+      love: "happy.html",
+      surprise: "happy.html",
       sadness: "sad.html",
-      anger: "angry.html", // You may need to create this page
-      fear: "anxious.html", // You may need to create this page
+      anger: "angry.html",
+      fear: "anxious.html",
+      neutral: "happy.html"
     };
-    return challengePages[emotion] || "happy.html"; // Default to happy.html
+    return challengePages[emotion] || "happy.html";
   }
 
   // Helper function to get mood display name
   function getMoodDisplayName(emotion) {
     const moodNames = {
       joy: "Happy",
-      love: "Happy", // Or "Love" if you have a specific love quiz/page
-      surprise: "Happy", // Or "Surprise" if you have a specific surprise quiz/page
+      love: "Loving",
+      surprise: "Surprised",
       sadness: "Sad",
       anger: "Angry",
       fear: "Anxious",
+      neutral: "Neutral"
     };
     return moodNames[emotion] || "Happy";
   }
 
-  function updateRecommendations(emotionDistribution) {
+  function updateRecommendations(emotionDistribution, sarcasmDetected = false) {
     let recommendations = [];
-    const dominantEmotion = Object.entries(emotionDistribution).reduce((a, b) =>
-      a[1] > b[1] ? a : b
-    )[0];
-
+    const entries = Object.entries(emotionDistribution);
+    if (entries.length === 0) {
+      recommendationsContent.innerHTML = '<p>No specific recommendations available for this analysis.</p>';
+      return;
+    }
+    
+    const dominantEmotion = entries.reduce((a, b) => a[1] > b[1] ? a : b)[0];
     const moodDisplayName = getMoodDisplayName(dominantEmotion);
     const quizPageUrl = getQuizPageUrl(dominantEmotion);
 
@@ -251,29 +329,19 @@ document.addEventListener("DOMContentLoaded", function () {
         "Practice progressive muscle relaxation to reduce physical tension.",
         `Take the ${moodDisplayName.toLowerCase()} quiz to build confidence and reduce fear.`
       ],
+      neutral: [
+        "Take a moment to reflect on your current emotional state.",
+        "Practice mindfulness to become more aware of subtle emotions.",
+        "Consider keeping a mood journal to track emotional patterns.",
+        `Take a general mood quiz to explore different emotional states.`
+      ]
     };
 
-    recommendations.push(...(recMap[dominantEmotion] || []));
+    recommendations.push(...(recMap[dominantEmotion] || recMap.neutral));
 
-    const positiveTotal =
-      (emotionDistribution.joy || 0) +
-      (emotionDistribution.love || 0) +
-      (emotionDistribution.surprise || 0);
-    const negativeTotal =
-      (emotionDistribution.sadness || 0) +
-      (emotionDistribution.anger || 0) +
-      (emotionDistribution.fear || 0);
-
-    if (negativeTotal > 50) {
-      recommendations.push(
-        "Limit exposure to negative news or stressful media today.",
-        "Prioritize self-care and don't hesitate to seek support if needed."
-      );
-    } else if (positiveTotal > 60) {
-      recommendations.push(
-        "Your positive outlook is a strength - consider how you might sustain it.",
-        "Positive emotions broaden our thinking - take advantage by tackling creative projects."
-      );
+    // Adjust recommendations for sarcasm
+    if (sarcasmDetected) {
+      recommendations.unshift("Your text suggests sarcasm. It might be helpful to explore what's behind these feelings.");
     }
 
     let html = "<ul>";
@@ -285,22 +353,9 @@ document.addEventListener("DOMContentLoaded", function () {
       <div style="margin-top: 15px; text-align: center;">
         <button 
           onclick="navigateToQuizPage('${dominantEmotion}')" 
-          style="
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-          "
-          onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)';"
-          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)';"
+          class="quiz-btn"
         >
-          Take ${moodDisplayName} Quiz
+          <i class="fas fa-brain"></i> Take ${moodDisplayName} Quiz
         </button>
       </div>
     `;
@@ -308,11 +363,14 @@ document.addEventListener("DOMContentLoaded", function () {
     recommendationsContent.innerHTML = html;
   }
 
-  function updateDailyChallenge(emotionDistribution) {
-    const dominantEmotion = Object.entries(emotionDistribution).reduce((a, b) =>
-      a[1] > b[1] ? a : b
-    )[0];
-
+  function updateDailyChallenge(emotionDistribution, sarcasmDetected = false) {
+    const entries = Object.entries(emotionDistribution);
+    if (entries.length === 0) {
+      dailyChallengeContent.innerHTML = '<h3>Daily Challenge</h3><p>Practice mindfulness for 5 minutes today.</p>';
+      return;
+    }
+    
+    const dominantEmotion = entries.reduce((a, b) => a[1] > b[1] ? a : b)[0];
     const moodDisplayName = getMoodDisplayName(dominantEmotion);
     const challengePageUrl = getChallengePageUrl(dominantEmotion);
 
@@ -347,38 +405,33 @@ document.addEventListener("DOMContentLoaded", function () {
         "Take one small step toward something that scares you.",
         "Take the Anxious Challenge to build confidence and overcome fears!"
       ],
+      neutral: [
+        "Mindful Awareness",
+        "Practice being present and aware of your surroundings for 10 minutes.",
+        "Take a mindfulness challenge to improve emotional awareness!"
+      ]
     };
 
-    const [title, explanation, challengePrompt] = challenges[dominantEmotion] || [
-      "Reflect",
-      "Take time to reflect on your current emotional state.",
-      "Take a mood-specific challenge to improve your wellbeing!"
-    ];
+    const [title, explanation, challengePrompt] = challenges[dominantEmotion] || challenges.neutral;
 
     let html = `<h3>${title}</h3><p>${explanation}</p>`;
     html += `<p style="margin-top: 15px; font-style: italic; color: #666;">${challengePrompt}</p>`;
+    
+    // Adjust for sarcasm
+    if (sarcasmDetected) {
+      html += `<p style="margin-top: 10px; color: #ff9800; font-weight: bold;">
+                <i class="fas fa-lightbulb"></i> Since sarcasm was detected, consider exploring underlying feelings.
+               </p>`;
+    }
     
     // Add challenge button for daily challenges
     html += `
       <div style="margin-top: 15px; text-align: center;">
         <button 
           onclick="navigateToChallengePage('${dominantEmotion}')" 
-          style="
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-            color: #333;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 3px 12px rgba(255, 154, 158, 0.3);
-          "
-          onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 18px rgba(255, 154, 158, 0.4)';"
-          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 12px rgba(255, 154, 158, 0.3)';"
+          class="challenge-btn"
         >
-          Take the ${moodDisplayName} Challenge
+          <i class="fas fa-tasks"></i> Take the ${moodDisplayName} Challenge
         </button>
       </div>
     `;
@@ -386,7 +439,7 @@ document.addEventListener("DOMContentLoaded", function () {
     dailyChallengeContent.innerHTML = html;
   }
 
-  // Navigation function for mood-specific quiz pages (for recommendations)
+  // Navigation function for mood-specific quiz pages
   function navigateToQuizPage(emotion) {
     const quizPageUrl = getQuizPageUrl(emotion);
     
@@ -398,7 +451,7 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = quizPageUrl;
   }
 
-  // Navigation function for mood-specific challenge pages (for daily challenges)
+  // Navigation function for mood-specific challenge pages
   function navigateToChallengePage(emotion) {
     const challengePageUrl = getChallengePageUrl(emotion);
     
@@ -428,7 +481,7 @@ document.addEventListener("DOMContentLoaded", function () {
       "Mindful eating helps connect with emotional needs.",
     ];
     const randomTip = tips[Math.floor(Math.random() * tips.length)];
-    dailyTipContent.innerHTML = `<p>${randomTip}</p>`;
+    dailyTipContent.innerHTML = `<p><i class="fas fa-lightbulb"></i> ${randomTip}</p>`;
   }
 
   function initProgressChart() {
@@ -461,8 +514,25 @@ document.addEventListener("DOMContentLoaded", function () {
           y: {
             beginAtZero: true,
             max: 100,
-          },
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          }
         },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ' + context.parsed.y + '%';
+              }
+            }
+          }
+        }
       },
     });
   }
@@ -618,18 +688,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Show a subtle notification that report is available
     const notification = document.createElement("div");
     notification.className = "analysis-complete-notification";
-    notification.style.cssText = `
-      background: #e8f5e8;
-      border: 1px solid #4caf50;
-      color: #2e7d32;
-      padding: 10px 15px;
-      border-radius: 5px;
-      margin-top: 15px;
-      text-align: center;
-      font-size: 14px;
-    `;
     notification.innerHTML = `
-      ✅ Analysis complete! <a href="assessment-report.html" style="color: #1976d2; text-decoration: underline;">View your detailed assessment report</a>
+      <i class="fas fa-chart-line"></i>
+      <span>Analysis complete! View detailed report in History section.</span>
     `;
 
     // Remove existing notification if present
@@ -641,314 +702,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     emotionResult.appendChild(notification);
-  }
-
-  // Generate comprehensive assessment report
-  async function generateAssessmentReport() {
-    try {
-      let analysisHistory = [];
-
-      // Get user-specific analysis history
-      if (token && currentUserId !== "guest") {
-        try {
-          const res = await fetch(`${API_BASE}/text-analysis/history`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            analysisHistory = await res.json();
-          }
-        } catch (error) {
-          console.log("Using localStorage data");
-        }
-      }
-
-      // Fallback to localStorage
-      if (analysisHistory.length === 0) {
-        const userHistoryKey = getUserSpecificKey("emotionHistory");
-        analysisHistory =
-          JSON.parse(localStorage.getItem(userHistoryKey)) || [];
-      }
-
-      // Generate report
-      const reportData = generateReportData(analysisHistory);
-      displayAssessmentReport(reportData);
-    } catch (error) {
-      console.error("Error generating assessment report:", error);
-      alert("Error generating report. Please try again.");
-    }
-  }
-
-  // Generate report data from analysis history
-  function generateReportData(history) {
-    if (history.length === 0) {
-      return {
-        totalAnalyses: 0,
-        timeRange: "No data available",
-        emotionalTrends: {},
-        averageEmotions: { positive: 0, negative: 0, neutral: 0 },
-        insights: ["Complete more text analyses to generate insights"],
-        recommendations: [
-          "Start by analyzing your daily thoughts and feelings",
-        ],
-      };
-    }
-
-    const now = new Date();
-    const oldestAnalysis = new Date(
-      Math.min(...history.map((h) => new Date(h.timestamp)))
-    );
-    const daysDiff = Math.ceil((now - oldestAnalysis) / (1000 * 60 * 60 * 24));
-
-    // Calculate trends
-    const emotionalTrends = {};
-    const totalEmotions = { positive: 0, negative: 0, neutral: 0 };
-
-    history.forEach((analysis) => {
-      const dominant = analysis.dominantEmotion;
-      emotionalTrends[dominant] = (emotionalTrends[dominant] || 0) + 1;
-
-      totalEmotions.positive += analysis.emotions.positive || 0;
-      totalEmotions.negative += analysis.emotions.negative || 0;
-      totalEmotions.neutral += analysis.emotions.neutral || 0;
-    });
-
-    const averageEmotions = {
-      positive: totalEmotions.positive / history.length,
-      negative: totalEmotions.negative / history.length,
-      neutral: totalEmotions.neutral / history.length,
-    };
-
-    // Generate insights
-    const insights = generateInsights(
-      emotionalTrends,
-      averageEmotions,
-      history
-    );
-    const recommendations = generatePersonalizedRecommendations(
-      emotionalTrends,
-      averageEmotions
-    );
-
-    return {
-      totalAnalyses: history.length,
-      timeRange: `${daysDiff} days`,
-      emotionalTrends,
-      averageEmotions,
-      insights,
-      recommendations,
-      recentAnalyses: history.slice(-5).reverse(),
-    };
-  }
-
-  // Generate personalized insights
-  function generateInsights(trends, averages, history) {
-    const insights = [];
-
-    // Most common emotion
-    const mostCommon = Object.entries(trends).reduce((a, b) =>
-      a[1] > b[1] ? a : b
-    );
-    insights.push(
-      `Your most frequent emotional state is ${mostCommon[0]} (${mostCommon[1]} times)`
-    );
-
-    // Emotional balance
-    if (averages.positive > averages.negative) {
-      insights.push(
-        `You maintain a positive emotional outlook ${averages.positive.toFixed(
-          1
-        )}% of the time`
-      );
-    } else if (averages.negative > averages.positive) {
-      insights.push(
-        `Your emotional state shows ${averages.negative.toFixed(
-          1
-        )}% negative sentiment - consider focusing on self-care`
-      );
-    } else {
-      insights.push("You maintain a balanced emotional state");
-    }
-
-    // Recent trend
-    if (history.length >= 3) {
-      const recent = history.slice(-3);
-      const recentPositive =
-        recent.reduce((sum, a) => sum + (a.emotions.positive || 0), 0) / 3;
-      const overallPositive = averages.positive;
-
-      if (recentPositive > overallPositive + 5) {
-        insights.push(
-          "Your recent emotional state shows improvement - keep it up!"
-        );
-      } else if (recentPositive < overallPositive - 5) {
-        insights.push(
-          "Your recent emotional state shows some challenges - consider additional support"
-        );
-      }
-    }
-
-    return insights;
-  }
-
-  // Generate personalized recommendations
-  function generatePersonalizedRecommendations(trends, averages) {
-    const recommendations = [];
-
-    if (averages.negative > 40) {
-      recommendations.push(
-        "Consider practicing daily mindfulness meditation (10-15 minutes)"
-      );
-      recommendations.push(
-        "Schedule regular check-ins with a trusted friend or counselor"
-      );
-      recommendations.push(
-        "Engage in physical activity to improve mood naturally"
-      );
-    }
-
-    if (averages.positive > 60) {
-      recommendations.push(
-        "Your positive outlook is a strength - consider mentoring others"
-      );
-      recommendations.push(
-        "Use your positive energy to tackle challenging goals"
-      );
-    }
-
-    // Specific emotion-based recommendations
-    const dominantEmotion = Object.entries(trends).reduce((a, b) =>
-      a[1] > b[1] ? a : b
-    )[0];
-
-    const emotionRecs = {
-      sadness: [
-        "Practice gratitude journaling",
-        "Engage in creative activities",
-        "Spend time in nature",
-      ],
-      anger: [
-        "Try progressive muscle relaxation",
-        "Practice assertive communication",
-        "Consider anger management techniques",
-      ],
-      fear: [
-        "Practice exposure therapy with small steps",
-        "Learn grounding techniques",
-        "Build a support network",
-      ],
-      joy: [
-        "Share your joy with others",
-        "Capture positive moments in a journal",
-        "Plan enjoyable activities regularly",
-      ],
-      love: [
-        "Express appreciation to loved ones",
-        "Practice self-compassion",
-        "Consider volunteer work",
-      ],
-      surprise: [
-        "Embrace new experiences",
-        "Stay curious and open-minded",
-        "Reflect on unexpected positive outcomes",
-      ],
-    };
-
-    if (emotionRecs[dominantEmotion]) {
-      recommendations.push(...emotionRecs[dominantEmotion]);
-    }
-
-    return recommendations.slice(0, 6); // Limit to 6 recommendations
-  }
-
-  // Display comprehensive assessment report (for separate page)
-  function displayAssessmentReport(reportData) {
-    // This function is now designed to work with a separate assessment report page
-    // The report data will be stored and accessed by the report page
-    return reportData;
-  }
-
-  // Prepare report data for separate page access
-  async function prepareReportForPage() {
-    try {
-      let analysisHistory = [];
-
-      // Get user-specific analysis history
-      if (token && currentUserId !== "guest") {
-        try {
-          const res = await fetch(`${API_BASE}/text-analysis/history`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            analysisHistory = await res.json();
-          }
-        } catch (error) {
-          console.log("Using localStorage data");
-        }
-      }
-
-      // Fallback to localStorage
-      if (analysisHistory.length === 0) {
-        const userHistoryKey = getUserSpecificKey("emotionHistory");
-        analysisHistory =
-          JSON.parse(localStorage.getItem(userHistoryKey)) || [];
-      }
-
-      // Generate and store report data
-      const reportData = generateReportData(analysisHistory);
-      const reportKey = getUserSpecificKey("assessmentReportData");
-      sessionStorage.setItem(reportKey, JSON.stringify(reportData));
-
-      return reportData;
-    } catch (error) {
-      console.error("Error preparing assessment report:", error);
-      return null;
-    }
-  }
-
-  // Record challenge completion for text analysis
-  async function recordTextAnalysisChallenge(dominantEmotion) {
-    try {
-      if (!currentUserId) {
-        await initializeUserContext();
-      }
-
-      let newCompletion = {
-        mood: dominantEmotion.toLowerCase(),
-        challenge: "text-analysis",
-        time: new Date().toISOString(),
-        userId: currentUserId,
-        type: "text-analysis-challenge",
-      };
-
-      // If logged in, also save to database
-      if (token && currentUserId !== "guest") {
-        await fetch(`${API_BASE}/progress/complete-challenge`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            mood: dominantEmotion.toLowerCase(),
-            challenge: "text-analysis",
-            type: "text-analysis-challenge",
-          }),
-        });
-      }
-
-      // Save to user-specific localStorage
-      const userChallengesKey = getUserSpecificKey("completedChallenges");
-      let completions =
-        JSON.parse(localStorage.getItem(userChallengesKey)) || [];
-      completions.push(newCompletion);
-      localStorage.setItem(userChallengesKey, JSON.stringify(completions));
-
-      console.log(
-        `Text analysis challenge recorded for user ${currentUserId}: ${dominantEmotion}`
-      );
-    } catch (error) {
-      console.error("Error recording text analysis challenge:", error);
-    }
   }
 
   // Get user progress summary
@@ -1014,185 +767,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Export analysis data for user
-  async function exportUserAnalysisData() {
-    try {
-      const userHistoryKey = getUserSpecificKey("emotionHistory");
-      const localData = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
-
-      let allData = localData;
-
-      // If logged in, try to get backend data too
-      if (token && currentUserId !== "guest") {
-        try {
-          const res = await fetch(`${API_BASE}/text-analysis/export`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            const backendData = await res.json();
-            // Merge and deduplicate data
-            const combined = [...backendData, ...localData];
-            allData = combined.filter(
-              (item, index, self) =>
-                index ===
-                self.findIndex(
-                  (t) => t.timestamp === item.timestamp && t.text === item.text
-                )
-            );
-          }
-        } catch (error) {
-          console.log("Using local data only for export");
-        }
-      }
-
-      // Create downloadable CSV
-      if (allData.length === 0) {
-        alert("No analysis data to export");
-        return;
-      }
-
-      const csvContent = convertToCSV(allData);
-      const blob = new Blob([csvContent], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `emotion_analysis_${currentUserId}_${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Error exporting analysis data:", error);
-      alert("Error exporting data. Please try again.");
-    }
-  }
-
-  // Convert analysis data to CSV format
-  function convertToCSV(data) {
-    const headers = [
-      "Date",
-      "Time",
-      "Text",
-      "Dominant Emotion",
-      "Positive %",
-      "Negative %",
-      "Neutral %",
-      "Joy %",
-      "Love %",
-      "Surprise %",
-      "Sadness %",
-      "Anger %",
-      "Fear %",
-    ];
-
-    const rows = data.map((item) => {
-      const date = new Date(item.timestamp);
-      return [
-        date.toLocaleDateString(),
-        date.toLocaleTimeString(),
-        `"${item.text.replace(/"/g, '""')}"`, // Escape quotes in text
-        item.dominantEmotion,
-        item.emotions.positive.toFixed(2),
-        item.emotions.negative.toFixed(2),
-        item.emotions.neutral.toFixed(2),
-        (item.emotionDetails.joy || 0).toFixed(2),
-        (item.emotionDetails.love || 0).toFixed(2),
-        (item.emotionDetails.surprise || 0).toFixed(2),
-        (item.emotionDetails.sadness || 0).toFixed(2),
-        (item.emotionDetails.anger || 0).toFixed(2),
-        (item.emotionDetails.fear || 0).toFixed(2),
-      ].join(",");
-    });
-
-    return [headers.join(","), ...rows].join("\n");
-  }
-
-  // Sync local data with backend
-  async function syncAnalysisData() {
-    if (!token || currentUserId === "guest") {
-      console.log("Cannot sync - user not logged in");
-      return;
-    }
-
-    try {
-      const userHistoryKey = getUserSpecificKey("emotionHistory");
-      const localData = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
-
-      if (localData.length === 0) {
-        console.log("No local data to sync");
-        return;
-      }
-
-      // Send local data to backend
-      const response = await fetch(`${API_BASE}/text-analysis/sync`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ analyses: localData }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log(`Synced ${result.syncedCount} analyses to backend`);
-      } else {
-        console.error("Failed to sync data with backend");
-      }
-    } catch (error) {
-      console.error("Error syncing analysis data:", error);
-    }
-  }
-
-  // Delete analysis entry
-  async function deleteAnalysis(timestamp) {
-    try {
-      // Remove from localStorage
-      const userHistoryKey = getUserSpecificKey("emotionHistory");
-      let localData = JSON.parse(localStorage.getItem(userHistoryKey)) || [];
-      localData = localData.filter((item) => item.timestamp !== timestamp);
-      localStorage.setItem(userHistoryKey, JSON.stringify(localData));
-
-      // Remove from backend if logged in
-      if (token && currentUserId !== "guest") {
-        await fetch(`${API_BASE}/text-analysis/delete`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ timestamp }),
-        });
-      }
-
-      console.log("Analysis deleted successfully");
-      updateProgressChart("daily"); // Refresh chart
-    } catch (error) {
-      console.error("Error deleting analysis:", error);
-    }
-  }
-
-  // Get emotion color for styling
-  function getEmotionColor(emotion) {
-    const colors = {
-      joy: "#66bb6a",
-      love: "#ef5350",
-      surprise: "#ffca28",
-      sadness: "#42a5f5",
-      anger: "#ff7043",
-      fear: "#ab47bc",
-    };
-    return colors[emotion] || "#9e9e9e";
-  }
-
   // Initialize authentication check
   function checkAuthenticationStatus() {
     if (token) {
       console.log("User is authenticated - syncing enabled");
-      syncAnalysisData(); // Auto-sync on load
     } else {
       console.log("Guest user - local storage only");
     }
@@ -1219,4 +797,117 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Check auth status on load
   checkAuthenticationStatus();
+
+  // Word count functionality
+  userInput.addEventListener('input', function() {
+    const text = this.value.trim();
+    const words = text.split(/\s+/).filter(word => word.length > 0);
+    const wordCount = words.length;
+    
+    if (text.length > 0) {
+      wordCountEl.style.display = 'block';
+      wordCountEl.textContent = `${wordCount} word${wordCount !== 1 ? 's' : ''}`;
+    } else {
+      wordCountEl.style.display = 'none';
+    }
+  });
+
+  // Add CSS for new elements
+  const style = document.createElement('style');
+  style.textContent = `
+    .sarcasm-alert {
+      background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+    }
+    
+    .sarcasm-alert i {
+      margin-right: 10px;
+      font-size: 1.2em;
+    }
+    
+    .close-alert {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5em;
+      cursor: pointer;
+      padding: 0 5px;
+    }
+    
+    .interpretation-note.sarcasm {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border-left: 4px solid #ff9800;
+      color: #856404;
+    }
+    
+    .quiz-btn, .challenge-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .challenge-btn {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+      color: #333;
+    }
+    
+    .quiz-btn:hover, .challenge-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .challenge-btn:hover {
+      box-shadow: 0 6px 20px rgba(255, 154, 158, 0.4);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    
+    .loading i {
+      margin-right: 10px;
+      color: #6366F1;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(style);
 });
+
+// Word count functionality - only shows when user types
+    const userInput = document.getElementById('userInput');
+    const wordCountEl = document.getElementById('wordCount');
+
+    userInput.addEventListener('input', function() {
+      const text = this.value.trim();
+      const words = text.split(/\s+/).filter(word => word.length > 0);
+      const wordCount = words.length;
+      
+      if (text.length > 0) {
+        wordCountEl.style.display = 'block';
+        wordCountEl.textContent = `${wordCount} word${wordCount !== 1 ? 's' : ''}`;
+      } else {
+        wordCountEl.style.display = 'none';
+      }
+    });
+  
