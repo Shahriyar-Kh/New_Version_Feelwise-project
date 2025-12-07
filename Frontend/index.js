@@ -1405,3 +1405,26 @@ function onPlayerStateChange(event) {
     console.log("Video ended");
   }
 }
+function playYouTube(el) {
+    el.innerHTML = `
+        <iframe width="100%" height="100%"
+        src="https://www.youtube.com/embed/xl9r_hOh9r4?autoplay=1"
+        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    `;
+}
+
+// ===== YouTube Player Fix =====
+
+document.querySelectorAll('.youtube-player').forEach(box => {
+    box.addEventListener('click', () => {
+        const videoId = box.getAttribute('data-id');
+        box.innerHTML = `
+            <iframe width="100%" height="100%" 
+                src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+                frameborder="0" 
+                allow="autoplay; encrypted-media" 
+                allowfullscreen>
+            </iframe>
+        `;
+    });
+});
