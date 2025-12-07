@@ -1,356 +1,1226 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeelWise - AI Emotional Intelligence Training</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="index.css" />
-  </head>
-  <body>
-    <!-- Header -->
-    <div class="header">
-      <div class="logo"><img id="m" src="/video/lgo.png" alt="" /></div>
-      <div class="nav">
-        <a href="#features">Features</a>
-        <a href="#demo">Demo</a>
-        <a href="#testimonials">Testimonials</a>
-        <a href="#resources">Resources</a>
-        <a href="#contact">Contact</a>
-      </div>
+</head>
+<body>
+    <!-- Progress Indicator -->
+    <div class="progress-container">
+        <div class="progress-bar"></div>
     </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1>FEEL<span class="purple-text">WISE</span></h1>
-        <p>Where Your Emotions Evolve.</p>
-        <a href="signup.html" class="btn">Get Started</a>
-      </div>
-    </section>
-
-    <!-- Resources Section -->
-    <section id="resources" class="resources section-padding">
-      <div class="content-wrapper">
-        <h2>Useful Resources</h2>
-        <div class="resources-container">
-          <div class="resource-box">
-            <h3>YouTube Videos</h3>
-            <p>Watch videos on emotional intelligence and FeelWise features.</p>
-            <a href="https://www.youtube.com" class="a" target="_blank"
-              >Watch Now</a
-            >
-          </div>
-          <div class="resource-box">
-            <h3>Articles</h3>
-            <p>
-              Read articles about emotional intelligence and mental well-being.
-            </p>
-            <a href="https://www.psychologytoday.com" class="a" target="_blank"
-              >Read More</a
-            >
-          </div>
-          <div class="resource-box">
-            <h3>Research Papers</h3>
-            <p>
-              Explore the scientific research on emotional intelligence and AI.
-            </p>
-            <a href="https://www.researchgate.net" class="a" target="_blank"
-              >Explore</a
-            >
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Daily Emotional Insights Section -->
-    <section id="ai-feelwise" class="section-padding">
-      <div class="content-wrapper">
-        <h2>🧠 Daily Emotional Insights</h2>
-        <div class="insight-container">
-          <div class="insight-list-container">
-            <div class="insight-list">
-              <div class="insight">
-                1️⃣ Self-awareness is the foundation of emotional intelligence.
-              </div>
-              <div class="insight">
-                2️⃣ Practicing gratitude daily can improve emotional well-being.
-              </div>
-              <div class="insight">
-                3️⃣ Deep breathing can help regulate emotions.
-              </div>
-              <div class="insight">
-                4️⃣ Listening actively improves interpersonal relationships.
-              </div>
-              <div class="insight">
-                5️⃣ Empathy is key to understanding others' emotions.
-              </div>
-              <div class="insight">
-                6️⃣ Taking breaks helps manage stress effectively.
-              </div>
-              <div class="insight">
-                7️⃣ Journaling can increase self-reflection and awareness.
-              </div>
-              <div class="insight">
-                8️⃣ Expressing emotions in a healthy way improves mental health.
-              </div>
-              <div class="insight">
-                9️⃣ Mindfulness enhances emotional regulation.
-              </div>
-              <div class="insight">
-                🔟 Recognizing emotional triggers helps in managing responses.
-              </div>
-              <!-- Additional insights would continue here -->
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fas fa-brain"></i>
             </div>
-          </div>
-
-          <!-- Right Side: YouTube Video Section -->
-          <div class="video-container">
-            <h2>🎥 Learn About Emotional Well-being</h2>
-            <div id="player">
-              <iframe
-                width="560"
-                height="315"
-                src="https://www.youtube.com/embed/xl9r_hOh9r4"
-                title="YouTube video player"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              >
-              </iframe>
+            <div class="logo-text">
+                <span class="logo-part-1">FEEL</span>
+                <span class="logo-part-2">WISE</span>
             </div>
-          </div>
         </div>
-      </div>
-    </section>
+
+        <nav class="nav">
+            <div class="nav-container">
+                <a href="#features" class="nav-link">
+                    <i class="fas fa-star nav-icon"></i>
+                    <span class="nav-text">Features</span>
+                </a>
+                <a href="#demo" class="nav-link">
+                    <i class="fas fa-play-circle nav-icon"></i>
+                    <span class="nav-text">Demo</span>
+                </a>
+                <a href="#testimonials" class="nav-link">
+                    <i class="fas fa-comment-dots nav-icon"></i>
+                    <span class="nav-text">Testimonials</span>
+                </a>
+                <a href="#resources" class="nav-link">
+                    <i class="fas fa-book-open nav-icon"></i>
+                    <span class="nav-text">Resources</span>
+                </a>
+                <a href="#contact" class="nav-link">
+                    <i class="fas fa-envelope nav-icon"></i>
+                    <span class="nav-text">Contact</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="header-actions">
+            <a href="signup.html" class="btn-header">
+                <i class="fas fa-rocket"></i>
+                <span>Get Started</span>
+            </a>
+            
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-header">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-part-1">FEEL</span>
+                    <span class="logo-part-2">WISE</span>
+                </div>
+            </div>
+            <button class="mobile-menu-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-nav">
+            <a href="#features" class="mobile-nav-link">
+                <i class="fas fa-star"></i>
+                <span>Features</span>
+            </a>
+            <a href="#demo" class="mobile-nav-link">
+                <i class="fas fa-play-circle"></i>
+                <span>Demo</span>
+            </a>
+            <a href="#testimonials" class="mobile-nav-link">
+                <i class="fas fa-comment-dots"></i>
+                <span>Testimonials</span>
+            </a>
+            <a href="#resources" class="mobile-nav-link">
+                <i class="fas fa-book-open"></i>
+                <span>Resources</span>
+            </a>
+            <a href="#contact" class="mobile-nav-link">
+                <i class="fas fa-envelope"></i>
+                <span>Contact</span>
+            </a>
+            <a href="signup.html" class="mobile-nav-link btn-mobile">
+                <i class="fas fa-rocket"></i>
+                <span>Get Started</span>
+            </a>
+        </div>
+    </div>
+
+
+<!-- Hero Section -->
+<section class="hero">
+    <!-- Animated Background -->
+    <div class="hero-background">
+        <div class="bg-particle p1"></div>
+        <div class="bg-particle p2"></div>
+        <div class="bg-particle p3"></div>
+        <div class="bg-particle p4"></div>
+        <div class="bg-particle p5"></div>
+    </div>
+    
+    <div class="hero-container">
+        <!-- Badge -->
+        <div class="hero-badge">
+            <div class="badge-icon">
+                <i class="fas fa-sparkles"></i>
+            </div>
+            <span class="badge-text">AI-Powered Emotional Intelligence</span>
+        </div>
+        
+        <!-- Main Title -->
+        <div class="hero-title-container">
+            <h1 class="hero-title">
+                <span class="title-part" data-text="FEEL">FEEL </span>
+                <span class="title-part gradient-text" data-text="WISE">WISE</span>
+            </h1>
+        </div>
+        
+        <!-- Subtitle -->
+        <p class="hero-subtitle">
+            Where Your Emotions <span class="highlight">Evolve</span>
+            <span class="typing-cursor">|</span>
+        </p>
+        
+        <!-- Description -->
+        <p class="hero-description">
+            Transform your emotional well-being with our AI-powered platform. 
+            Discover personalized insights and grow your emotional intelligence.
+        </p>
+        
+        <!-- CTA Buttons -->
+        <div class="hero-actions">
+            <a href="signup.html" class="btn btn-primary">
+                <i class="fas fa-play-circle"></i>
+                <span>Start Your Journey</span>
+                <div class="btn-hover-effect"></div>
+            </a>
+            
+            <a href="#features" class="btn btn-secondary">
+                <i class="fas fa-eye"></i>
+                <span>Explore Features</span>
+            </a>
+        </div>
+        
+        <!-- Stats -->
+
+    </div>
+    
+    <!-- Floating Elements -->
+    <div class="floating-elements">
+        <div class="floating-element fe1">
+            <i class="fas fa-heart"></i>
+        </div>
+        <div class="floating-element fe2">
+            <i class="fas fa-brain"></i>
+        </div>
+        <div class="floating-element fe3">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="floating-element fe4">
+            <i class="fas fa-cloud"></i>
+        </div>
+        <div class="floating-element fe5">
+            <i class="fas fa-moon"></i>
+        </div>
+    </div>
+    
+
+</section>
+
 
     <!-- Features Section -->
-    <section id="features" class="features section-padding">
-      <div class="content-wrapper">
-        <h2>Features</h2>
-        <div class="feature-container">
-          <div class="feature-box">
-            <video autoplay loop muted class="box-video">
-              <source
-                src="/video/WhatsApp Video 2025-03-18 at 7.43.37 PM.mp4"
-                type="video/mp4"
-              />
-            </video>
-            <div class="feature-content">
-              <h3>Emotion Recognition</h3>
-              <p>
-                AI-powered emotion detection to understand how you're feeling in
-                real-time.
+<!-- Features Section -->
+<section id="features" class="features section-padding">
+    <div class="features-container">
+        <!-- Section Header -->
+        <div class="features-header">
+            <div class="features-badge">
+                <i class="fas fa-sparkles"></i>
+                <span>Powerful Features</span>
+            </div>
+            <h2 class="features-title">
+                Everything You Need for <span class="gradient-text">Emotional Wellness</span>
+            </h2>
+            <p class="features-description">
+                Experience cutting-edge emotional intelligence technology designed to transform your emotional well-being
+            </p>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card" data-feature="emotion">
+                <div class="feature-card-inner">
+                    <div class="feature-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-brain"></i>
+                            <div class="icon-ring"></div>
+                        </div>
+                        <span class="feature-number">01</span>
+                    </div>
+                    
+                    <div class="feature-media">
+                        <div class="youtube-wrapper" onclick="playYouTube(this)">
+                            <img src="https://img.youtube.com/vi/xl9r_hOh9r4/hqdefault.jpg">
+                            <div class="play-btn"><i class="fas fa-play"></i></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="feature-content">
+                        <h3 class="feature-title">
+                            <i class="fas fa-brain icon-inline"></i>
+                            Emotion Recognition
+                        </h3>
+                        <p class="feature-text">
+                            AI-powered emotion detection to understand how you're feeling in real-time with advanced algorithms.
+                        </p>
+                        
+                        <div class="feature-list">
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Real-time emotion analysis</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Multi-modal detection</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Detailed emotional insights</span>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-footer">
+                            <a href="#" class="feature-link">
+                                Learn More
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <div class="feature-tag">
+                                <i class="fas fa-bolt"></i>
+                                <span>Popular</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-hover-effect"></div>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card" data-feature="growth">
+                <div class="feature-card-inner">
+                    <div class="feature-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-chart-line"></i>
+                            <div class="icon-ring"></div>
+                        </div>
+                        <span class="feature-number">02</span>
+                    </div>
+                    
+                    <div class="feature-media">
+                    <div class="feature-media youtube-player" data-id="xl9r_hOh9r4">
+                        <img src="https://img.youtube.com/vi/xl9r_hOh9r4/hqdefault.jpg" class="youtube-thumb">
+                        <div class="video-overlay"></div>
+                        <div class="play-indicator"><i class="fas fa-play"></i></div>
+                    </div>
+
+                    </div>
+                    
+                    <div class="feature-content">
+                        <h3 class="feature-title">
+                            <i class="fas fa-chart-line icon-inline"></i>
+                            Personalized Growth Pathway
+                        </h3>
+                        <p class="feature-text">
+                            Tailored recommendations and exercises to help you improve emotional intelligence effectively.
+                        </p>
+                        
+                        <div class="feature-list">
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Custom learning paths</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Progress tracking</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Adaptive recommendations</span>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-footer">
+                            <a href="#" class="feature-link">
+                                Learn More
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <div class="feature-tag">
+                                <i class="fas fa-star"></i>
+                                <span>Featured</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-hover-effect"></div>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card" data-feature="insights">
+                <div class="feature-card-inner">
+                    <div class="feature-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-lightbulb"></i>
+                            <div class="icon-ring"></div>
+                        </div>
+                        <span class="feature-number">03</span>
+                    </div>
+                    
+                    <div class="feature-media">
+                    <div class="feature-media youtube-player" data-id="xl9r_hOh9r4">
+                        <img src="https://img.youtube.com/vi/xl9r_hOh9r4/hqdefault.jpg" class="youtube-thumb">
+                        <div class="video-overlay"></div>
+                        <div class="play-indicator"><i class="fas fa-play"></i></div>
+                    </div>
+
+                    </div>
+                    
+                    <div class="feature-content">
+                        <h3 class="feature-title">
+                            <i class="fas fa-lightbulb icon-inline"></i>
+                            Mindful Insights
+                        </h3>
+                        <p class="feature-text">
+                            Daily tips and reflections designed to boost self-awareness and emotional balance.
+                        </p>
+                        
+                        <div class="feature-list">
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Daily mindfulness exercises</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Personalized reflections</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Progress analytics</span>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-footer">
+                            <a href="#" class="feature-link">
+                                Learn More
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-hover-effect"></div>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="feature-card" data-feature="feedback">
+                <div class="feature-card-inner">
+                    <div class="feature-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-comment-dots"></i>
+                            <div class="icon-ring"></div>
+                        </div>
+                        <span class="feature-number">04</span>
+                    </div>
+                    
+                    <div class="feature-media">
+<div class="feature-media youtube-player" data-id="xl9r_hOh9r4">
+    <img src="https://img.youtube.com/vi/xl9r_hOh9r4/hqdefault.jpg" class="youtube-thumb">
+    <div class="video-overlay"></div>
+    <div class="play-indicator"><i class="fas fa-play"></i></div>
+</div>
+
+                    </div>
+                    
+                    <div class="feature-content">
+                        <h3 class="feature-title">
+                            <i class="fas fa-comment-dots icon-inline"></i>
+                            Real-Time Feedback
+                        </h3>
+                        <p class="feature-text">
+                            Get instant feedback on your emotional state and suggestions to regulate emotions effectively.
+                        </p>
+                        
+                        <div class="feature-list">
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Instant analysis</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Actionable suggestions</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Performance metrics</span>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-footer">
+                            <a href="#" class="feature-link">
+                                Learn More
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-hover-effect"></div>
+                </div>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="feature-card" data-feature="tracking">
+                <div class="feature-card-inner">
+                    <div class="feature-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-chart-bar"></i>
+                            <div class="icon-ring"></div>
+                        </div>
+                        <span class="feature-number">05</span>
+                    </div>
+                    
+                    <div class="feature-media">
+<div class="feature-media youtube-player" data-id="xl9r_hOh9r4">
+    <img src="https://img.youtube.com/vi/xl9r_hOh9r4/hqdefault.jpg" class="youtube-thumb">
+    <div class="video-overlay"></div>
+    <div class="play-indicator"><i class="fas fa-play"></i></div>
+</div>
+
+                    </div>
+                    
+                    <div class="feature-content">
+                        <h3 class="feature-title">
+                            <i class="fas fa-chart-bar icon-inline"></i>
+                            Emotional Tracking
+                        </h3>
+                        <p class="feature-text">
+                            Monitor your emotions over time and gain insights into behavioral patterns and trends.
+                        </p>
+                        
+                        <div class="feature-list">
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Mood tracking</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Pattern recognition</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Historical data</span>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-footer">
+                            <a href="#" class="feature-link">
+                                Learn More
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-hover-effect"></div>
+                </div>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="feature-card" data-feature="stress">
+                <div class="feature-card-inner">
+                    <div class="feature-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-wind"></i>
+                            <div class="icon-ring"></div>
+                        </div>
+                        <span class="feature-number">06</span>
+                    </div>
+                    
+                    <div class="feature-media">
+<div class="feature-media youtube-player" data-id="xl9r_hOh9r4">
+    <img src="https://img.youtube.com/vi/xl9r_hOh9r4/hqdefault.jpg" class="youtube-thumb">
+    <div class="video-overlay"></div>
+    <div class="play-indicator"><i class="fas fa-play"></i></div>
+</div>
+
+                    </div>
+                    
+                    <div class="feature-content">
+                        <h3 class="feature-title">
+                            <i class="fas fa-wind icon-inline"></i>
+                            Stress Reduction
+                        </h3>
+                        <p class="feature-text">
+                            Access scientifically proven stress management strategies and meditation techniques.
+                        </p>
+                        
+                        <div class="feature-list">
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Guided meditations</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Breathing exercises</span>
+                            </div>
+                            <div class="list-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Relaxation techniques</span>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-footer">
+                            <a href="#" class="feature-link">
+                                Learn More
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <div class="feature-tag">
+                                <i class="fas fa-heart"></i>
+                                <span>Essential</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-hover-effect"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features CTA -->
+        <div class="features-cta">
+            <div class="cta-content">
+                <h3>Ready to Experience All Features?</h3>
+                <p>Start your emotional wellness journey today with our comprehensive suite of tools</p>
+            </div>
+            <a href="signup.html" class="btn btn-primary btn-large">
+                <i class="fas fa-rocket"></i>
+                <span>Get Started Free</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced Resources Section -->
+<section id="resources" class="resources section-padding">
+    <div class="content-wrapper">
+        <div class="section-header">
+            <div class="section-badge">
+                <i class="fas fa-book-open"></i>
+                <span>Learning Center</span>
+            </div>
+            <h2>Useful <span class="gradient-text">Resources</span></h2>
+            <p class="section-description">Access curated materials to enhance your emotional intelligence journey</p>
+        </div>
+        
+        <div class="resources-grid">
+            <!-- YouTube Videos -->
+            <div class="resource-card" data-resource="youtube">
+                <div class="resource-card-inner">
+                    <div class="resource-icon">
+                        <i class="fab fa-youtube"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    
+                    <div class="resource-content">
+                        <div class="resource-header">
+                            <h3>
+                                <i class="fab fa-youtube icon-inline"></i>
+                                YouTube Videos
+                            </h3>
+                            <span class="resource-badge">
+                                <i class="fas fa-fire"></i>
+                                Popular
+                            </span>
+                        </div>
+                        
+                        <p class="resource-text">
+                            Watch videos on emotional intelligence and FeelWise features.
+                        </p>
+                        
+                        <div class="resource-features">
+                            <span class="feature-tag">
+                                <i class="fas fa-play-circle"></i>
+                                Tutorials
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-users"></i>
+                                Expert Talks
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-chart-line"></i>
+                                Success Stories
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-footer">
+                        <a href="https://www.youtube.com" class="resource-btn" target="_blank">
+                            <i class="fas fa-external-link-alt"></i>
+                            Watch Now
+                        </a>
+                        <div class="resource-meta">
+                            <i class="fas fa-eye"></i>
+                            <span>Updated Weekly</span>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-hover-effect"></div>
+                </div>
+            </div>
+
+            <!-- Articles -->
+            <div class="resource-card" data-resource="articles">
+                <div class="resource-card-inner">
+                    <div class="resource-icon">
+                        <i class="fas fa-newspaper"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    
+                    <div class="resource-content">
+                        <div class="resource-header">
+                            <h3>
+                                <i class="fas fa-newspaper icon-inline"></i>
+                                Articles
+                            </h3>
+                        </div>
+                        
+                        <p class="resource-text">
+                            Read articles about emotional intelligence and mental well-being.
+                        </p>
+                        
+                        <div class="resource-features">
+                            <span class="feature-tag">
+                                <i class="fas fa-book"></i>
+                                Guides
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-lightbulb"></i>
+                                Tips
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-stethoscope"></i>
+                                Health
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-footer">
+                        <a href="https://www.psychologytoday.com" class="resource-btn" target="_blank">
+                            <i class="fas fa-external-link-alt"></i>
+                            Read More
+                        </a>
+                        <div class="resource-meta">
+                            <i class="fas fa-book-reader"></i>
+                            <span>Expert Written</span>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-hover-effect"></div>
+                </div>
+            </div>
+
+            <!-- Research Papers -->
+            <div class="resource-card" data-resource="research">
+                <div class="resource-card-inner">
+                    <div class="resource-icon">
+                        <i class="fas fa-file-alt"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    
+                    <div class="resource-content">
+                        <div class="resource-header">
+                            <h3>
+                                <i class="fas fa-file-alt icon-inline"></i>
+                                Research Papers
+                            </h3>
+                            <span class="resource-badge">
+                                <i class="fas fa-graduation-cap"></i>
+                                Academic
+                            </span>
+                        </div>
+                        
+                        <p class="resource-text">
+                            Explore the scientific research on emotional intelligence and AI.
+                        </p>
+                        
+                        <div class="resource-features">
+                            <span class="feature-tag">
+                                <i class="fas fa-microscope"></i>
+                                Studies
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-chart-bar"></i>
+                                Analysis
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-university"></i>
+                                Research
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-footer">
+                        <a href="https://www.researchgate.net" class="resource-btn" target="_blank">
+                            <i class="fas fa-external-link-alt"></i>
+                            Explore
+                        </a>
+                        <div class="resource-meta">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Peer Reviewed</span>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-hover-effect"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced Daily Emotional Insights Section -->
+<section id="ai-feelwise" class="insights-section section-padding">
+    <div class="content-wrapper">
+        <div class="section-header">
+            <div class="section-badge">
+                <i class="fas fa-brain"></i>
+                <span>Daily Wisdom</span>
+            </div>
+            <h2>Daily Emotional <span class="gradient-text">Insights</span></h2>
+            <p class="section-description">Receive daily wisdom to enhance your emotional intelligence journey</p>
+        </div>
+        
+        <div class="insights-container">
+            <!-- Left Column: Insights -->
+            <div class="insights-column">
+                <div class="insights-card">
+                    <div class="insights-header">
+                        <h3>
+                            <i class="fas fa-lightbulb"></i>
+                            Today's Insights
+                        </h3>
+
+                    </div>
+                    
+                    <div class="insights-scroller">
+                        <div class="insights-list">
+                            <div class="insight-item active">
+                                <div class="insight-icon">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Self-awareness Foundation</h4>
+                                    <p>Self-awareness is the foundation of emotional intelligence.</p>
+                                </div>
+                                <div class="insight-number">01</div>
+                            </div>
+                            
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Practice Gratitude</h4>
+                                    <p>Practicing gratitude daily can improve emotional well-being.</p>
+                                </div>
+                                <div class="insight-number">02</div>
+                            </div>
+                            
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-wind"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Deep Breathing</h4>
+                                    <p>Deep breathing can help regulate emotions effectively.</p>
+                                </div>
+                                <div class="insight-number">03</div>
+                            </div>
+                            
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Active Listening</h4>
+                                    <p>Listening actively improves interpersonal relationships.</p>
+                                </div>
+                                <div class="insight-number">04</div>
+                            </div>
+                            
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-hands-helping"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Empathy is Key</h4>
+                                    <p>Empathy is key to understanding others' emotions.</p>
+                                </div>
+                                <div class="insight-number">05</div>
+                            </div>
+                            
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-coffee"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Take Breaks</h4>
+                                    <p>Taking breaks helps manage stress effectively.</p>
+                                </div>
+                                <div class="insight-number">06</div>
+                            </div>
+                            
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Journaling Benefits</h4>
+                                    <p>Journaling can increase self-reflection and awareness.</p>
+                                </div>
+                                <div class="insight-number">07</div>
+                            </div>
+                            
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-comment-medical"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Healthy Expression</h4>
+                                    <p>Expressing emotions in a healthy way improves mental health.</p>
+                                </div>
+                                <div class="insight-number">08</div>
+                            </div>
+                            
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-spa"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Mindfulness Practice</h4>
+                                    <p>Mindfulness enhances emotional regulation.</p>
+                                </div>
+                                <div class="insight-number">09</div>
+                            </div>
+                            
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Recognize Triggers</h4>
+                                    <p>Recognizing emotional triggers helps in managing responses.</p>
+                                </div>
+                                <div class="insight-number">10</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+<!-- Right Column: Updated Advanced YouTube Player -->
+<div class="video-column">
+    <div class="video-card">
+        <div class="video-header">
+            <h3>
+                <i class="fas fa-play-circle"></i>
+                Learn About Emotional Well-being
+            </h3>
+            <div class="video-badge">
+                <i class="fas fa-clock"></i>
+                <span>5:24 min</span>
+            </div>
+        </div>
+
+        <!-- Advanced YouTube Player -->
+        <div class="youtube-player-advanced" data-id="xl9r_hOh9r4">
+            <div class="youtube-thumb-overlay">
+                <img src="https://img.youtube.com/vi/xl9r_hOh9r4/hqdefault.jpg">
+                <i class="fas fa-play youtube-play-icon"></i>
+            </div>
+
+            <iframe
+                class="youtube-iframe"
+                frameborder="0"
+                allow="autoplay; encrypted-media"
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <!-- Video Info -->
+        <div class="video-info-simple">
+            <div class="video-stats">
+                <span class="stat">
+                    <i class="fas fa-eye"></i>
+                    1.2K views
+                </span>
+                <span class="stat">
+                    <i class="fas fa-thumbs-up"></i>
+                    95% liked
+                </span>
+            </div>
+
+            <div class="video-description">
+                Learn about emotional intelligence and mindfulness techniques in this short video.
+            </div>
+        </div>
+    </div>
+</div>
+
+            
+
+        </div>
+    </div>
+
+    
+
+
+
+
+</section>
+
+<!-- ======== testimonial Section    -->
+
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="testimonials section-padding">
+  <div class="content-wrapper">
+    <div class="section-header">
+      <div class="section-icon">💬</div>
+      <h2 class="section-title">What People Are Saying</h2>
+      <p class="section-subtitle">Join thousands who transformed their emotional journey</p>
+    </div>
+    
+    <div class="testimonial-grid">
+      <!-- Testimonial 1 -->
+      <div class="testimonial-card">
+        <div class="testimonial-card-inner">
+          <div class="testimonial-front">
+            <div class="testimonial-header">
+              <div class="avatar-container">
+                <div class="avatar-ring">
+                  <img src="/video/4.png" alt="Rosheen Naseem" class="avatar-img" loading="lazy">
+                  <div class="avatar-status"></div>
+                </div>
+                <div class="stars">★★★★★</div>
+              </div>
+              <h3 class="testimonial-name">Rosheen Naseem</h3>
+              <p class="testimonial-role">Software Engineer</p>
+            </div>
+            
+            <div class="testimonial-preview">
+              <div class="quote-mark">❝</div>
+              <p class="testimonial-content">
+                "FeelWise has completely transformed how I manage my emotions. As someone in a high-stress tech job, 
+                I struggled with anxiety and burnout. The personalized growth pathways helped me develop coping 
+                mechanisms that actually work."
               </p>
+              <div class="read-full-btn">
+                <span>Read Full Story</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24">
+                  <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                </svg>
+              </div>
             </div>
           </div>
-          <div class="feature-box">
-            <video autoplay loop muted class="box-video">
-              <source
-                src="/video/WhatsApp Video 2025-03-18 at 7.43.38 PM.mp4"
-                type="video/mp4"
-              />
-            </video>
-            <div class="feature-content">
-              <h3>Personalized Growth Pathway</h3>
-              <p>
-                Tailored recommendations to help you improve emotional
-                intelligence effectively.
-              </p>
+          
+          <div class="testimonial-back">
+            <div class="quote-mark">❝</div>
+            <p class="full-testimonial">
+              "FeelWise has completely transformed how I manage my emotions. As someone in a high-stress tech job, 
+              I struggled with anxiety and burnout. The personalized growth pathways helped me develop coping 
+              mechanisms that actually work. I'm now more productive and emotionally balanced than ever before. 
+              Highly recommend to anyone in the tech industry!"
+            </p>
+            <div class="testimonial-footer">
+              <div class="social-proof">
+                <span class="activity">Active for 4 months</span>
+                <span class="entries">• 127 entries</span>
+              </div>
+              <button class="close-testimonial" aria-label="Close testimonial">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
             </div>
           </div>
-          <div class="feature-box">
-            <video autoplay loop muted class="box-video">
-              <source
-                src="/video/istockphoto-1391682061-640_adpp_is.mp4"
-                type="video/mp4"
-              />
-            </video>
-            <div class="feature-content">
-              <h3>Mind-full Insights</h3>
-              <p>
-                Daily tips and reflections designed to boost self-awareness and
-                emotional balance.
+        </div>
+        
+      </div>
+
+      <!-- Testimonial 2 -->
+      <div class="testimonial-card">
+        <div class="testimonial-card-inner">
+          <div class="testimonial-front">
+            <div class="testimonial-header">
+              <div class="avatar-container">
+                <div class="avatar-ring">
+                  <img src="/video/2.png" alt="Laiba Haq Nawaz" class="avatar-img" loading="lazy">
+                  <div class="avatar-status"></div>
+                </div>
+                <div class="stars">★★★★★</div>
+              </div>
+              <h3 class="testimonial-name">Laiba Haq Nawaz</h3>
+              <p class="testimonial-role">Psychology Student</p>
+            </div>
+            
+            <div class="testimonial-preview">
+              <div class="quote-mark">❝</div>
+              <p class="testimonial-content">
+                "As a psychology student, I've tried many emotional intelligence tools, but FeelWise stands out. 
+                The personalized growth pathways are a game-changer. The AI adapts to my specific emotional patterns."
               </p>
+              <div class="read-full-btn">
+                <span>Read Full Story</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24">
+                  <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                </svg>
+              </div>
             </div>
           </div>
-          <div class="feature-box">
-            <video autoplay loop muted class="box-video">
-              <source
-                src="/video/WhatsApp Video 2025-03-18 at 7.43.40 PM.mp4"
-                type="video/mp4"
-              />
-            </video>
-            <div class="feature-content">
-              <h3>Real-Time Feedback</h3>
-              <p>
-                Get instant feedback on your emotional state and suggestions to
-                regulate emotions.
-              </p>
+          
+          <div class="testimonial-back">
+            <div class="quote-mark">❝</div>
+            <p class="full-testimonial">
+              "As a psychology student, I've tried many emotional intelligence tools, but FeelWise stands out. 
+              The personalized growth pathways are a game-changer. The AI adapts to my specific emotional patterns 
+              and provides actionable insights that align with psychological principles. It's like having a personal 
+              therapist available 24/7. Thank you, FeelWise!"
+            </p>
+            <div class="testimonial-footer">
+              <div class="social-proof">
+                <span class="activity">Active for 6 months</span>
+                <span class="entries">• 89 entries</span>
+              </div>
+              <button class="close-testimonial" aria-label="Close testimonial">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
             </div>
           </div>
-          <div class="feature-box">
-            <video autoplay loop muted class="box-video">
-              <source
-                src="/video/WhatsApp Video 2025-03-18 at 7.43.38 PM (1).mp4"
-                type="video/mp4"
-              />
-            </video>
-            <div class="feature-content">
-              <h3>Emotional Tracking</h3>
-              <p>
-                Monitor your emotions over time and gain insights into
-                behavioral patterns.
+        </div>
+        
+      </div>
+
+      <!-- Testimonial 3 -->
+      <div class="testimonial-card">
+        <div class="testimonial-card-inner">
+          <div class="testimonial-front">
+            <div class="testimonial-header">
+              <div class="avatar-container">
+                <div class="avatar-ring">
+                  <img src="/video/3.png" alt="Sidra Ayub" class="avatar-img" loading="lazy">
+                  <div class="avatar-status"></div>
+                </div>
+                <div class="stars">★★★★★</div>
+              </div>
+              <h3 class="testimonial-name">Sidra Ayub</h3>
+              <p class="testimonial-role">Marketing Manager</p>
+            </div>
+            
+            <div class="testimonial-preview">
+              <div class="quote-mark">❝</div>
+              <p class="testimonial-content">
+                "In the fast-paced world of marketing, stress was my constant companion. FeelWise's stress reduction 
+                techniques have made a huge difference in my daily life. The guided breathing exercises are perfectly timed."
               </p>
+              <div class="read-full-btn">
+                <span>Read Full Story</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24">
+                  <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                </svg>
+              </div>
             </div>
           </div>
-          <div class="feature-box">
-            <video autoplay loop muted class="box-video">
-              <source
-                src="/video/WhatsApp Video 2025-03-18 at 7.43.39 PM.mp4"
-                type="video/mp4"
-              />
-            </video>
-            <div class="feature-content">
-              <h3>Stress Reduction Techniques</h3>
-              <p>
-                Access scientifically proven stress management strategies like
-                meditation and breathing exercises.
+          
+          <div class="testimonial-back">
+            <div class="quote-mark">❝</div>
+            <p class="full-testimonial">
+              "In the fast-paced world of marketing, stress was my constant companion. FeelWise's stress reduction 
+              techniques have made a huge difference in my daily life. The guided breathing exercises and mindfulness 
+              tips are perfectly timed throughout my workday. My productivity has increased by 40% and I feel more 
+              in control than ever before!"
+            </p>
+            <div class="testimonial-footer">
+              <div class="social-proof">
+                <span class="activity">Active for 3 months</span>
+                <span class="entries">• 142 entries</span>
+              </div>
+              <button class="close-testimonial" aria-label="Close testimonial">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Testimonial 4 -->
+      <div class="testimonial-card">
+        <div class="testimonial-card-inner">
+          <div class="testimonial-front">
+            <div class="testimonial-header">
+              <div class="avatar-container">
+                <div class="avatar-ring">
+                  <img src="/video/1.png" alt="Qaiser Shahzad" class="avatar-img" loading="lazy">
+                  <div class="avatar-status"></div>
+                </div>
+                <div class="stars">★★★★★</div>
+              </div>
+              <h3 class="testimonial-name">Qaiser Shahzad</h3>
+              <p class="testimonial-role">Entrepreneur</p>
+            </div>
+            
+            <div class="testimonial-preview">
+              <div class="quote-mark">❝</div>
+              <p class="testimonial-content">
+                "As an entrepreneur, the emotional rollercoaster is real. FeelWise has improved my confidence and 
+                emotional well-being significantly. The mood tracking features help me identify patterns in my decisions."
               </p>
+              <div class="read-full-btn">
+                <span>Read Full Story</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24">
+                  <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="testimonial-back">
+            <div class="quote-mark">❝</div>
+            <p class="full-testimonial">
+              "As an entrepreneur, the emotional rollercoaster is real. FeelWise has improved my confidence and 
+              emotional well-being significantly. The mood tracking features help me identify patterns in my 
+              decision-making process, and the AI suggestions have made me a better leader. My team has noticed 
+              the positive change, and we're now implementing FeelWise across our company!"
+            </p>
+            <div class="testimonial-footer">
+              <div class="social-proof">
+                <span class="activity">Active for 5 months</span>
+                <span class="entries">• 213 entries</span>
+              </div>
+              <button class="close-testimonial" aria-label="Close testimonial">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="testimonials section-padding">
-      <div class="content-wrapper">
-        <h2>What People Are Saying</h2>
-        <div class="testimonial-container">
-          <div class="testimonial-box">
-            <div class="flip-card">
-              <div class="flip-card-inner">
-                <div class="flip-card-front">
-                  <img src="/video/4.png" alt="Rosheen Naseem" />
-                  <h3>- Rosheen Naseem</h3>
-                </div>
-                <div class="flip-card-back">
-                  <p>
-                    "FeelWise has transformed how I manage my emotions. Highly
-                    recommend!"
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="testimonial-box">
-            <div class="flip-card">
-              <div class="flip-card-inner">
-                <div class="flip-card-front">
-                  <img src="/video/2.png" alt="Laiba Haq Nawaz" />
-                  <h3>- Laiba Haq Nawaz</h3>
-                </div>
-                <div class="flip-card-back">
-                  <p>
-                    "The personalized growth pathways are a game-changer. Thank
-                    you, FeelWise!"
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="testimonial-box">
-            <div class="flip-card">
-              <div class="flip-card-inner">
-                <div class="flip-card-front">
-                  <img src="/video/3.png" alt="Sidra Ayub" />
-                  <h3>- Sidra Ayub</h3>
-                </div>
-                <div class="flip-card-back">
-                  <p>
-                    "The stress reduction techniques have made a huge difference
-                    in my daily life."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="testimonial-box">
-            <div class="flip-card">
-              <div class="flip-card-inner">
-                <div class="flip-card-front">
-                  <img src="/video/1.png" alt="Qaiser Shahzad" />
-                  <h3>- Qaiser Shahzad</h3>
-                </div>
-                <div class="flip-card-back">
-                  <p>
-                    "Using FeelWise has improved my confidence and emotional
-                    well-being significantly."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Who We Are Section -->
-    <section
-      class="section-padding"
-      style="
-        background: linear-gradient(
-          135deg,
-          rgba(109, 78, 255, 0.05),
-          rgba(138, 43, 226, 0.05)
-        );
-      "
-    >
-      <div class="content-wrapper">
-        <h2 class="slide-in">Who We Are</h2>
-        <div class="who-content">
-          <p class="slide-in">
-            FeelWise plays a crucial role in personal and professional success,
-            influencing how individuals perceive, express, and regulate
-            emotions. Our AI-powered FeelWise Training System leverages
-            cutting-edge artificial intelligence, natural language processing,
-            and machine learning algorithms to help users enhance their
-            emotional awareness, communication skills, and interpersonal
-            relationships.
-          </p>
-          <p class="slide-in">
-            By analyzing facial expressions, vocal tones, and textual inputs,
-            the system provides real-time feedback on emotional states and
-            responses, offering personalized recommendations for improvement.
-            Through interactive simulations, role-playing scenarios, and
-            adaptive learning techniques, users can practice empathy, conflict
-            resolution, and stress management in a safe and controlled
-            environment.
-          </p>
-          <p class="slide-in">
-            The system can be integrated into various industries, including
-            education, healthcare, and business, to enhance emotional well-being
-            and productivity. In corporate settings, it helps teams build
-            stronger collaboration by promoting emotional intelligence-driven
-            leadership and decision-making.
-          </p>
-        </div>
-      </div>
-    </section>
+    </div>
+  </div>
+<!-- Who We Are Section -->
+<section class="section-padding who-we-are-enhanced">
+  <div class="content-wrapper">
+    <h2 class="enhanced-title">Who We Are</h2>
+    <div class="who-content-enhanced">
+      <p class="enhanced-paragraph">
+        <span class="paragraph-highlight">FeelWise plays a crucial role</span> in personal and professional success,
+        influencing how individuals perceive, express, and regulate
+        emotions. Our AI-powered FeelWise Training System leverages
+        cutting-edge artificial intelligence, natural language processing,
+        and machine learning algorithms to help users enhance their
+        emotional awareness, communication skills, and interpersonal
+        relationships.
+      </p>
+      <p class="enhanced-paragraph">
+        <span class="paragraph-highlight">By analyzing facial expressions</span>, vocal tones, and textual inputs,
+        the system provides real-time feedback on emotional states and
+        responses, offering personalized recommendations for improvement.
+        Through interactive simulations, role-playing scenarios, and
+        adaptive learning techniques, users can practice empathy, conflict
+        resolution, and stress management in a safe and controlled
+        environment.
+      </p>
+      <p class="enhanced-paragraph">
+        <span class="paragraph-highlight">The system can be integrated</span> into various industries, including
+        education, healthcare, and business, to enhance emotional well-being
+        and productivity. In corporate settings, it helps teams build
+        stronger collaboration by promoting emotional intelligence-driven
+        leadership and decision-making.
+      </p>
+    </div>
+  </div>
+</section>
 
     <!-- Footer -->
     <footer class="footer">
@@ -440,20 +1310,6 @@
           </p>
         </li>
         <li>
-          <strong>Is my information safe?</strong>
-          <p>
-            Yes, your data is protected and only used to help you grow
-            emotionally.
-          </p>
-        </li>
-        <li>
-          <strong>Can I talk to FeelWise?</strong>
-          <p>
-            Yes! FeelWise has a chat feature where you can talk, and it will
-            respond kindly and supportively.
-          </p>
-        </li>
-        <li>
           <strong>What makes FeelWise special?</strong>
           <p>
             It's smart, personal, and helps you feel better every day through
@@ -501,5 +1357,67 @@
         });
       });
     </script>
+
+    <script>
+// FIX: universal YouTube player
+function playYouTube(el) {
+    const videoId = "xl9r_hOh9r4"; // your video ID
+
+    el.innerHTML = `
+        <iframe 
+            width="100%" height="100%"
+            src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen>
+        </iframe>
+    `;
+}
+
+// FIX: second major video (the big one)
+document.addEventListener("DOMContentLoaded", () => {
+    const placeholder = document.querySelector(".youtube-placeholder");
+    const iframe = document.getElementById("youtube-iframe");
+
+    placeholder.addEventListener("click", () => {
+        iframe.src =
+            "https://www.youtube.com/embed/xl9r_hOh9r4?autoplay=1";
+        placeholder.style.display = "none";
+    });
+});
+</script>
+<script>
+// Load YouTube API
+let tag = document.createElement("script");
+tag.src = "https://www.youtube.com/iframe_api";
+document.body.appendChild(tag);
+
+let ytPlayers = {};
+
+function onYouTubeIframeAPIReady() {
+    document.querySelectorAll(".youtube-player-advanced").forEach((wrap, index) => {
+        let videoId = wrap.dataset.id;
+        let iframe = wrap.querySelector("iframe");
+        let thumb = wrap.querySelector(".youtube-thumb-overlay");
+
+        ytPlayers[index] = new YT.Player(iframe, {
+            events: {
+                "onStateChange": (event) => {
+                    if (event.data === 0) {
+                        thumb.style.display = "flex";   // show thumbnail again
+                        iframe.src = "";               // stop video completely
+                    }
+                }
+            }
+        });
+
+        thumb.addEventListener("click", () => {
+            thumb.style.display = "none";
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+        });
+    });
+}
+</script>
+
   </body>
 </html>

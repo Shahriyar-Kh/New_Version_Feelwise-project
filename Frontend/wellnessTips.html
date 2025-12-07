@@ -5,94 +5,169 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FeelWise - Emotion Interaction</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="module.css">
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-  <style>
-    
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  .dailydiv1{
-  height: 150px;
-  width: 150px;
-   border-radius: 100%;
-   background-color: #5e60ceaf;
-   color: #e0f7fa;
-  transition: all 0.4s ease-in-out;
-    animation: glowingCard 3s infinite alternate;
-   }
-     @keyframes glowingCard {
-    0% {
-      background-color:  #5e60ce;
-      box-shadow: 0 4px 30px  #5e60ce;
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #d0d8ff);
+      color: #333;
+      margin: 0;
+      padding: 0;
     }
-    50% {
-      background-color: rgba(95, 158, 160, 0.659); /* Light blue */
-      box-shadow: 0 4px 40px cadetblue;
+
+    .top-header {
+      text-align: center;
+      padding: 1rem 0;
+      background: #5e60ce;
+      color: white;
+      font-size: 1.8rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
-    100% {
-      background-color: #5e60cea5; /* Light pink */
-      box-shadow: 0 4px 50px #5e60ce;
+
+    .responsive-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      text-align: center;
+      color: #333;
+      margin-top: 1rem;
     }
-  }
-  a{
-    text-decoration:none;
-    color: #e0f7fa;
-  }
-  .responsive-title {
-    font-size: clamp(1.5rem, 4vw, 3rem);
-    font-weight: bold;
-    margin-left: 23%;
-  }
-  .EmojiDiv{
-    font-size:80px;
-  }
-</style>
+
+    .dailydiv1 {
+      height: 160px;
+      width: 160px;
+      border-radius: 20px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      transition: all 0.4s ease-in-out;
+      box-shadow: 0 6px 18px rgba(94,96,206,0.2);
+      animation: glowingCard 3s infinite alternate;
+    }
+
+    .dailydiv1:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 25px rgba(94,96,206,0.4);
+      background: linear-gradient(135deg, #5e60ce, #6a82fb);
+    }
+
+    @keyframes glowingCard {
+      0% { box-shadow: 0 4px 20px rgba(94,96,206,0.3); }
+      50% { box-shadow: 0 6px 35px rgba(94,96,206,0.5); }
+      100% { box-shadow: 0 8px 45px rgba(94,96,206,0.7); }
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .EmojiDiv {
+      font-size: 70px;
+      line-height: 1;
+      transition: transform 0.3s ease-in-out;
+      color: #5e60ce;
+    }
+
+    .dailydiv1:hover .EmojiDiv {
+      transform: rotate(10deg) scale(1.1);
+      color: #fff;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding: 1rem;
+      color: #666;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
   <!-- Top Header Section -->
-  <div class="top-header">
-    <div class="logo">FeelWise</div>
-    
-  </div>
+  <header class="site-header">
+    <div class="header-content">
+      <div class="logo-container">
+        <h1 class="logo">
+          <i class="fas fa-brain"></i>
+          FeelWise
+        </h1>
+      </div>
+      <nav class="main-nav">
+        <a href="progress.html" class="nav-link"><i class="fas fa-history"></i> History</a>
+        <a href="profile.html" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+      </nav>
+    </div>
+  </header>
 
   <!-- Main Content -->
-  <div class="container-fluid mt-5">
-    <div class="row justify-content-around">
-       <div class="row justify-content-center"> 
-        <div class="col-10 col-lg-5 col-md-6">
- <h1 class="my-2  responsive-title">Wellness Tips</h1>
-        </div>
-    </div>
-       
-        <div class="row justify-content-evenly mt-5">
-            <div class="dailydiv1 col-10 col-lg-3 col-md-6">
-                <h1 class=" mt-4 mx-2 EmojiDiv"><a href="happyTips.html">😊</a></h1>
-                <!-- <h2 class=" mt-2 mx-3 "><a href="happy.html"> Happy</a></h2> -->
-            </div>
-            <div class=" dailydiv1 col-10 col-lg-3 col-md-6">
-                <h1 class="  mt-4 mx-2 EmojiDiv "><a href="loveTips.html">💖</a></h1>
-               <!-- <h2 class=" mt-2 mx-4 "><a href="love.html"> Love</a></h2> -->
-            </div>
-            <div class=" dailydiv1 col-10 col-lg-3 col-md-6">
-                <h1 class="EmojiDiv mt-4 mx-2"><a href="sadTips.html">☹️</a> </h1>
-               <!-- <h2 class=" mt-2 mx-4"><a href="sad.html">Sad</a></h2> -->
-            </div>
-            </div>
-            <div class="row  mt-5 justify-content-evenly">
-                <div class=" dailydiv1 col-10 col-lg-3 col-md-6">
-                <h1 class=" EmojiDiv mt-4 mx-2"><a href="fearTips.html">😰</a></h1>
-               <!-- <h2 class=" mt-2 mx-4 "><a href="fear.html">Fear</a></h2> -->
-            </div>
-                 <div class="  dailydiv1 col-10 col-lg-3 col-md-6">
-                <h1 class=" EmojiDiv mt-4 mx-2"><a href="surpriseTips.html">😲</a></h1>
-                <!-- <h2 class="mt-2"><a href="surprised.html">Surprised</a></h2> -->
-            </div>
-            
-            <div class=" dailydiv1  col-10 col-lg-3 col-md-6">
-                <h1 class="EmojiDiv mt-4 mx-2"><a href="angryTips.html">😠</a> </h1>
-                <!-- <h2 class=" mt-2 mx-3 "><a href="angry.html">Angry</a></h2> -->
-            </div>
-          
-        </div>
+  <div class="container mt-5">
+    <h1 class="responsive-title">Wellness Tips</h1>
+    <div class="row justify-content-center mt-5">
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <div class="dailydiv1"><h1 class="EmojiDiv"><a href="happyTips.html"><i class="fa-regular fa-face-smile"></i></a></h1></div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <div class="dailydiv1"><h1 class="EmojiDiv"><a href="loveTips.html"><i class="fa-solid fa-heart"></i></a></h1></div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <div class="dailydiv1"><h1 class="EmojiDiv"><a href="sadTips.html"><i class="fa-regular fa-face-frown"></i></a></h1></div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <div class="dailydiv1"><h1 class="EmojiDiv"><a href="fearTips.html"><i class="fa-regular fa-face-surprise"></i></a></h1></div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <div class="dailydiv1"><h1 class="EmojiDiv"><a href="surpriseTips.html"><i class="fa-regular fa-face-meh-blank"></i></a></h1></div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <div class="dailydiv1"><h1 class="EmojiDiv"><a href="angryTips.html"><i class="fa-regular fa-face-angry"></i></a></h1></div>
+      </div>
     </div>
   </div>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>FeelWise</h3>
+        <p>Understanding emotions through AI-powered analysis</p>
+      </div>
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <a href="#">Blog</a>
+        <a href="#">Guides</a>
+        <a href="#">Support</a>
+      </div>
+      <div class="footer-section">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Careers</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-section">
+        <h4>Connect</h4>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2023 FeelWise. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

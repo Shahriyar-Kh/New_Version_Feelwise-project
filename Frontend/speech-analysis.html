@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Speech Emotion Analysis</title>
+  <title>Speech Emotion Analysis - FeelWise</title>
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,10 +13,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="speech-analysis.css">
+  
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-
+  <!-- External CSS -->
+  <link rel="stylesheet" href="speech-analysis.css">
 </head>
 
 <body>
@@ -30,10 +32,10 @@
         </h1>
       </div>
       <nav class="main-nav">
-        <a href="#" class="nav-link"><i class="fas fa-home"></i> Home</a>
-        <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
-        <a href="#" class="nav-link"><i class="fas fa-history"></i> History</a>
-        <a href="#" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+        <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+      <a href="module.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="progress.html" class="nav-link"><i class="fas fa-history"></i> History</a>
+        <a href="profile.html" class="nav-link"><i class="fas fa-user"></i> Profile</a>
       </nav>
     </div>
   </header>
@@ -58,11 +60,11 @@
         <div class="transcript-box">
           <h3><i class="fas fa-scroll"></i> Live Transcript</h3>
           <div id="transcriptDisplay" class="transcript-display">Your speech will appear here...</div>
-          <div id="processingIndicator"><div class="spinner"></div> Processing your emotions...</div>
+          
         </div>
       </div>
 
-      <!-- Results Section -->
+           <!-- Results Section -->
       <div class="results-section">
         <div class="emotion-report">
           <h2><i class="fas fa-chart-pie"></i> Your Emotion Report</h2>
@@ -73,11 +75,77 @@
 
         <div class="progress-section">
           <h2><i class="fas fa-trending-up"></i> Your Emotional Progress</h2>
-          <div class="time-filters">
+          <div style="display: flex;" class="time-filters">
             <button class="time-filter active" data-period="daily" type="button">Daily</button>
             <button class="time-filter" data-period="weekly" type="button">Weekly</button>
             <button class="time-filter" data-period="monthly" type="button">Monthly</button>
           </div>
+          
+          <!-- New Emotion Report Card matching the image style -->
+          <div id="progressReportCard" class="progress-report-card" style="display: none;">
+            <div class="report-header">
+              <h3>Your Emotion Report</h3>
+              <p>Your analysis will appear here after you share your thoughts</p>
+            </div>
+            
+            <div class="dominant-emotion">
+              <h4>Dominant Emotion:</h4>
+              <div id="dominantEmotion" class="dominant-emotion-value">Joy</div>
+            </div>
+            
+            <div class="detailed-emotion-distribution">
+              <h4>Detailed Emotion Distribution</h4>
+              <div class="emotion-bars">
+                <div class="emotion-bar">
+                  <span class="emotion-label">Joy</span>
+                  <div class="bar-container">
+                    <div id="joyBar" class="bar-fill joy" style="width: 100%"></div>
+                  </div>
+                  <span id="joyPercent" class="emotion-percent">100%</span>
+                </div>
+                <div class="emotion-bar">
+                  <span class="emotion-label">Sadness</span>
+                  <div class="bar-container">
+                    <div id="sadnessBar" class="bar-fill sadness" style="width: 0%"></div>
+                  </div>
+                  <span id="sadnessPercent" class="emotion-percent">0%</span>
+                </div>
+                <div class="emotion-bar">
+                  <span class="emotion-label">Anger</span>
+                  <div class="bar-container">
+                    <div id="angerBar" class="bar-fill anger" style="width: 0%"></div>
+                  </div>
+                  <span id="angerPercent" class="emotion-percent">0%</span>
+                </div>
+                <div class="emotion-bar">
+                  <span class="emotion-label">Fear</span>
+                  <div class="bar-container">
+                    <div id="fearBar" class="bar-fill fear" style="width: 0%"></div>
+                  </div>
+                  <span id="fearPercent" class="emotion-percent">0%</span>
+                </div>
+                <div class="emotion-bar">
+                  <span class="emotion-label">Surprise</span>
+                  <div class="bar-container">
+                    <div id="surpriseBar" class="bar-fill surprise" style="width: 0%"></div>
+                  </div>
+                  <span id="surprisePercent" class="emotion-percent">0%</span>
+                </div>
+                <div class="emotion-bar">
+                  <span class="emotion-label">Love</span>
+                  <div class="bar-container">
+                    <div id="loveBar" class="bar-fill love" style="width: 0%"></div>
+                  </div>
+                  <span id="lovePercent" class="emotion-percent">0%</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="report-footer">
+              <button id="viewDetailedReport" class="view-report-btn">View your detailed assessment report</button>
+            </div>
+          </div>
+          
           <canvas id="progressChart"></canvas>
         </div>
       </div>
@@ -148,8 +216,9 @@
     </div>
   </footer>
 
-  <!-- JS -->
+  <!-- External JavaScript -->
   <script src="speech-analysis.js"></script>
+  
   <script>
     // Show/hide processing indicator during recording analysis
     const processingIndicator = document.getElementById('processingIndicator');
@@ -162,14 +231,6 @@
       processingIndicator.style.display = 'none';
     }
 
-    // Override JS analyzeSpeech to toggle indicator
-    const originalAnalyzeSpeech = window.analyzeSpeech;
-    window.analyzeSpeech = async function(transcript, audioBase64) {
-      showProcessing();
-      await originalAnalyzeSpeech(transcript, audioBase64);
-      hideProcessing();
-    };
-
     // Add recording state visual feedback
     const startBtn = document.getElementById('startRecordingBtn');
     const stopBtn = document.getElementById('stopRecordingBtn');
@@ -178,10 +239,94 @@
     startBtn.addEventListener('click', () => {
       startBtn.classList.add('recording');
       transcriptDisplay.classList.add('active');
+      showProcessing();
     });
     
     stopBtn.addEventListener('click', () => {
       startBtn.classList.remove('recording');
+      showProcessing();
+    });
+
+    // Enhanced UI feedback for emotion analysis completion
+    document.addEventListener('DOMContentLoaded', function() {
+      const emotionResult = document.getElementById('emotionResult');
+      const recommendationsContent = document.getElementById('recommendationsContent');
+      const dailyChallengeContent = document.getElementById('dailyChallengeContent');
+      const dailyTipContent = document.getElementById('dailyTipContent');
+
+      // Override the original analyzeSpeech function to add processing indicator
+      const originalAnalyzeSpeech = window.analyzeSpeech;
+      if (originalAnalyzeSpeech) {
+        window.analyzeSpeech = async function(transcript, audioBase64) {
+          showProcessing();
+          try {
+            await originalAnalyzeSpeech.call(this, transcript, audioBase64);
+          } finally {
+            hideProcessing();
+          }
+        };
+      }
+
+      // Add enhanced visual feedback for successful analysis
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.target.id === 'emotionResult' && mutation.target.innerHTML.includes('emotion-report-card')) {
+            // Add success animation
+            mutation.target.style.animation = 'fadeInUp 0.6s ease-out';
+            hideProcessing();
+          }
+          if (mutation.target.id === 'recommendationsContent' && mutation.target.innerHTML.includes('recommendation-card-enhanced')) {
+            mutation.target.style.animation = 'fadeInLeft 0.8s ease-out 0.2s both';
+          }
+          if (mutation.target.id === 'dailyChallengeContent' && mutation.target.innerHTML.includes('challenge-card-enhanced')) {
+            mutation.target.style.animation = 'fadeInUp 0.8s ease-out 0.4s both';
+          }
+          if (mutation.target.id === 'dailyTipContent' && mutation.target.innerHTML.includes('tip-card-enhanced')) {
+            mutation.target.style.animation = 'fadeInRight 0.8s ease-out 0.6s both';
+          }
+        });
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      // Add CSS animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes fadeInLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes fadeInRight {
+          from {
+            opacity: 0;
+            transform: translateX(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+      `;
+      document.head.appendChild(style);
     });
   </script>
 </body>

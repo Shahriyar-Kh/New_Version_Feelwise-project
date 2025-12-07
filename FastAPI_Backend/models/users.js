@@ -1,15 +1,18 @@
-
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
     username: { type: String, required: true, trim: true },
-    email:    { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
-    image:    { type: String, default: "" }, // served from /uploads/...
-    mood:     { type: String, default: "Neutral" },
+    image: { type: String, default: "" },
+    mood: { type: String, default: "Neutral" },
+    
+    // Password reset fields
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
 
-    // if you want to mirror your old progress/badges structure, keep these:
+    // Progress tracking
     progress: {
       selfAwareness: { type: Number, default: 0 },
       selfRegulation: { type: Number, default: 0 },

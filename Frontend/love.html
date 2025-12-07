@@ -16,11 +16,26 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="module.css" />
     <link rel="stylesheet" href="challenges.css" />
   </head>
   <body>
-    <!-- Background Particles -->
+     <header class="site-header">
+    <div class="header-content">
+      <div class="logo-container">
+        <h1 class="logo">
+          <i class="fas fa-brain"></i>
+          FeelWise
+        </h1>
+      </div>
+      <nav class="main-nav">
+        <a href="#" class="nav-link"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="#" class="nav-link"><i class="fas fa-history"></i> History</a>
+        <a href="#" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+      </nav>
+    </div>
+  </header>
+
     <div class="particles-container" id="particles-container"></div>
 
     <div class="main-container">
@@ -28,7 +43,6 @@
         <h1 class="fear-title">❤️ LOVE CHALLENGES</h1>
       </div>
 
-      <!-- Challenge Section -->
       <div class="fear-card" id="challenge-container">
         <div class="reset-notice">
           <i class="fas fa-lightbulb me-2"></i>
@@ -39,102 +53,158 @@
         <div class="challenges-grid">
           <!-- Challenge 1 -->
           <div class="challenge-item">
-            <div class="challenge-icon">
-              <i class="fas fa-envelope"></i>
-            </div>
+            <div class="challenge-icon"><i class="fas fa-envelope"></i></div>
             <h2>💌 Send Love</h2>
             <p>Message someone and tell them what they mean to you.</p>
-            <button class="challenge-btn" onclick="acceptChallenge('sendlove')">
-              Accept Challenge
-            </button>
-            <button
-              class="complete-btn"
-              id="sendlove-complete"
-              onclick="completeChallenge('sendlove')"
-            >
+            <button class="challenge-btn" onclick="acceptChallenge('sendlove')">Accept Challenge</button>
+            <button class="complete-btn" id="sendlove-complete" onclick="completeChallenge('sendlove')">
               <i class="fas fa-check-circle me-2"></i>Completed
             </button>
-            <div class="progress-wrapper">
-              <div class="progress-bar" id="sendlove-progress"></div>
-            </div>
+            <div class="progress-wrapper"><div class="progress-bar" id="sendlove-progress"></div></div>
           </div>
 
           <!-- Challenge 2 -->
           <div class="challenge-item">
-            <div class="challenge-icon">
-              <i class="fas fa-gift"></i>
-            </div>
+            <div class="challenge-icon"><i class="fas fa-gift"></i></div>
             <h2>💐 Spread Kindness</h2>
             <p>Give a compliment or small gift.</p>
-            <button class="challenge-btn" onclick="acceptChallenge('kindness')">
-              Accept Challenge
-            </button>
-            <button
-              class="complete-btn"
-              id="kindness-complete"
-              onclick="completeChallenge('kindness')"
-            >
+            <button class="challenge-btn" onclick="acceptChallenge('kindness')">Accept Challenge</button>
+            <button class="complete-btn" id="kindness-complete" onclick="completeChallenge('kindness')">
               <i class="fas fa-check-circle me-2"></i>Completed
             </button>
-            <div class="progress-wrapper">
-              <div class="progress-bar" id="kindness-progress"></div>
-            </div>
+            <div class="progress-wrapper"><div class="progress-bar" id="kindness-progress"></div></div>
           </div>
 
           <!-- Challenge 3 -->
           <div class="challenge-item">
-            <div class="challenge-icon">
-              <i class="fas fa-hand-holding-heart"></i>
-            </div>
+            <div class="challenge-icon"><i class="fas fa-hand-holding-heart"></i></div>
             <h2>🤗 Hug Time</h2>
             <p>Give someone a warm, genuine hug.</p>
-            <button class="challenge-btn" onclick="acceptChallenge('hug')">
-              Accept Challenge
-            </button>
-            <button
-              class="complete-btn"
-              id="hug-complete"
-              onclick="completeChallenge('hug')"
-            >
+            <button class="challenge-btn" onclick="acceptChallenge('hug')">Accept Challenge</button>
+            <button class="complete-btn" id="hug-complete" onclick="completeChallenge('hug')">
               <i class="fas fa-check-circle me-2"></i>Completed
             </button>
-            <div class="progress-wrapper">
-              <div class="progress-bar" id="hug-progress"></div>
-            </div>
+            <div class="progress-wrapper"><div class="progress-bar" id="hug-progress"></div></div>
+          </div>
+
+          <!-- Challenge 4 -->
+          <div class="challenge-item">
+            <div class="challenge-icon"><i class="fas fa-phone"></i></div>
+            <h2>📞 Call Someone Special</h2>
+            <p>Spend 5 minutes calling a loved one.</p>
+            <button class="challenge-btn" onclick="acceptChallenge('call')">Accept Challenge</button>
+            <button class="complete-btn" id="call-complete" onclick="completeChallenge('call')">
+              <i class="fas fa-check-circle me-2"></i>Completed
+            </button>
+            <div class="progress-wrapper"><div class="progress-bar" id="call-progress"></div></div>
+          </div>
+
+          <!-- Challenge 5 -->
+          <div class="challenge-item">
+            <div class="challenge-icon"><i class="fas fa-pen"></i></div>
+            <h2>📝 Write a Note</h2>
+            <p>Write a heartfelt note or letter.</p>
+            <button class="challenge-btn" onclick="acceptChallenge('note')">Accept Challenge</button>
+            <button class="complete-btn" id="note-complete" onclick="completeChallenge('note')">
+              <i class="fas fa-check-circle me-2"></i>Completed
+            </button>
+            <div class="progress-wrapper"><div class="progress-bar" id="note-progress"></div></div>
+          </div>
+
+          <!-- Challenge 6 -->
+          <div class="challenge-item">
+            <div class="challenge-icon"><i class="fas fa-utensils"></i></div>
+            <h2>🍳 Cook for Love</h2>
+            <p>Make a meal for someone you care about.</p>
+            <button class="challenge-btn" onclick="acceptChallenge('cook')">Accept Challenge</button>
+            <button class="complete-btn" id="cook-complete" onclick="completeChallenge('cook')">
+              <i class="fas fa-check-circle me-2"></i>Completed
+            </button>
+            <div class="progress-wrapper"><div class="progress-bar" id="cook-progress"></div></div>
+          </div>
+
+          <!-- Challenge 7 -->
+          <div class="challenge-item">
+            <div class="challenge-icon"><i class="fas fa-camera"></i></div>
+            <h2>📸 Capture Memories</h2>
+            <p>Take a meaningful photo with someone you love.</p>
+            <button class="challenge-btn" onclick="acceptChallenge('photo')">Accept Challenge</button>
+            <button class="complete-btn" id="photo-complete" onclick="completeChallenge('photo')">
+              <i class="fas fa-check-circle me-2"></i>Completed
+            </button>
+            <div class="progress-wrapper"><div class="progress-bar" id="photo-progress"></div></div>
+          </div>
+
+          <!-- Challenge 8 -->
+          <div class="challenge-item">
+            <div class="challenge-icon"><i class="fas fa-music"></i></div>
+            <h2>🎶 Share a Song</h2>
+            <p>Send someone a song that reminds you of them.</p>
+            <button class="challenge-btn" onclick="acceptChallenge('song')">Accept Challenge</button>
+            <button class="complete-btn" id="song-complete" onclick="completeChallenge('song')">
+              <i class="fas fa-check-circle me-2"></i>Completed
+            </button>
+            <div class="progress-wrapper"><div class="progress-bar" id="song-progress"></div></div>
+          </div>
+
+          <!-- Challenge 9 -->
+          <div class="challenge-item">
+            <div class="challenge-icon"><i class="fas fa-praying-hands"></i></div>
+            <h2>🙏 Gratitude List</h2>
+            <p>List 3 things you love about someone close to you.</p>
+            <button class="challenge-btn" onclick="acceptChallenge('gratitude')">Accept Challenge</button>
+            <button class="complete-btn" id="gratitude-complete" onclick="completeChallenge('gratitude')">
+              <i class="fas fa-check-circle me-2"></i>Completed
+            </button>
+            <div class="progress-wrapper"><div class="progress-bar" id="gratitude-progress"></div></div>
+          </div>
+
+          <!-- Challenge 10 -->
+          <div class="challenge-item">
+            <div class="challenge-icon"><i class="fas fa-walking"></i></div>
+            <h2>🚶 Walk Together</h2>
+            <p>Take a short walk with someone you care for.</p>
+            <button class="challenge-btn" onclick="acceptChallenge('walk')">Accept Challenge</button>
+            <button class="complete-btn" id="walk-complete" onclick="completeChallenge('walk')">
+              <i class="fas fa-check-circle me-2"></i>Completed
+            </button>
+            <div class="progress-wrapper"><div class="progress-bar" id="walk-progress"></div></div>
           </div>
         </div>
 
         <button id="submit-challenges-btn" onclick="submitAllChallenges()">
           <i class="fas fa-paper-plane me-2"></i>Submit All Challenges
-          <span
-            id="submit-loading"
-            class="loading-spinner"
-            style="display: none"
-          ></span>
+          <span id="submit-loading" class="loading-spinner" style="display: none"></span>
         </button>
       </div>
 
-      <!-- Success Card -->
       <div class="success-card text-center" id="success-card">
         <h2><i class="fas fa-trophy me-2"></i>WELL DONE!</h2>
         <p>You successfully completed all Love challenges!</p>
         <p>Your positivity has been shared with the world! ❤️</p>
         <p id="save-status" style="color: var(--success); font-size: 14px"></p>
         <div class="mt-4">
-          <button onclick="goToProgress()">
-            <i class="fas fa-chart-line me-2"></i>View Progress
-          </button>
-          <button class="retake-btn" onclick="retakeChallenges()">
-            <i class="fas fa-redo me-2"></i>Retake Challenges
-          </button>
+          <button onclick="goToProgress()"><i class="fas fa-chart-line me-2"></i>View Progress</button>
+          <button class="retake-btn" onclick="retakeChallenges()"><i class="fas fa-redo me-2"></i>Retake Challenges</button>
         </div>
       </div>
     </div>
+    <div class="footer-bottom">
+      <p>&copy; 2023 FeelWise. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
 
     <script>
       const API_BASE = "http://localhost:5000/api";
-      let challenges = { sendlove: 0, kindness: 0, hug: 0 };
-
+      let challenges = {
+        sendlove: 0, kindness: 0, hug: 0, call: 0, note: 0,
+        cook: 0, photo: 0, song: 0, gratitude: 0, walk: 0
+      };
       // Create animated particles
       function createParticles() {
         const container = document.getElementById("particles-container");

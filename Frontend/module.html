@@ -8,26 +8,70 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="module.css">
+    
 </head>
 <body>
+      <!-- Header with Navigation -->
+  <header class="site-header">
+    <div class="header-content">
+      <div class="logo-container">
+        <h1 class="logo">
+          <i class="fas fa-brain"></i>
+          FeelWise
+        </h1>
+      </div>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+        <a href="progress.html" class="nav-link"><i class="fas fa-history"></i> History</a>
+        <a href="profile.html" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+        <button id="themeToggle" style="background-color: transparent; border: none;" class="nav-link icon-btn" title="Toggle Dark/Light Mode">
+          <i class="fas fa-moon"></i>
+      </nav>
+    </div>
+  </header>
     <!-- Particle Background -->
     <div class="particles" id="particles"></div>
 
     <!-- Main Dashboard Container -->
     <div id="dashboard">
-        <!-- Top Header -->
-        <div class="top-header">
-            <div class="logo">
-                <i class="fas fa-brain"></i>
-                <span>FeelWise</span>
-            </div>
-            <div class="header-actions">
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
+
+         <div class="daily-tip">
+            <strong>Tip of the Day:</strong> 
+            Practice gratitude by writing down three things you're thankful for today. 
+            This simple exercise can significantly improve your mental well-being over time.
+        </div> 
+        <div class="header">
+            <h1>Emotion Analysis</h1>
+            <p>Express your emotions through text, voice, or facial expressions and gain valuable insights into your emotional well-being</p>
         </div>
 
+           
+
+         <!-- Navigation Cards -->
+        <div class="nav-cards">
+            <a href="text-analysis.html" class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <h3><i class="fas fa-edit"></i> Text Analysis</h3>
+                <p>Express your feelings through writing and get instant emotional insights</p>
+            </a>
+            <a href="speech-analysis.html" class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <h3><i class="fas fa-microphone"></i> Voice Analysis</h3>
+                <p>Speak your feelings and let our AI understand your emotional state</p>
+            </a>
+            <a href="facial-analysis.html" class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <h3><i class="fas fa-camera"></i> Facial Analysis</h3>
+                <p>Show your emotions through your camera for instant analysis</p>
+            </a>
+        </div>
+    </div>
         <!-- Feature Cards -->
         <div class="features-container">
             <div class="feature-card" onclick="navigateTo('dailychallenges.html')">
@@ -66,55 +110,43 @@
                 <p>Collection of mental health strategies</p>
             </div>
         </div>
-
-        <!-- Daily Tip -->
-        <div class="daily-tip">
-            <strong>Tip of the Day:</strong> 
-            Practice gratitude by writing down three things you're thankful for today. 
-            This simple exercise can significantly improve your mental well-being over time.
-        </div> 
-
-        <!-- Main Content -->
-        <div class="header">
-            <h1>Emotion Analysis</h1>
-            <p>Express your emotions through text, voice, or facial expressions and gain valuable insights into your emotional well-being</p>
+    <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>FeelWise</h3>
+        <p>Understanding emotions through AI-powered analysis</p>
+      </div>
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <a href="#">Blog</a>
+        <a href="#">Guides</a>
+        <a href="#">Support</a>
+      </div>
+      <div class="footer-section">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Careers</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-section">
+        <h4>Connect</h4>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin"></i></a>
         </div>
-
-        <!-- Navigation Cards -->
-        <div class="nav-cards">
-            <a href="text-analysis.html" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-edit"></i>
-                </div>
-                <h3><i class="fas fa-edit"></i> Text Analysis</h3>
-                <p>Express your feelings through writing and get instant emotional insights</p>
-            </a>
-            <a href="speech-analysis.html" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-microphone"></i>
-                </div>
-                <h3><i class="fas fa-microphone"></i> Voice Analysis</h3>
-                <p>Speak your feelings and let our AI understand your emotional state</p>
-            </a>
-            <a href="facial-analysis.html" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-camera"></i>
-                </div>
-                <h3><i class="fas fa-camera"></i> Facial Analysis</h3>
-                <p>Show your emotions through your camera for instant analysis</p>
-            </a>
-        </div>
+      </div>
     </div>
-
-    <!-- Floating Action Button -->
-    <div class="floating-action">
-        <i class="fas fa-plus"></i>
-        <div class="notification-badge">3</div>
+    <div class="footer-bottom">
+      <p>&copy; 2023 FeelWise. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
     </div>
-
-    <footer class="app-footer">
-        <p>&copy; 2023 FeelWise - Mental Wellness Companion</p>
-    </footer>
+  </footer>
 
     <script>
         // Navigate using normal page loads so browser arrows work
