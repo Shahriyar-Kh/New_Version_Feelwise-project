@@ -926,60 +926,299 @@ function loadDailyTip() {
 }
 
 // Emotional Progress Chart
+// Emotional Progress Chart with Beautiful UI
 function updateChart(period = 'daily') {
+    // Update period buttons active state
+    document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.period === period) {
+            btn.classList.add('active');
+        }
+    });
+
     loadFacialAnalysisHistory(period).then(analyses => {
         let avgPositive = 0, avgNegative = 0, avgNeutral = 0;
+        let totalAnalyses = analyses.length;
         
-        if (analyses.length > 0) {
+        if (totalAnalyses > 0) {
             analyses.forEach(analysis => {
                 avgPositive += analysis.emotionDistribution.positive;
                 avgNegative += analysis.emotionDistribution.negative;
                 avgNeutral += analysis.emotionDistribution.neutral;
             });
             
-            avgPositive /= analyses.length;
-            avgNegative /= analyses.length;
-            avgNeutral /= analyses.length;
+            avgPositive /= totalAnalyses;
+            avgNegative /= totalAnalyses;
+            avgNeutral /= totalAnalyses;
+            
+            // Update stats display
+            updateStatsDisplay(avgPositive, avgNegative, avgNeutral, totalAnalyses);
         } else {
+            // Show demo data with beautiful empty state
             avgPositive = Math.floor(Math.random() * 30) + 40;
             avgNegative = Math.floor(Math.random() * 20) + 15;
             avgNeutral = 100 - avgPositive - avgNegative;
+            showEmptyState(period);
         }
 
-        const ctx = progressChart.getContext("2d");
-        const chartData = {
+        // Create beautiful chart
+        renderProgressChart(avgPositive, avgNegative, avgNeutral, period);
+        
+        // Update insights
+        updateChartInsights(avgPositive, avgNegative, avgNeutral, period);
+    });
+}
+
+function renderProgressChart(positive, negative, neutral, period) {
+    const ctx = progressChart.getContext("2d");
+    
+    // Destroy previous chart if exists
+    if (chart) chart.destroy();
+    
+    // Create gradient backgrounds
+    const positiveGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    positiveGradient.addColorStop(0, 'rgba(76, 175, 80, 0.8)');
+    positiveGradient.addColorStop(1, 'rgba(76, 175, 80, 0.2)');
+    
+    const negativeGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    negativeGradient.addColorStop(0, 'rgba(244, 67, 54, 0.8)');
+    negativeGradient.addColorStop(1, 'rgba(244, 67, 54, 0.2)');
+    
+    const neutralGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    neutralGradient.addColorStop(0, 'rgba(158, 158, 158, 0.8)');
+    neutralGradient.addColorStop(1, 'rgba(158, 158, 158, 0.2)');
+
+    chart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
             labels: ["Positive", "Negative", "Neutral"],
             datasets: [{
-                label: "Facial Emotion Distribution",
-                data: [avgPositive, avgNegative, avgNeutral],
-                backgroundColor: [
-                    "rgba(102, 187, 106, 0.7)",
-                    "rgba(239, 83, 80, 0.7)",
-                    "rgba(255, 202, 40, 0.7)"
-                ],
+                data: [positive, negative, neutral],
+                backgroundColor: [positiveGradient, negativeGradient, neutralGradient],
                 borderColor: [
-                    "rgba(102, 187, 106, 1)",
-                    "rgba(239, 83, 80, 1)",
-                    "rgba(255, 202, 40, 1)"
+                    "rgba(76, 175, 80, 1)",
+                    "rgba(244, 67, 54, 1)",
+                    "rgba(158, 158, 158, 1)"
                 ],
-                borderWidth: 2
+                borderWidth: 3,
+                borderJoinStyle: 'round',
+                borderRadius: 10,
+                hoverOffset: 20,
+                hoverBackgroundColor: [
+                    "rgba(76, 175, 80, 0.9)",
+                    "rgba(244, 67, 54, 0.9)",
+                    "rgba(158, 158, 158, 0.9)"
+                ]
             }]
-        };
-
-        if (chart) chart.destroy();
-        chart = new Chart(ctx, {
-            type: "doughnut",
-            data: chartData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 13,
+                            family: "'Inter', sans-serif",
+                            weight: '600'
+                        },
+                        color: '#555'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    titleColor: '#333',
+                    bodyColor: '#666',
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 10,
+                    padding: 12,
+                    boxPadding: 6,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw.toFixed(1)}%`;
+                        }
                     }
                 }
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true,
+                duration: 1500,
+                easing: 'easeOutQuart'
+            },
+            elements: {
+                arc: {
+                    borderWidth: 2
+                }
             }
-        });
+        },
+        plugins: [{
+            id: 'centerText',
+            afterDraw: (chart) => {
+                const { ctx, chartArea: { width, height } } = chart;
+                ctx.save();
+                
+                // Draw center circle
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                // Background circle
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.stroke();
+                
+                // Main percentage text
+                ctx.font = 'bold 28px "Inter", sans-serif';
+                ctx.fillStyle = getDominantColor(positive, negative, neutral);
+                ctx.textAlign = 'center';
+                ctx.fillText(`${Math.max(positive, negative, neutral).toFixed(0)}%`, centerX, centerY - 5);
+                
+                // Subtitle
+                ctx.font = '600 12px "Inter", sans-serif';
+                ctx.fillStyle = '#666';
+                ctx.fillText(getDominantEmotion(positive, negative, neutral), centerX, centerY + 20);
+                
+                ctx.restore();
+            }
+        }]
     });
+}
+
+function updateStatsDisplay(positive, negative, neutral, totalAnalyses) {
+    const statsContainer = document.querySelector('.chart-stats');
+    if (!statsContainer) return;
+    
+    const periodText = document.querySelector('.period-btn.active')?.textContent || 'Daily';
+    
+    statsContainer.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card positive">
+                <div class="stat-icon">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="stat-content">
+                    <h4>${positive.toFixed(1)}%</h4>
+                    <p>Positive</p>
+                </div>
+            </div>
+            <div class="stat-card negative">
+                <div class="stat-icon">
+                    <i class="fas fa-frown"></i>
+                </div>
+                <div class="stat-content">
+                    <h4>${negative.toFixed(1)}%</h4>
+                    <p>Negative</p>
+                </div>
+            </div>
+            <div class="stat-card neutral">
+                <div class="stat-icon">
+                    <i class="fas fa-meh"></i>
+                </div>
+                <div class="stat-content">
+                    <h4>${neutral.toFixed(1)}%</h4>
+                    <p>Neutral</p>
+                </div>
+            </div>
+            <div class="stat-card total">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h4>${totalAnalyses}</h4>
+                    <p>Analyses (${periodText})</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function updateChartInsights(positive, negative, neutral, period) {
+    const insightsContainer = document.querySelector('.chart-insights');
+    if (!insightsContainer) return;
+    
+    const periodText = period === 'daily' ? 'today' : period === 'weekly' ? 'this week' : 'this month';
+    const dominantEmotion = getDominantEmotion(positive, negative, neutral);
+    
+    let insight = '';
+    if (positive > 60) {
+        insight = `Great! You've been mostly positive ${periodText}. Keep up the positive energy!`;
+    } else if (negative > 40) {
+        insight = `You've experienced more negative emotions ${periodText}. Consider what might be affecting your mood.`;
+    } else if (neutral > 50) {
+        insight = `Your emotions have been mostly balanced ${periodText}. You're maintaining good emotional stability.`;
+    } else {
+        insight = `Your emotional balance shows a healthy mix of different states ${periodText}.`;
+    }
+    
+    insightsContainer.innerHTML = `
+        <div class="insight-card">
+            <div class="insight-header">
+                <i class="fas fa-chart-pie"></i>
+                <h4>Emotional Insights</h4>
+            </div>
+            <p class="insight-text">${insight}</p>
+            <div class="insight-footer">
+                <span class="trend-indicator ${positive > negative ? 'up' : 'down'}">
+                    <i class="fas fa-arrow-${positive > negative ? 'up' : 'down'}"></i>
+                    ${Math.abs(positive - negative).toFixed(1)}% ${positive > negative ? 'more positive' : 'more negative'}
+                </span>
+            </div>
+        </div>
+    `;
+}
+
+function showEmptyState(period) {
+    const periodText = period === 'daily' ? 'today' : period === 'weekly' ? 'this week' : 'this month';
+    
+    const statsContainer = document.querySelector('.chart-stats');
+    if (statsContainer) {
+        statsContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-chart-bar"></i>
+                <p>No analysis data available ${periodText}</p>
+                <small>Start analyzing your emotions to see progress here</small>
+            </div>
+        `;
+    }
+}
+
+// Helper functions for chart
+function getDominantColor(positive, negative, neutral) {
+    if (positive >= negative && positive >= neutral) return '#4CAF50';
+    if (negative >= positive && negative >= neutral) return '#F44336';
+    return '#9E9E9E';
+}
+
+function getDominantEmotion(positive, negative, neutral) {
+    if (positive >= negative && positive >= neutral) return 'Positive';
+    if (negative >= positive && negative >= neutral) return 'Negative';
+    return 'Neutral';
+}
+
+// Helper function to create emotion progress bars (for emotion card display)
+function createEmotionBar(type, value, color) {
+    return `
+        <div class="emotion-bar">
+            <div class="bar-label">
+                <span class="bar-name">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                <span class="bar-value">${value.toFixed(1)}%</span>
+            </div>
+            <div class="bar-container">
+                <div class="bar-fill ${type}" style="width: ${value}%; background-color: ${color};"></div>
+            </div>
+        </div>
+    `;
 }
 
 function formatFacialAnalysisResults(data, imageData) {
