@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const dailyTipContent = document.getElementById('dailyTipContent');
     const timeFilters = document.querySelectorAll('.time-filter');
     let progressChart;
+        // 🆕 ADD THIS: Initialize user context
+    initializeUserContext();    
     
     // Audio recording variables
     let recognition;
@@ -22,6 +24,37 @@ document.addEventListener('DOMContentLoaded', function() {
     initProgressChart();
     loadDailyTip();
     initSpeechRecognition();
+
+
+// Backend API configuration
+const API_BASE = "http://localhost:5000/api";
+const token = localStorage.getItem("token");
+
+// Initialize user context for backend integration
+async function initializeUserContext() {
+    if (token) {
+        try {
+            const res = await fetch(`${API_BASE}/auth/me`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const user = await res.json();
+                window.currentUserId = user.id || user._id;
+                console.log("✅ Current user ID:", window.currentUserId);
+            }
+        } catch (error) {
+            console.error("Error getting user context:", error);
+            window.currentUserId = "guest";
+        }
+    } else {
+        window.currentUserId = "guest";
+    }
+}
+
+// Get user-specific localStorage key
+function getUserSpecificKey(baseKey) {
+    return window.currentUserId ? `${baseKey}_${window.currentUserId}` : `${baseKey}_guest`;
+}
     
     // Event listeners
     startBtn.addEventListener('click', function(event) {
@@ -50,11 +83,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Initialize speech recognition
-    function initSpeechRecognition() {
-        // Check for browser support
-        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            console.error("Speech recognition not supported in this browser");
+    // 🆕 ADD THIS: Initialize user context
+    // 🆕 ADD THIS FUNCTION
+async function initializeUserContext() {
+    const token = localStorage.getItem("token");
+    const API_BASE = "http://localhost:5000/api";
+    
+    if (token) {
+        try {
+            const res = await fetch(`${API_BASE}/auth/me`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const user = await res.json();
+                window.currentUserId = user.id || user._id;
+                console.log("Current user ID:", window.currentUserId);
+            }
+        } catch (error) {
+            console.error("Error getting user context:", error);
+            window.currentUserId = "guest";
+        }
+    } else {
+        window.currentUserId = "guest";
+    }
+}
+
+// 🆕 ADD THIS HELPER FUNCTION
+function getUserSpecificKey(baseKey) {
+    return window.currentUserId ? `${baseKey}_${window.currentUserId}` : `${baseKey}_guest`;
+}
+
+// Initialize speech recognition
+function initSpeechRecognition() {
+    // Check for browser support
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        console.error("Speech recognition not supported in this browser");
             startBtn.disabled = true;
             startBtn.textContent = "Speech API Not Supported";
             return;
@@ -218,22 +281,24 @@ document.addEventListener('DOMContentLoaded', function() {
             resetUI();
         }
     }
-    // --- begin: add to speech-analysis.js ---
-function saveSpeechAnalysisToHistory(result) {
+
+
+// Add this new function after saveSpeechAnalysisToHistory
+// Enhanced save function with backend support
+async function saveSpeechAnalysisToHistory(result) {
     try {
-        // keep same key scheme as full_assessment uses
+        // Save to localStorage
         const baseKey = 'speechAnalysisHistory';
-        const userKey = (typeof getUserSpecificKey === 'function')
-            ? getUserSpecificKey(baseKey)
-            : (localStorage.getItem('userId') ? `${baseKey}_${localStorage.getItem('userId')}` : `${baseKey}_guest`);
+        const userKey = getUserSpecificKey(baseKey);
 
         let history = JSON.parse(localStorage.getItem(userKey)) || [];
 
-        // Build a compact object to store (drop audio binary)
+        // Build entry
         const entry = {
             type: 'speech',
             emotion: (result.emotion || result.raw_label || 'neutral'),
-            confidence: typeof result.confidence === 'number' ? result.confidence : (result.probabilities ? Math.max(...Object.values(result.probabilities)) : 0),
+            confidence: typeof result.confidence === 'number' ? result.confidence : 
+                       (result.probabilities ? Math.max(...Object.values(result.probabilities)) * 100 : 75),
             transcript: result.transcript || '',
             top3: result.top3 || result.top_emotions || [],
             probabilities: result.probabilities || {},
@@ -242,25 +307,64 @@ function saveSpeechAnalysisToHistory(result) {
             userId: (window.currentUserId || 'guest'),
         };
 
-        // keep recent N entries
         history.push(entry);
         if (history.length > 100) history = history.slice(-100);
 
         localStorage.setItem(userKey, JSON.stringify(history));
-        console.log('Saved speech analysis to localStorage (key):', userKey);
+        console.log('✅ Speech analysis saved to localStorage (key):', userKey);
+        console.log('✅ Total speech analyses:', history.length);
+
+        // Also save to backend if user is logged in
+        await saveSpeechAnalysisToBackend(entry);
+        
     } catch (err) {
-        console.warn('Failed to save speech analysis:', err);
-        // if localStorage full, try trimming then save
+        console.warn('⚠️ Failed to save speech analysis:', err);
+        // Retry with trimming
         try {
-            const userKey = (typeof getUserSpecificKey === 'function') ? getUserSpecificKey('speechAnalysisHistory') : 'speechAnalysisHistory_guest';
+            const userKey = getUserSpecificKey('speechAnalysisHistory');
             let history = JSON.parse(localStorage.getItem(userKey)) || [];
             history = history.slice(-20); // keep last 20
             history.push(entry);
             localStorage.setItem(userKey, JSON.stringify(history));
-            console.log('Saved after trimming old entries');
+            console.log('✅ Saved after trimming old entries');
         } catch (e) {
-            console.error('Still could not save speech history:', e);
+            console.error('❌ Still could not save speech history:', e);
         }
+    }
+}
+
+// Save speech analysis to backend
+async function saveSpeechAnalysisToBackend(entry) {
+    if (!token || window.currentUserId === "guest") {
+        console.log("Guest user - speech analysis saved locally only");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/speech-analysis/save`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                emotion: entry.emotion,
+                confidence: entry.confidence,
+                transcript: entry.transcript,
+                probabilities: entry.probabilities,
+                top3: entry.top3,
+                duration_sec: entry.duration_sec,
+                timestamp: entry.timestamp
+            })
+        });
+
+        if (response.ok) {
+            console.log("✅ Speech analysis saved to backend successfully");
+        } else {
+            console.error("❌ Failed to save speech analysis to backend:", response.status);
+        }
+    } catch (error) {
+        console.error("❌ Error saving speech analysis to backend:", error);
     }
 }
 // --- end: add to speech-analysis.js ---
@@ -273,7 +377,6 @@ function saveSpeechAnalysisToHistory(result) {
         if (!data || typeof data !== 'object') {
             throw new Error("displayAnalysisResults: invalid data");
         }
-
         const rawEmotion = (data.emotion || data.raw_label || "neutral").toString();
         const emotion = rawEmotion.toLowerCase();
         const safeEmotionLabel = emotion.charAt(0).toUpperCase() + emotion.slice(1);
@@ -351,6 +454,19 @@ function saveSpeechAnalysisToHistory(result) {
 
         // Clear "Processing..." message
         transcriptDisplay.innerHTML += "<br><span style='color:green'>Analysis complete ✓</span>";
+         // 🆕 ADD THIS: Save the analysis to history
+    // 🆕 ADD THIS: Save the analysis to history
+    saveSpeechAnalysisToHistory({
+        emotion: data.emotion || data.raw_label,
+        raw_label: data.raw_label,
+        confidence: typeof data.confidence === 'number' ? data.confidence : 
+                   (data.probabilities ? Math.max(...Object.values(data.probabilities)) * 100 : 75),
+        transcript: finalTranscript || '',
+        probabilities: data.probabilities || {},
+        top3: data.top3 || data.top_emotions || [],
+        duration_sec: data.duration_sec || null,
+        timestamp: new Date().toISOString()
+    });
     }
 
     // New function to update the progress report card

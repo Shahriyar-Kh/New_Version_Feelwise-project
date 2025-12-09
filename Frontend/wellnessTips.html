@@ -9,7 +9,9 @@
   <link rel="stylesheet" href="module.css">
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <link rel="stylesheet" href="back-button.css">
+  <link rel="stylesheet" href="header.css">
+  <script src="back-button.js"></script>
   <style>
     body {
       font-family: 'Nunito', sans-serif;
@@ -17,17 +19,6 @@
       color: #333;
       margin: 0;
       padding: 0;
-    }
-
-    .top-header {
-      text-align: center;
-      padding: 1rem 0;
-      background: #5e60ce;
-      color: white;
-      font-size: 1.8rem;
-      font-weight: bold;
-      letter-spacing: 1px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
 
     .responsive-title {
@@ -88,10 +79,12 @@
       color: #666;
       font-size: 0.9rem;
     }
+
   </style>
+
 </head>
 <body>
-  <!-- Top Header Section -->
+ <!-- Header with Navigation -->
   <header class="site-header">
     <div class="header-content">
       <div class="logo-container">
@@ -101,8 +94,11 @@
         </h1>
       </div>
       <nav class="main-nav">
+        <a href="index.html" class="nav-link"><i class="fas fa-chart-line"></i> Home</a>
+        <a href="module.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
         <a href="progress.html" class="nav-link"><i class="fas fa-history"></i> History</a>
         <a href="profile.html" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+        <button onclick="goBack()" class="btn-back">Back</button>
       </nav>
     </div>
   </header>

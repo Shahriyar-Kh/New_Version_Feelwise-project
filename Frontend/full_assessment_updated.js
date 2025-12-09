@@ -1131,24 +1131,8 @@ function initializeSpeechAnalysisTab(speechData) {
 
     populateSpeechSummary(speechData);
     createSpeechCharts(speechData);
+    populateSpeechHistoryTable(speechData);     
 }
-
-function showEmptySpeechTab() {
-    const tabContent = document.getElementById('speechTab');
-    tabContent.innerHTML = `
-        <div class="empty-tab-state">
-            <div class="empty-icon">
-                <i class="fas fa-microphone"></i>
-            </div>
-            <h3>No Speech Analysis Data</h3>
-            <p>Start by analyzing your vocal expressions to understand emotional patterns.</p>
-            <a href="speech-analysis.html" class="btn-primary action-btn">
-                <i class="fas fa-microphone-alt"></i> Start Speech Analysis
-            </a>
-        </div>
-    `;
-}
-
 function populateSpeechSummary(data) {
     const report = generateReportData(data, 'speech');
     
@@ -1170,6 +1154,128 @@ function populateSpeechSummary(data) {
         document.getElementById('rateValue').textContent = rate > 70 ? 'Fast' : rate > 40 ? 'Normal' : 'Slow';
         document.getElementById('volumeValue').textContent = volume > 70 ? 'Stable' : volume > 40 ? 'Moderate' : 'Variable';
     }, 500);
+    
+    // 🆕 ADD THIS: Populate speech history table
+    populateSpeechHistoryTable(data);
+}
+
+// 🆕 ADD THIS NEW FUNCTION:
+function populateSpeechHistoryTable(data) {
+    const tableBody = document.getElementById('speechHistoryTable');
+    if (!tableBody) {
+        console.warn('speechHistoryTable element not found');
+        return;
+    }
+    
+    console.log('📊 Populating speech history with', data.length, 'entries');
+    
+    let html = '';
+    data.slice(0, 10).forEach((item) => {
+        const date = new Date(item.timestamp).toLocaleDateString();
+        const time = new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const duration = item.duration_sec ? `${item.duration_sec.toFixed(1)}s` : 'N/A';
+        const preview = item.transcript ? item.transcript.substring(0, 60) + '...' : 'No transcript';
+        const emotionClass = classifyEmotion(item.emotion);
+        
+        html += `
+            <tr>
+                <td>
+                    <div class="date-time">
+                        <span class="date">${date}</span>
+                        <span class="time">${time}</span>
+                    </div>
+                </td>
+                <td>${duration}</td>
+                <td>
+                    <span class="emotion-badge ${emotionClass}">
+                        ${item.emotion}
+                    </span>
+                </td>
+                <td class="preview-cell">
+                    "${preview}"
+                </td>
+            </tr>
+        `;
+    });
+    
+    if (html === '') {
+        html = `
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 20px;">
+                    No speech analyses found. Start by recording your voice!
+                </td>
+            </tr>
+        `;
+    }
+    
+    tableBody.innerHTML = html;
+    console.log('✅ Speech history table populated');
+}
+
+
+function showEmptySpeechTab() {
+    const tabContent = document.getElementById('speechTab');
+    tabContent.innerHTML = `
+        <div class="empty-tab-state">
+            <div class="empty-icon">
+                <i class="fas fa-microphone"></i>
+            </div>
+            <h3>No Speech Analysis Data</h3>
+            <p>Start by analyzing your vocal expressions to understand emotional patterns.</p>
+            <a href="speech-analysis.html" class="btn-primary action-btn">
+                <i class="fas fa-microphone-alt"></i> Start Speech Analysis
+            </a>
+        </div>
+    `;
+}
+
+
+// 🆕 ADD THIS NEW FUNCTION
+function populateSpeechHistoryTable(data) {
+    const tableBody = document.getElementById('speechHistoryTable');
+    if (!tableBody) return;
+    
+    let html = '';
+    data.slice(0, 10).forEach((item) => {
+        const date = new Date(item.timestamp).toLocaleDateString();
+        const time = new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const duration = item.duration_sec ? `${item.duration_sec.toFixed(1)}s` : 'N/A';
+        const preview = item.transcript ? item.transcript.substring(0, 60) + '...' : 'No transcript';
+        const emotionClass = classifyEmotion(item.emotion);
+        const confidence = item.confidence ? item.confidence.toFixed(1) + '%' : 'N/A';
+        
+        html += `
+            <tr>
+                <td>
+                    <div class="date-time">
+                        <span class="date">${date}</span>
+                        <span class="time">${time}</span>
+                    </div>
+                </td>
+                <td>${duration}</td>
+                <td>
+                    <span class="emotion-badge ${emotionClass}">
+                        ${item.emotion}
+                    </span>
+                </td>
+                <td class="preview-cell">
+                    "${preview}"
+                </td>
+            </tr>
+        `;
+    });
+    
+    if (html === '') {
+        html = `
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 20px;">
+                    No speech analyses found. Start by recording your voice!
+                </td>
+            </tr>
+        `;
+    }
+    
+    tableBody.innerHTML = html;
 }
 
 function createSpeechCharts(data) {
